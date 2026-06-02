@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restaurant Content Services — Lefking Enterprise</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--gd:#0a4a35;--gm:#0f6e56;--gl:#1d9e75;--gp:#9fe1cb;--gold:#f0b94a;--cream:#faf7f0;--td:#1a1a1a;--tm:#4a5568;--tl:#718096;--err:#e53e3e;--ok:#38a169;--bdr:#e2e8f0;--r:12px;--sh:0 4px 24px rgba(10,74,53,.10);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--td);min-height:100vh;}
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:1.1rem 2rem;background:var(--gd);}
+  .nav-logo{font-family:'Playfair Display',serif;color:#fff;font-size:15px;line-height:1.3;}
+  .nav-logo span{color:var(--gold);}
+  .nav-tag{font-size:10px;color:var(--gp);letter-spacing:.06em;text-transform:uppercase;}
+  .btn-gold{background:var(--gold);color:var(--gd);border:none;padding:10px 22px;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:.2s;}
+  .btn-gold:hover{filter:brightness(1.08);}
+  .btn-wht{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4);padding:10px 22px;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;text-decoration:none;display:inline-block;}
+  .btn-wht:hover{background:rgba(255,255,255,.08);}
+  .hero{background:linear-gradient(135deg,var(--gd) 0%,var(--gm) 100%);padding:3.5rem 2rem 4.5rem;text-align:center;position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 50%,rgba(240,185,74,.08) 0%,transparent 70%);pointer-events:none;}
+  .hero-badge{display:inline-block;background:rgba(240,185,74,.15);border:1px solid rgba(240,185,74,.3);color:var(--gold);font-size:12px;padding:4px 14px;border-radius:99px;letter-spacing:.05em;margin-bottom:1.25rem;}
+  .hero-title{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,4.5vw,3rem);color:#fff;line-height:1.2;margin-bottom:.875rem;}
+  .hero-title span{color:var(--gold);}
+  .hero-sub{font-size:15px;color:var(--gp);max-width:460px;margin:0 auto 2.25rem;line-height:1.7;font-weight:300;}
+  .hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .features{padding:3.5rem 2rem;max-width:860px;margin:0 auto;}
+  .sec-title{font-family:'Playfair Display',serif;font-size:1.7rem;text-align:center;margin-bottom:.4rem;color:var(--gd);}
+  .sec-sub{text-align:center;color:var(--tl);margin-bottom:2.25rem;font-size:13px;}
+  .feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:18px;}
+  .feat-card{background:#fff;border-radius:var(--r);padding:1.4rem;border:1px solid var(--bdr);box-shadow:var(--sh);}
+  .feat-icon{font-size:26px;margin-bottom:10px;}
+  .feat-title{font-size:14px;font-weight:500;margin-bottom:5px;color:var(--gd);}
+  .feat-desc{font-size:12px;color:var(--tl);line-height:1.6;}
+  .pricing{background:var(--gd);padding:3.5rem 2rem;}
+  .pricing-inner{max-width:800px;margin:0 auto;text-align:center;}
+  .pricing-title{font-family:'Playfair Display',serif;color:#fff;font-size:1.7rem;margin-bottom:.4rem;}
+  .pricing-sub{color:var(--gp);font-size:13px;margin-bottom:2.25rem;}
+  .plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;}
+  .plan{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:var(--r);padding:1.4rem;text-align:left;}
+  .plan.pop{border-color:var(--gold);background:rgba(240,185,74,.08);}
+  .pop-badge{font-size:10px;background:var(--gold);color:var(--gd);padding:2px 8px;border-radius:99px;font-weight:500;display:inline-block;margin-bottom:9px;}
+  .plan-name{font-size:13px;color:var(--gp);margin-bottom:5px;}
+  .plan-price{font-family:'Playfair Display',serif;font-size:22px;color:#fff;margin-bottom:2px;}
+  .plan-period{font-size:11px;color:var(--tl);margin-bottom:12px;}
+  .plan-list{list-style:none;font-size:11px;color:var(--gp);line-height:2;}
+  .plan-list li::before{content:'✓ ';color:var(--gold);}
+  .how{padding:3.5rem 2rem;max-width:660px;margin:0 auto;}
+  .how-steps{display:flex;flex-direction:column;gap:14px;}
+  .how-step{display:flex;gap:14px;align-items:flex-start;}
+  .how-num{width:34px;height:34px;border-radius:50%;background:var(--gd);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0;}
+  .how-body{flex:1;padding-top:3px;}
+  .how-step-title{font-size:14px;font-weight:500;margin-bottom:2px;}
+  .how-step-desc{font-size:12px;color:var(--tl);line-height:1.6;}
+  .cta{background:var(--gold);padding:2.75rem 2rem;text-align:center;}
+  .cta-title{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--gd);margin-bottom:.4rem;}
+  .cta-sub{font-size:13px;color:var(--gd);margin-bottom:1.25rem;opacity:.8;}
+  .mpesa-note{font-size:11px;color:var(--gd);margin-top:.875rem;opacity:.7;}
+  .footer{background:var(--gd);padding:1.1rem 2rem;text-align:center;font-size:11px;color:var(--gp);}
+  /* MODAL */
+  .overlay{display:none;position:fixed;inset:0;background:rgba(10,74,53,.75);backdrop-filter:blur(4px);z-index:100;align-items:center;justify-content:center;}
+  .overlay.open{display:flex;}
+  .modal{background:#fff;border-radius:18px;padding:2.25rem;width:90%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.25);position:relative;}
+  .modal-logo{font-family:'Playfair Display',serif;font-size:17px;color:var(--gd);margin-bottom:1.25rem;text-align:center;}
+  .modal-logo span{color:var(--gold);}
+  .modal-title{font-size:19px;font-weight:500;color:var(--gd);margin-bottom:.4rem;text-align:center;font-family:'Playfair Display',serif;}
+  .modal-sub{font-size:12px;color:var(--tl);text-align:center;margin-bottom:1.5rem;line-height:1.6;}
+  .inp-grp{margin-bottom:.875rem;}
+  .inp-grp label{display:block;font-size:11px;color:var(--tm);margin-bottom:5px;font-weight:500;}
+  .inp-grp input{width:100%;padding:11px 14px;border:1.5px solid var(--bdr);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:15px;letter-spacing:.14em;text-transform:uppercase;transition:.2s;}
+  .inp-grp input:focus{outline:none;border-color:var(--gl);}
+  .btn-access{width:100%;background:var(--gd);color:#fff;border:none;padding:12px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:.4rem;}
+  .btn-access:hover{background:var(--gm);}
+  .modal-div{text-align:center;font-size:11px;color:var(--tl);margin:1rem 0;position:relative;}
+  .modal-div::before,.modal-div::after{content:'';position:absolute;top:50%;width:38%;height:1px;background:var(--bdr);}
+  .modal-div::before{left:0;}.modal-div::after{right:0;}
+  .modal-mpesa{background:var(--cream);border-radius:9px;padding:.875rem;font-size:11px;color:var(--tm);line-height:1.9;}
+  .modal-mpesa strong{color:var(--gd);}
+  .modal-err{background:#fff5f5;border:1px solid #fed7d7;border-radius:7px;padding:9px 12px;font-size:12px;color:var(--err);margin-bottom:.75rem;display:none;}
+  .modal-close{position:absolute;top:14px;right:18px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--tl);}
+  /* TOOLKIT */
+  #toolkit{display:none;min-height:100vh;}
+  .app-nav{background:var(--gd);padding:.875rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+  .app-nav-logo{font-family:'Playfair Display',serif;color:#fff;font-size:14px;}
+  .app-nav-logo span{color:var(--gold);}
+  .app-nav-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .u-badge{background:rgba(255,255,255,.1);color:var(--gp);font-size:11px;padding:3px 9px;border-radius:99px;}
+  .exp-badge{font-size:11px;padding:3px 9px;border-radius:99px;}
+  .exp-ok{background:rgba(56,161,105,.2);color:#9ae6b4;}
+  .exp-warn{background:rgba(240,185,74,.2);color:var(--gold);}
+  .exp-dead{background:rgba(229,62,62,.2);color:#fc8181;}
+  .btn-out{background:none;border:1px solid rgba(255,255,255,.2);color:var(--gp);font-size:11px;padding:3px 9px;border-radius:99px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+  /* USAGE BAR */
+  .usage-bar-wrap{background:rgba(255,255,255,.07);padding:.6rem 1.5rem;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--gp);border-bottom:1px solid rgba(255,255,255,.08);}
+  .usage-bar-label{white-space:nowrap;}
+  .usage-track{flex:1;height:6px;background:rgba(255,255,255,.15);border-radius:99px;overflow:hidden;max-width:180px;}
+  .usage-fill{height:100%;border-radius:99px;transition:.4s;}
+  .usage-ok{background:var(--gp);}
+  .usage-warn{background:var(--gold);}
+  .usage-full{background:#fc8181;}
+  .usage-count{font-size:11px;white-space:nowrap;}
+  .upgrade-strip{background:rgba(240,185,74,.12);border-bottom:1px solid rgba(240,185,74,.2);padding:.5rem 1.5rem;font-size:12px;color:var(--gold);display:none;align-items:center;justify-content:space-between;gap:8px;}
+  .upgrade-strip a{color:var(--gold);font-weight:500;}
+  .app-tabs{display:flex;background:#fff;border-bottom:1px solid var(--bdr);padding:0 1.5rem;overflow-x:auto;}
+  .app-tab{padding:13px 18px;font-size:13px;border:none;background:none;cursor:pointer;color:var(--tl);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:.15s;}
+  .app-tab.active{color:var(--gd);border-bottom-color:var(--gd);font-weight:500;}
+  .app-panel{display:none;padding:1.5rem;max-width:680px;margin:0 auto;}
+  .app-panel.active{display:block;}
+  .tool-card{background:#fff;border-radius:var(--r);padding:1.5rem;border:1px solid var(--bdr);box-shadow:var(--sh);}
+  .tool-title{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--gd);margin-bottom:.2rem;}
+  .tool-sub{font-size:12px;color:var(--tl);margin-bottom:1.25rem;}
+  .field{margin-bottom:.875rem;}
+  .field label{display:block;font-size:11px;color:var(--tm);margin-bottom:4px;font-weight:500;}
+  .field input,.field select,.field textarea{width:100%;padding:9px 12px;border:1.5px solid var(--bdr);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;transition:.15s;background:#fff;}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gl);}
+  .field textarea{min-height:80px;resize:vertical;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .btn-gen{width:100%;background:var(--gd);color:#fff;border:none;padding:12px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:4px;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-gen:hover{background:var(--gm);}
+  .btn-gen:disabled{opacity:.5;cursor:not-allowed;}
+  .output-card{margin-top:1.25rem;background:#f0faf5;border:1px solid #9fe1cb;border-radius:var(--r);padding:1.25rem;animation:fadeIn .3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .output-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;color:var(--gl);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+  .output-text{font-size:14px;line-height:1.8;color:var(--td);white-space:pre-wrap;}
+  .btn-copy{background:#fff;border:1px solid var(--gp);color:var(--gd);padding:5px 12px;border-radius:7px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+  .btn-copy:hover{background:var(--gp);}
+  .spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .limit-banner{background:#fff5f5;border:1px solid #fed7d7;border-radius:var(--r);padding:1.25rem;text-align:center;margin-top:1rem;}
+  .limit-banner-title{font-size:15px;font-weight:500;color:var(--err);margin-bottom:.5rem;}
+  .limit-banner-sub{font-size:13px;color:var(--tm);line-height:1.6;margin-bottom:1rem;}
+  /* ADMIN */
+  .admin-card{background:#fff;border-radius:var(--r);padding:1.4rem;border:1px solid var(--bdr);margin-bottom:1rem;box-shadow:var(--sh);}
+  .admin-card-title{font-size:13px;font-weight:500;color:var(--gd);margin-bottom:.875rem;}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem;}
+  .stat-box{background:var(--cream);border-radius:9px;padding:.75rem;text-align:center;}
+  .stat-num{font-size:20px;font-weight:500;font-family:'Playfair Display',serif;color:var(--gd);}
+  .stat-label{font-size:10px;color:var(--tl);margin-top:2px;}
+  .gen-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;}
+  .gen-form .field{margin:0;flex:1;min-width:110px;}
+  .gen-form .field input,.gen-form .field select{height:38px;padding:0 10px;}
+  .btn-gen-code{background:var(--gd);color:#fff;border:none;padding:0 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;height:38px;white-space:nowrap;}
+  .gen-out{background:var(--cream);border:2px dashed var(--gold);border-radius:10px;padding:1.1rem;text-align:center;margin-top:.75rem;display:none;}
+  .gen-code-val{font-family:monospace;font-size:22px;font-weight:700;color:var(--gd);letter-spacing:.18em;}
+  .gen-code-meta{font-size:11px;color:var(--tl);margin-top:5px;line-height:1.8;}
+  .wa-btn{display:inline-block;margin-top:9px;background:var(--ok);color:#fff;padding:7px 14px;border-radius:8px;font-size:11px;text-decoration:none;font-family:'DM Sans',sans-serif;}
+  .code-table{width:100%;border-collapse:collapse;font-size:11px;}
+  .code-table th{text-align:left;padding:7px;font-weight:500;color:var(--tl);border-bottom:1px solid var(--bdr);}
+  .code-table td{padding:7px;border-bottom:1px solid var(--bdr);vertical-align:middle;}
+  .code-table tr:last-child td{border-bottom:none;}
+  .s-active{color:var(--ok);font-weight:500;}.s-warn{color:#d69e2e;font-weight:500;}.s-dead{color:var(--err);}
+  .act-btn{background:none;font-size:10px;padding:2px 6px;border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+  .revoke-btn{border:1px solid #fed7d7;color:var(--err);}.revoke-btn:hover{background:#fff5f5;}
+  .renew-btn{border:1px solid #c6f6d5;color:var(--ok);margin-left:3px;}.renew-btn:hover{background:#f0fff4;}
+  .copy-code-btn{border:1px solid var(--bdr);color:var(--tm);margin-left:3px;}.copy-code-btn:hover{background:var(--cream);}
+  @media(max-width:500px){.row2{grid-template-columns:1fr;}.plans{grid-template-columns:1fr;}.feat-grid{grid-template-columns:1fr;}.stats-row{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<!-- ══ LANDING ══ -->
+<div id="landing">
+  <nav class="nav">
+    <div class="nav-logo">Lefking Enterprise <span>(T)</span> Ltd<br><span class="nav-tag">Restaurant Content Services</span></div>
+    <button class="btn-gold" onclick="openModal()" style="padding:8px 18px;font-size:12px;">Access Tool</button>
+  </nav>
+  <div class="hero">
+    <div class="hero-badge">🍴 Work Smatter-Save Time With</div>
+    <h1 class="hero-title">Restaurant content,<br><span>written in seconds.</span></h1>
+    <p class="hero-sub">Menu descriptions, social media captions, and review replies — generated live on screen, ready to copy and use.</p>
+    <div class="hero-btns">
+      <button class="btn-gold" onclick="openModal()">🔑 Enter Access Code</button>
+      <a href="https://wa.me/255768777057?text=Hi%2C%20I%20want%20to%20subscribe%20to%20Restaurant%20Content%20Services" target="_blank" class="btn-wht">💬 Buy Access via M-Pesa</a>
+    </div>
+  </div>
+  <div class="features">
+    <h2 class="sec-title">Everything your restaurant needs</h2>
+    <p class="sec-sub">Three powerful AI tools — content generated live on your screen</p>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-icon">🍽️</div><p class="feat-title">Menu Descriptions</p><p class="feat-desc">Appetizing, professional dish descriptions ready to print. Pick your tone — upscale, warm, or bold.</p></div>
+      <div class="feat-card"><div class="feat-icon">📱</div><p class="feat-title">Social Captions</p><p class="feat-desc">Instagram, Facebook & WhatsApp captions with emojis and hashtags — ready to post instantly.</p></div>
+      <div class="feat-card"><div class="feat-icon">⭐</div><p class="feat-title">Review Replies</p><p class="feat-desc">Professional responses to any review. Sounds human. Protects your restaurant's reputation.</p></div>
+      <div class="feat-card"><div class="feat-icon">🔑</div><p class="feat-title">Secure Access</p><p class="feat-desc">Pay via M-Pesa, receive code on WhatsApp. 30-day access, renew anytime.</p></div>
+    </div>
+  </div>
+  <div class="pricing">
+    <div class="pricing-inner">
+      <h2 class="pricing-title">Simple, affordable pricing</h2>
+      <p class="pricing-sub">Pay via M-Pesa · Code sent to WhatsApp · Valid 30 days</p>
+      <div class="plans">
+        <div class="plan">
+          <p class="plan-name">Starter</p><p class="plan-price">TSh 30,000</p><p class="plan-period">/month · 30 days</p>
+          <ul class="plan-list"><li>30 generations/month</li><li>Menu descriptions</li><li>Social captions</li><li>WhatsApp support</li></ul>
+        </div>
+        <div class="plan pop">
+          <div class="pop-badge">Most Popular</div>
+          <p class="plan-name">Growth</p><p class="plan-price">TSh 60,000</p><p class="plan-period">/month · 30 days</p>
+          <ul class="plan-list"><li>100 generations/month</li><li>Menu + Social + Reviews</li><li>Priority support</li><li>Usage dashboard</li></ul>
+        </div>
+        <div class="plan">
+          <p class="plan-name">Premium</p><p class="plan-price">TSh 100,000</p><p class="plan-period">/month · 30 days</p>
+          <ul class="plan-list"><li>Unlimited generations</li><li>Everything in Growth</li><li>5 staff codes</li><li>Monthly report</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="how">
+    <h2 class="sec-title">How to get started</h2>
+    <p class="sec-sub">From payment to content in under 5 minutes</p>
+    <div class="how-steps">
+      <div class="how-step"><div class="how-num">1</div><div class="how-body"><p class="how-step-title">Pay via M-Pesa</p><p class="how-step-desc">Send to <strong>0768 777 057</strong> (Lefking Enterprise). Choose your plan amount.</p></div></div>
+      <div class="how-step"><div class="how-num">2</div><div class="how-body"><p class="how-step-title">Send M-Pesa receipt</p><p class="how-step-desc">WhatsApp your confirmation screenshot to 0768 777 057.</p></div></div>
+      <div class="how-step"><div class="how-num">3</div><div class="how-body"><p class="how-step-title">Receive access code</p><p class="how-step-desc">Your unique code arrives on WhatsApp within minutes. Valid 30 days.</p></div></div>
+      <div class="how-step"><div class="how-num">4</div><div class="how-body"><p class="how-step-title">Enter code & generate</p><p class="how-step-desc">Click Access Tool, enter your code, fill the form — content appears on screen instantly.</p></div></div>
+    </div>
+  </div>
+  <div class="cta">
+    <h2 class="cta-title">Ready to save hours every week?</h2>
+    <p class="cta-sub">First week free — no contract, cancel anytime</p>
+    <a href="https://wa.me/255768777057?text=Hi%20Lefking%2C%20I%20want%20to%20subscribe%20to%20Restaurant%20Content%20Services" target="_blank" class="btn-gold" style="text-decoration:none;padding:12px 26px;">💬 WhatsApp to Subscribe</a>
+    <p class="mpesa-note">M-Pesa: 0768 777 057 · Lefking Enterprise (T) Ltd</p>
+  </div>
+  <div class="footer">© 2026 Lefking Enterprise (T) Limited · Dar es Salaam · <a href="https://wa.me/255768777057" style="color:var(--gold);text-decoration:none;">0768 777 057</a></div>
+</div>
+
+<!-- ══ MODAL ══ -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-logo">Lefking <span>Enterprise</span></div>
+    <h2 class="modal-title">Enter your access code</h2>
+    <p class="modal-sub">Enter your access code or promo code to unlock the Restaurant Content Toolkit.</p>
+    <div class="modal-err" id="modal-err"></div>
+    <div class="inp-grp">
+      <label>Access code or promo code</label>
+      <input type="text" id="code-input" maxlength="12" placeholder="e.g. GROW1A2B" oninput="this.value=this.value.toUpperCase().replace(/\s/g,'')" onkeydown="if(event.key==='Enter')checkCode()" autocomplete="off"/>
+    </div>
+    <button class="btn-access" onclick="checkCode()">Unlock Toolkit →</button>
+    <div class="modal-div">or get a code</div>
+    <div class="modal-mpesa">
+      <strong>Pay via M-Pesa to get your code:</strong><br>
+      1. Send TSh 30,000 / 60,000 / 100,000 to <strong>0768 777 057</strong><br>
+      2. WhatsApp your receipt to the same number<br>
+      3. Receive your 30-day code within minutes<br><br>
+      <a href="https://wa.me/255768777057?text=Hi%2C%20I%20want%20an%20access%20code" target="_blank" style="color:var(--gm);font-weight:500;font-size:11px;">💬 WhatsApp now →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOOLKIT ══ -->
+<div id="toolkit">
+  <div class="app-nav">
+    <div class="app-nav-logo">Lefking <span>Restaurant Toolkit</span></div>
+    <div class="app-nav-r">
+      <span class="u-badge" id="u-badge">—</span>
+      <span class="exp-badge exp-ok" id="exp-badge">—</span>
+      <button class="btn-out" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+  <div class="usage-bar-wrap" id="usage-wrap">
+    <span class="usage-bar-label" id="usage-label">Generations this month:</span>
+    <div class="usage-track"><div class="usage-fill usage-ok" id="usage-fill" style="width:0%"></div></div>
+    <span class="usage-count" id="usage-count">0 / 30</span>
+  </div>
+  <div class="upgrade-strip" id="upgrade-strip">
+    ⚠️ You've used all your generations this month.
+    <a href="https://wa.me/255768777057?text=Hi%2C%20I%20want%20to%20upgrade%20my%20plan" target="_blank">Upgrade via WhatsApp →</a>
+  </div>
+  <div class="app-tabs">
+    <button class="app-tab active" onclick="switchTab('menu',this)">🍽 Menu</button>
+    <button class="app-tab" onclick="switchTab('social',this)">📱 Social</button>
+    <button class="app-tab" onclick="switchTab('review',this)">⭐ Reviews</button>
+    <button class="app-tab" id="admin-tab" onclick="switchTab('admin',this)" style="display:none">⚙️ Admin</button>
+  </div>
+
+  <!-- MENU -->
+  <div id="app-panel-menu" class="app-panel active">
+    <div class="tool-card">
+      <p class="tool-title">Menu Description Generator</p>
+      <p class="tool-sub">Fill in the details and click Generate — your description appears instantly below.</p>
+      <div class="row2">
+        <div class="field"><label>Dish name *</label><input type="text" id="m-dish" placeholder="e.g. Nyama Choma Platter"/></div>
+        <div class="field"><label>Cuisine</label>
+          <select id="m-cuisine"><option>East African</option><option>Italian</option><option>Indian</option><option>Chinese</option><option>American BBQ</option><option>Mediterranean</option><option>French</option><option>Swahili</option></select>
+        </div>
+      </div>
+      <div class="field"><label>Key ingredients</label><input type="text" id="m-ing" placeholder="e.g. slow-grilled goat, kachumbari, ugali"/></div>
+      <div class="row2">
+        <div class="field"><label>Tone</label>
+          <select id="m-tone"><option>Warm & friendly</option><option>Upscale & poetic</option><option>Bold & punchy</option><option>Simple & clear</option></select>
+        </div>
+        <div class="field"><label>Price (optional)</label><input type="text" id="m-price" placeholder="e.g. TSh 18,000"/></div>
+      </div>
+      <button class="btn-gen" id="btn-menu" onclick="generate('menu')">✨ Generate Description</button>
+      <div id="out-menu" style="display:none" class="output-card">
+        <div class="output-label">📋 Menu Description <button class="btn-copy" onclick="copyOut('out-menu-text',this)">Copy</button></div>
+        <div class="output-text" id="out-menu-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOCIAL -->
+  <div id="app-panel-social" class="app-panel">
+    <div class="tool-card">
+      <p class="tool-title">Social Media Caption Generator</p>
+      <p class="tool-sub">Generate ready-to-post captions for any platform instantly.</p>
+      <div class="row2">
+        <div class="field"><label>Post type</label>
+          <select id="s-type"><option>Daily special</option><option>New menu item</option><option>Weekend promotion</option><option>Behind the scenes</option><option>Customer shoutout</option><option>Holiday/event</option></select>
+        </div>
+        <div class="field"><label>Platform</label>
+          <select id="s-platform"><option>Instagram</option><option>Facebook</option><option>WhatsApp status</option><option>TikTok</option><option>Twitter/X</option></select>
+        </div>
+      </div>
+      <div class="field"><label>What's the post about? *</label><textarea id="s-context" placeholder="e.g. Friday fish fry — whole tilapia, chips and salad for TSh 12,000. Only this weekend."></textarea></div>
+      <div class="field"><label>Restaurant name (optional)</label><input type="text" id="s-rname" placeholder="e.g. Mama Jiko's Kitchen"/></div>
+      <button class="btn-gen" id="btn-social" onclick="generate('social')">✨ Generate Caption</button>
+      <div id="out-social" style="display:none" class="output-card">
+        <div class="output-label">📱 Social Caption <button class="btn-copy" onclick="copyOut('out-social-text',this)">Copy</button></div>
+        <div class="output-text" id="out-social-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEW -->
+  <div id="app-panel-review" class="app-panel">
+    <div class="tool-card">
+      <p class="tool-title">Review Reply Generator</p>
+      <p class="tool-sub">Respond to customer reviews professionally — reply appears on screen ready to copy.</p>
+      <div class="field"><label>Customer review *</label><textarea id="r-review" placeholder="Paste the customer review text here..." style="min-height:100px"></textarea></div>
+      <div class="row2">
+        <div class="field"><label>Star rating</label>
+          <select id="r-stars"><option value="5">⭐⭐⭐⭐⭐ 5 stars</option><option value="4">⭐⭐⭐⭐ 4 stars</option><option value="3">⭐⭐⭐ 3 stars</option><option value="2">⭐⭐ 2 stars</option><option value="1">⭐ 1 star</option></select>
+        </div>
+        <div class="field"><label>Reply tone</label>
+          <select id="r-tone"><option>Warm & grateful</option><option>Professional & concise</option><option>Apologetic & caring</option><option>Upbeat & friendly</option></select>
+        </div>
+      </div>
+      <button class="btn-gen" id="btn-review" onclick="generate('review')">✨ Generate Reply</button>
+      <div id="out-review" style="display:none" class="output-card">
+        <div class="output-label">⭐ Review Reply <button class="btn-copy" onclick="copyOut('out-review-text',this)">Copy</button></div>
+        <div class="output-text" id="out-review-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="app-panel-admin" class="app-panel">
+    <div class="admin-card">
+      <p class="admin-card-title">📊 Dashboard</p>
+      <div class="stats-row" id="stats-row"></div>
+    </div>
+    <div class="admin-card">
+      <p class="admin-card-title">⚡ Generate Access Code</p>
+      <div class="gen-form">
+        <div class="field"><label>Plan</label>
+          <select id="gen-plan"><option value="Starter">Starter — TSh 30k (30 gen)</option><option value="Growth">Growth — TSh 60k (100 gen)</option><option value="Premium">Premium — TSh 100k (Unlimited)</option><option value="Promo">Promo — Free (10 gen)</option></select>
+        </div>
+        <div class="field"><label>Client name</label><input type="text" id="gen-client" placeholder="e.g. Mama Jiko"/></div>
+        <div class="field"><label>Days valid</label>
+          <select id="gen-days"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option></select>
+        </div>
+        <button class="btn-gen-code" onclick="generateCode()">Generate</button>
+      </div>
+      <div class="gen-out" id="gen-out">
+        <div class="gen-code-val" id="gen-code-val"></div>
+        <div class="gen-code-meta" id="gen-code-meta"></div>
+        <button class="btn-copy" onclick="copyGenCode()" style="margin-top:8px;">📋 Copy code</button>
+        <a id="wa-code-link" href="#" target="_blank" class="wa-btn">💬 Send via WhatsApp</a>
+      </div>
+    </div>
+    <div class="admin-card">
+      <p class="admin-card-title">🔑 All Access Codes</p>
+      <table class="code-table">
+        <thead><tr><th>Code</th><th>Plan</th><th>Client</th><th>Expiry</th><th>Used</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="code-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ PLAN LIMITS ══
+const LIMITS = { Starter:30, Growth:100, Premium:Infinity, Promo:10, Admin:Infinity };
+
+// ══ HELPERS ══
+const today=()=>new Date();
+const addDays=(d,n)=>{const r=new Date(d);r.setDate(r.getDate()+n);return r;};
+const fmtDate=d=>d.toISOString().split('T')[0];
+const daysLeft=e=>Math.ceil((new Date(e)-today())/(1000*60*60*24));
+const isExpired=e=>daysLeft(e)<=0;
+
+// ══ CODES DATABASE ══
+let CODES={
+  'ADMIN000':{plan:'Admin',   client:'Lefking Admin',  expiry:fmtDate(addDays(today(),3650)),active:true,used:0},
+  'RCST1234':{plan:'Starter', client:'Demo Starter',   expiry:fmtDate(addDays(today(),30)), active:true,used:0},
+  'GROW5678':{plan:'Growth',  client:'Demo Growth',    expiry:fmtDate(addDays(today(),30)), active:true,used:0},
+  'PREM9012':{plan:'Premium', client:'Demo Premium',   expiry:fmtDate(addDays(today(),30)), active:true,used:0},
+  'PROMO100':{plan:'Promo',   client:'Promo User',     expiry:fmtDate(addDays(today(),7)),  active:true,used:0},
+  'FREEWK1' :{plan:'Starter', client:'Free Trial',     expiry:fmtDate(addDays(today(),7)),  active:true,used:0},
+};
+let currentUser=null;
+
+// ══ MODAL ══
+function openModal(){document.getElementById('modal').classList.add('open');setTimeout(()=>document.getElementById('code-input').focus(),100);}
+function closeModal(){document.getElementById('modal').classList.remove('open');document.getElementById('modal-err').style.display='none';document.getElementById('code-input').value='';}
+
+function checkCode(){
+  const code=document.getElementById('code-input').value.trim().toUpperCase();
+  const err=document.getElementById('modal-err');
+  err.style.display='none';
+  if(!code){err.textContent='❌ Please enter your access code.';err.style.display='block';return;}
+  const e=CODES[code];
+  if(!e){err.textContent='❌ Code not found. Check for typos or contact 0768 777 057.';err.style.display='block';return;}
+  if(!e.active){err.textContent='❌ This code has been deactivated. Please renew via 0768 777 057.';err.style.display='block';return;}
+  if(isExpired(e.expiry)){err.textContent='⏰ Code expired on '+e.expiry+'. Renew via M-Pesa: 0768 777 057';err.style.display='block';return;}
+  currentUser={code,...e};
+  closeModal();
+  launchToolkit();
+}
+
+function launchToolkit(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('toolkit').style.display='block';
+  const dl=daysLeft(currentUser.expiry);
+  document.getElementById('u-badge').textContent=currentUser.plan+' · '+currentUser.client;
+  const eb=document.getElementById('exp-badge');
+  if(dl<=3){eb.textContent='⚠️ '+dl+'d left';eb.className='exp-badge exp-warn';}
+  else if(dl<=7){eb.textContent='⚠️ '+dl+' days left';eb.className='exp-badge exp-warn';}
+  else{eb.textContent='✅ '+dl+' days left';eb.className='exp-badge exp-ok';}
+  if(currentUser.plan==='Admin') document.getElementById('admin-tab').style.display='inline-block';
+  updateUsageBar();
+  window.scrollTo(0,0);
+}
+
+function logout(){
+  currentUser=null;
+  document.getElementById('landing').style.display='block';
+  document.getElementById('toolkit').style.display='none';
+  document.querySelectorAll('.app-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.app-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.app-tab').classList.add('active');
+  document.getElementById('app-panel-menu').classList.add('active');
+}
+
+// ══ USAGE BAR ══
+function updateUsageBar(){
+  if(!currentUser) return;
+  const limit=LIMITS[currentUser.plan]||30;
+  const used=CODES[currentUser.code].used||0;
+  const isUnlimited=limit===Infinity;
+  const pct=isUnlimited?0:Math.min(100,Math.round(used/limit*100));
+  const fill=document.getElementById('usage-fill');
+  const count=document.getElementById('usage-count');
+  const strip=document.getElementById('upgrade-strip');
+  const wrap=document.getElementById('usage-wrap');
+  if(isUnlimited){
+    wrap.style.display='none'; strip.style.display='none'; return;
+  }
+  wrap.style.display='flex';
+  fill.style.width=pct+'%';
+  fill.className='usage-fill '+(pct>=100?'usage-full':pct>=80?'usage-warn':'usage-ok');
+  count.textContent=used+' / '+limit;
+  if(pct>=100){
+    strip.style.display='flex';
+    document.querySelectorAll('.btn-gen').forEach(b=>b.disabled=true);
+  } else {
+    strip.style.display='none';
+    document.querySelectorAll('.btn-gen').forEach(b=>b.disabled=false);
+  }
+}
+
+function incrementUsage(){
+  if(!currentUser) return;
+  CODES[currentUser.code].used=(CODES[currentUser.code].used||0)+1;
+  currentUser.used=CODES[currentUser.code].used;
+  updateUsageBar();
+}
+
+function checkLimit(){
+  if(!currentUser) return false;
+  const limit=LIMITS[currentUser.plan]||30;
+  if(limit===Infinity) return true;
+  return (CODES[currentUser.code].used||0)<limit;
+}
+
+// ══ TABS ══
+function switchTab(name,el){
+  document.querySelectorAll('.app-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.app-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('app-panel-'+name).classList.add('active');
+  if(name==='admin') renderAdmin();
+}
+
+// ══ AI GENERATION ══
+async function generate(type){
+  if(!checkLimit()){
+    alert('You have used all your generations this month. Please upgrade via WhatsApp: 0768 777 057');
+    return;
+  }
+  let prompt='';
+  const btnId='btn-'+type, outId='out-'+type, textId='out-'+type+'-text';
+  const btn=document.getElementById(btnId);
+  const outCard=document.getElementById(outId);
+  const outText=document.getElementById(textId);
+
+  if(type==='menu'){
+    const dish=document.getElementById('m-dish').value.trim();
+    if(!dish){alert('Please enter a dish name.');return;}
+    const cuisine=document.getElementById('m-cuisine').value;
+    const ing=document.getElementById('m-ing').value.trim();
+    const tone=document.getElementById('m-tone').value;
+    const price=document.getElementById('m-price').value.trim();
+    prompt=`Write a ${tone} menu description for a ${cuisine} restaurant dish called "${dish}".${ing?' Key ingredients: '+ing+'.':''} ${price?'Price: '+price+'.':''} Write 2-3 appetizing sentences only. No headers or bullets. Output the description only.`;
+  } else if(type==='social'){
+    const ctx=document.getElementById('s-context').value.trim();
+    if(!ctx){alert('Please describe the post.');return;}
+    const platform=document.getElementById('s-platform').value;
+    const stype=document.getElementById('s-type').value;
+    const rname=document.getElementById('s-rname').value.trim();
+    prompt=`Write a ${platform} caption for a restaurant. Post type: ${stype}. Details: ${ctx}.${rname?' Restaurant: '+rname+'.':''} Include relevant emojis and 3-5 hashtags at the end. Sound authentic. Output the caption only.`;
+  } else {
+    const rev=document.getElementById('r-review').value.trim();
+    if(!rev){alert('Please paste the review.');return;}
+    const stars=document.getElementById('r-stars').value;
+    const tone=document.getElementById('r-tone').value;
+    prompt=`Write a ${tone} reply to this ${stars}-star restaurant review: "${rev}". Keep it 2-4 sentences. Sound human, not like a template.${parseInt(stars)<=3?' Acknowledge the issue and offer to make it right.':' Express genuine gratitude.'} Output the reply only.`;
+  }
+
+  const orig=btn.innerHTML;
+  btn.disabled=true;
+  btn.innerHTML='<div class="spinner"></div> Generating...';
+  outCard.style.display='none';
+
+  try {
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    });
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'API error '+res.status);}
+    const data=await res.json();
+    const text=data.content.map(b=>b.text||'').join('').trim();
+    outText.textContent=text;
+    outCard.style.background='#f0faf5';
+    outCard.style.border='1px solid #9fe1cb';
+    outCard.style.display='block';
+    incrementUsage();
+  } catch(e){
+    // Graceful fallback
+    outText.textContent='⚠️ Direct AI connection unavailable from this browser.\n\nCopy this prompt and paste into Claude chat (claude.ai):\n\n'+prompt;
+    outCard.style.background='#fffbf0';
+    outCard.style.border='1px solid #fde9a8';
+    outCard.style.display='block';
+    // Still count usage on fallback? No — don't penalise for browser restriction
+  }
+  btn.disabled=false;
+  btn.innerHTML=orig;
+  updateUsageBar();
+}
+
+function copyOut(id,btn){
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>{
+    btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent='Copy',1800);
+  });
+}
+
+// ══ ADMIN ══
+function generateCode(){
+  const plan=document.getElementById('gen-plan').value;
+  const client=document.getElementById('gen-client').value.trim()||'Client';
+  const days=parseInt(document.getElementById('gen-days').value)||30;
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const prefix=plan==='Promo'?'PRMO':plan==='Growth'?'GROW':plan==='Premium'?'PREM':'RCST';
+  let suffix='';for(let i=0;i<4;i++) suffix+=chars[Math.floor(Math.random()*chars.length)];
+  const code=prefix+suffix;
+  const expiry=fmtDate(addDays(today(),days));
+  const limitLabel=LIMITS[plan]===Infinity?'Unlimited':LIMITS[plan]+' generations';
+  CODES[code]={plan,client,expiry,active:true,used:0};
+  document.getElementById('gen-code-val').textContent=code;
+  document.getElementById('gen-code-meta').innerHTML=`Plan: <b>${plan}</b> (${limitLabel}) · Client: <b>${client}</b><br>Expires: <b>${expiry}</b> (${days} days)`;
+  document.getElementById('gen-out').style.display='block';
+  const msg=encodeURIComponent(`Hi ${client} 👋\n\nYour Restaurant Content Services access code is ready:\n\n🔑 *${code}*\n\nPlan: ${plan} (${limitLabel})\nExpires: ${expiry} (${days} days)\n\nVisit the tool and enter your code:\nhttps://lefking-restaurant.netlify.app\n\n— Lefking Enterprise (T) Ltd\n0768 777 057`);
+  document.getElementById('wa-code-link').href=`https://wa.me/?text=${msg}`;
+  renderAdmin();
+}
+
+function copyGenCode(){navigator.clipboard.writeText(document.getElementById('gen-code-val').textContent).then(()=>alert('Code copied!'));}
+function revokeCode(code){if(confirm('Deactivate '+code+'?')){CODES[code].active=false;renderAdmin();}}
+function renewCode(code){const d=parseInt(prompt('Renew for how many days?','30'))||30;CODES[code].expiry=fmtDate(addDays(today(),d));CODES[code].active=true;CODES[code].used=0;alert('Renewed! Usage reset to 0.');renderAdmin();}
+function copyCode(code){navigator.clipboard.writeText(code).then(()=>alert('Copied: '+code));}
+
+function renderAdmin(){
+  const all=Object.entries(CODES).filter(([,d])=>d.plan!=='Admin');
+  const active=all.filter(([,d])=>d.active&&!isExpired(d.expiry)).length;
+  const expiring=all.filter(([,d])=>d.active&&!isExpired(d.expiry)&&daysLeft(d.expiry)<=7).length;
+  const rev={Starter:30000,Growth:60000,Premium:100000,Promo:0};
+  const mrr=all.filter(([,d])=>d.active&&!isExpired(d.expiry)).reduce((s,[,d])=>s+(rev[d.plan]||0),0);
+  document.getElementById('stats-row').innerHTML=`
+    <div class="stat-box"><div class="stat-num">${all.length}</div><div class="stat-label">Total codes</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--ok)">${active}</div><div class="stat-label">Active</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:#d69e2e">${expiring}</div><div class="stat-label">Expiring soon</div></div>
+    <div class="stat-box"><div class="stat-num" style="font-size:14px;padding-top:3px">TSh ${mrr.toLocaleString()}</div><div class="stat-label">Monthly revenue</div></div>`;
+  const tbody=document.getElementById('code-tbody');
+  tbody.innerHTML='';
+  Object.entries(CODES).filter(([,d])=>d.plan!=='Admin').sort((a,b)=>new Date(b[1].expiry)-new Date(a[1].expiry)).forEach(([code,data])=>{
+    const dl=daysLeft(data.expiry);
+    const dead=!data.active||dl<=0;
+    const warn=!dead&&dl<=7;
+    const sc=dead?'s-dead':warn?'s-warn':'s-active';
+    const st=!data.active?'Revoked':dead?'Expired':warn?`⚠️ ${dl}d`:'Active';
+    const limit=LIMITS[data.plan];
+    const usedStr=limit===Infinity?data.used+' / ∞':`${data.used} / ${limit}`;
+    const usedPct=limit===Infinity?0:Math.round((data.used/limit)*100);
+    const barColor=usedPct>=100?'#fc8181':usedPct>=80?'#f6ad55':'var(--gp)';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="font-family:monospace;font-weight:600;letter-spacing:.05em">${code}</td>
+      <td>${data.plan}</td><td>${data.client}</td>
+      <td style="font-size:11px">${data.expiry}<br><span class="${sc}">${dead?'Expired':dl+' days left'}</span></td>
+      <td style="font-size:11px">
+        ${usedStr}<br>
+        ${limit!==Infinity?`<div style="width:60px;height:4px;background:#eee;border-radius:99px;margin-top:3px"><div style="width:${Math.min(100,usedPct)}%;height:100%;background:${barColor};border-radius:99px"></div></div>`:''}
+      </td>
+      <td class="${sc}">${st}</td>
+      <td>
+        ${!dead?`<button class="act-btn revoke-btn" onclick="revokeCode('${code}')">Revoke</button>`:''}
+        <button class="act-btn renew-btn" onclick="renewCode('${code}')">Renew</button>
+        <button class="act-btn copy-code-btn" onclick="copyCode('${code}')">Copy</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+</script>
+</body>
+</html>
