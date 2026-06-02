@@ -271,7 +271,6 @@
     <button class="app-tab" onclick="switchTab('social',this)">📱 Social</button>
     <button class="app-tab" onclick="switchTab('review',this)">⭐ Reviews</button>
     <button class="app-tab" id="admin-tab" onclick="switchTab('admin',this)" style="display:none">⚙️ Admin</button>
-    <button class="app-tab" onclick="switchTab('settings',this)">⚙️ Settings</button>
   </div>
 
   <!-- MENU -->
@@ -345,12 +344,10 @@
     </div>
   </div>
 
-  <!-- SETTINGS -->
-  <div id="app-panel-settings" class="app-panel">
-    <div class="tool-card">
-      <p class="tool-title">API Settings</p>
-      <p class="tool-sub">Configure your AI providers and preferred model. Keys are saved locally in your browser.</p>
-
+  <!-- ADMIN -->
+  <div id="app-panel-admin" class="app-panel">
+    <div class="admin-card">
+      <p class="admin-card-title">🤖 AI Configuration</p>
       <div class="field">
         <label>Preferred AI Provider</label>
         <select id="pref-provider" onchange="saveSettings()">
@@ -359,30 +356,13 @@
           <option value="google">Google (Gemini)</option>
         </select>
       </div>
-
-      <div class="field">
-        <label>Anthropic API Key</label>
-        <input type="password" id="key-anthropic" placeholder="sk-ant-..." oninput="saveSettings()">
+      <div class="row2">
+        <div class="field"><label>Anthropic API Key</label><input type="password" id="key-anthropic" placeholder="sk-ant-..." oninput="saveSettings()"></div>
+        <div class="field"><label>OpenAI API Key</label><input type="password" id="key-openai" placeholder="sk-..." oninput="saveSettings()"></div>
       </div>
-
-      <div class="field">
-        <label>OpenAI API Key</label>
-        <input type="password" id="key-openai" placeholder="sk-..." oninput="saveSettings()">
-      </div>
-
-      <div class="field">
-        <label>Google Gemini API Key</label>
-        <input type="password" id="key-google" placeholder="AIza..." oninput="saveSettings()">
-      </div>
-
-      <div class="mpesa-note" style="margin-top: 1rem; color: var(--tm);">
-        ℹ️ Keys are stored in your browser's <code>localStorage</code> and never sent to our servers.
-      </div>
+      <div class="field"><label>Google Gemini API Key</label><input type="password" id="key-google" placeholder="AIza..." oninput="saveSettings()"></div>
     </div>
-  </div>
 
-  <!-- ADMIN -->
-  <div id="app-panel-admin" class="app-panel">
     <div class="admin-card">
       <p class="admin-card-title">📊 Dashboard</p>
       <div class="stats-row" id="stats-row"></div>
@@ -466,7 +446,14 @@ function checkCode(){
   launchToolkit();
 }
 
+function resetUI(){
+  const ids=['m-dish','m-ing','m-price','s-context','s-rname','r-review'];
+  ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.querySelectorAll('.output-card').forEach(el=>el.style.display='none');
+}
+
 function launchToolkit(){
+  resetUI();
   document.getElementById('landing').style.display='none';
   document.getElementById('toolkit').style.display='block';
   const dl=daysLeft(currentUser.expiry);
@@ -619,15 +606,24 @@ async function generate(type){
   outCard.style.display='none';
 
   const settings=JSON.parse(localStorage.getItem('RCS_SETTINGS')||'{}');
-  const provider=settings.provider||'anthropic';
   const keys=settings.keys||{};
 
   try {
     let text='';
-    if(provider==='anthropic' && keys.anthropic) text=await callAnthropic(prompt, keys.anthropic);
-    else if(provider==='openai' && keys.openai) text=await callOpenAI(prompt, keys.openai);
-    else if(provider==='google' && keys.google) text=await callGemini(prompt, keys.google);
-    else throw new Error('No API key configured for selected provider');
+    const providers=['anthropic','openai','google'];
+    const startIdx=providers.indexOf(settings.provider||'anthropic');
+    const loop=providers.slice(startIdx).concat(providers.slice(0,startIdx));
+
+    let lastErr=null;
+    for(const p of loop){
+      try{
+        if(p==='anthropic' && keys.anthropic) { text=await callAnthropic(prompt, keys.anthropic); break; }
+        if(p==='openai' && keys.openai) { text=await callOpenAI(prompt, keys.openai); break; }
+        if(p==='google' && keys.google) { text=await callGemini(prompt, keys.google); break; }
+      } catch(e) { lastErr=e; console.error(`Provider ${p} failed:`, e); }
+    }
+
+    if(!text) throw lastErr || new Error('No AI providers available or configured');
 
     outText.textContent=text;
     outCard.style.background='#f0faf5';
@@ -637,20 +633,24 @@ async function generate(type){
     incrementUsage();
   } catch(e){
     // Graceful fallback
-    outText.textContent=prompt;
     outCard.style.background='#fffbf0';
     outCard.style.border='1px solid #fde9a8';
-    const enc=encodeURIComponent(prompt);
-    outCard.querySelector('.output-label').innerHTML=`
-      <span>⚠️ AI Offline — Copy prompt & pick platform</span>
-      <div style="display:flex;gap:4px;">
-        <button class="btn-copy" onclick="copyOut('${textId}',this)">Copy Prompt</button>
-        <a href="https://claude.ai" target="_blank" class="btn-copy" style="text-decoration:none">Claude</a>
-        <a href="https://chatgpt.com" target="_blank" class="btn-copy" style="text-decoration:none">ChatGPT</a>
-        <a href="https://gemini.google.com" target="_blank" class="btn-copy" style="text-decoration:none">Gemini</a>
-      </div>`;
+    if(isAdmin()){
+      outText.textContent=prompt;
+      outCard.querySelector('.output-label').innerHTML=`
+        <span>⚠️ AI Offline — Copy prompt & pick platform</span>
+        <div style="display:flex;gap:4px;">
+          <button class="btn-copy" onclick="copyOut('${textId}',this)">Copy Prompt</button>
+          <a href="https://claude.ai" target="_blank" class="btn-copy" style="text-decoration:none">Claude</a>
+          <a href="https://chatgpt.com" target="_blank" class="btn-copy" style="text-decoration:none">ChatGPT</a>
+          <a href="https://gemini.google.com" target="_blank" class="btn-copy" style="text-decoration:none">Gemini</a>
+        </div>`;
+    } else {
+      outText.textContent='⚠️ Service temporarily unavailable. Please contact support at 0768 777 057 for assistance.';
+      outCard.querySelector('.output-label').innerHTML='<span>⚠️ Error</span>';
+    }
     outCard.style.display='block';
-    console.warn('AI call failed or restricted. Providing prompt for manual fallback.', e);
+    console.warn('AI call failed or restricted.', e);
   }
   btn.disabled=false;
   btn.innerHTML=orig;

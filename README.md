@@ -8,22 +8,21 @@ A lightweight, powerful AI toolkit designed for restaurant owners and managers t
 - **📱 Social Media Caption Generator**: Generate ready-to-post captions for Instagram, Facebook, WhatsApp, TikTok, and Twitter. Includes emojis and hashtags.
 - **⭐ Review Reply Generator**: Respond to customer reviews professionally and humanely, protecting your restaurant's reputation.
 - **🤖 Multi-Model AI Support**: Choose between Anthropic (Claude), OpenAI (ChatGPT), and Google (Gemini) as your content provider.
-- **⚙️ Admin Dashboard**: Manage access codes, track usage, and monitor revenue.
-- **⚙️ Settings Panel**: Securely store your AI API keys locally in your browser.
+- **⚙️ Admin Dashboard**: Manage access codes, track usage, monitor revenue, and configure AI API keys.
 
 ## Getting Started
 
 1. Open `restaurant_toolkit_v4.html` in your web browser.
 2. Click **Access Tool**.
 3. Enter your access code to unlock the toolkit.
-4. (Optional) Go to the **Settings** tab to enter your AI API keys for direct generation.
-5. Select a tool from the tabs and start generating!
+4. Select a tool from the tabs and start generating!
 
 ## Multi-Model AI and Fallback
 
 The toolkit is designed to be flexible and resilient:
-- **Direct Generation**: If you provide an API key in the Settings tab, the toolkit will attempt to generate content directly within the application using your preferred provider (Claude, GPT-4o, or Gemini 1.5 Flash).
-- **Manual Fallback**: If a direct API call fails (due to browser security restrictions or lack of an API key), the toolkit provides a **"Copy Prompt"** button and direct links to **Claude.ai, ChatGPT, and Gemini**. You can copy the perfectly formatted prompt and paste it into any of these platforms to get your content in seconds.
+- **Direct Generation**: For Admins, the toolkit can be configured with API keys in the Admin panel. It will attempt to generate content directly using the preferred provider (Claude, GPT-4o, or Gemini 1.5 Flash).
+- **Automatic Fallback**: If the preferred AI provider fails, the system automatically attempts to use other configured providers in a loop.
+- **Error Handling**: If all AI options fail, regular users are directed to contact support for assistance. Admins retain access to a manual fallback (Copy Prompt and direct AI links) to facilitate troubleshooting.
 
 ## Security and Persistence Notice
 
