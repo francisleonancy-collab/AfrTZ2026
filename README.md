@@ -13,18 +13,20 @@ A lightweight, powerful AI toolkit designed for restaurant owners and managers t
 
 1. Open `restaurant_toolkit_v4.html` in your web browser.
 2. Click **Access Tool**.
-3. Enter your access code (e.g., `ADMIN000` for admin access).
+3. Enter your access code to unlock the toolkit.
 4. Select a tool from the tabs and start generating!
 
-## Admin Access
+## Security and Persistence Notice
 
-- **Admin Code**: `ADMIN000`
-- The Admin panel allows you to generate new access codes, revoke/renew existing ones, and view a dashboard of all active users.
+- **Client-Side Only**: This application is entirely client-side. It does not have a backend server or database.
+- **LocalStorage Persistence**: Data such as generated access codes and user sessions are stored in your browser's `localStorage`. This means data is **unique to each device/browser** and is not synchronized across different machines.
+- **Access Control**: The access control mechanism (Admin vs. User plans) is intended for UI organization and workflow management. Since the application is client-side, it should not be used for storing sensitive information or as a replacement for robust, server-side authentication.
+- **AI Generation**: Direct API calls to AI services from a browser are restricted by security policies (CORS). The toolkit provides a manual fallback where you can copy the generated prompt to use in your preferred AI chat interface.
 
 ## Technology Stack
 
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript.
-- **AI Integration**: Anthropic Claude API (Claude 3.5 Sonnet).
+- **AI Integration**: Anthropic Claude API (Template for integration).
 - **Persistence**: LocalStorage for session and database management.
 
 ---
