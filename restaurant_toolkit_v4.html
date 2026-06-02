@@ -271,6 +271,7 @@
     <button class="app-tab" onclick="switchTab('social',this)">📱 Social</button>
     <button class="app-tab" onclick="switchTab('review',this)">⭐ Reviews</button>
     <button class="app-tab" id="admin-tab" onclick="switchTab('admin',this)" style="display:none">⚙️ Admin</button>
+    <button class="app-tab" onclick="switchTab('settings',this)">⚙️ Settings</button>
   </div>
 
   <!-- MENU -->
@@ -340,6 +341,42 @@
       <div id="out-review" style="display:none" class="output-card">
         <div class="output-label">⭐ Review Reply <button class="btn-copy" onclick="copyOut('out-review-text',this)">Copy</button></div>
         <div class="output-text" id="out-review-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="app-panel-settings" class="app-panel">
+    <div class="tool-card">
+      <p class="tool-title">API Settings</p>
+      <p class="tool-sub">Configure your AI providers and preferred model. Keys are saved locally in your browser.</p>
+
+      <div class="field">
+        <label>Preferred AI Provider</label>
+        <select id="pref-provider" onchange="saveSettings()">
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="openai">OpenAI (ChatGPT)</option>
+          <option value="google">Google (Gemini)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Anthropic API Key</label>
+        <input type="password" id="key-anthropic" placeholder="sk-ant-..." oninput="saveSettings()">
+      </div>
+
+      <div class="field">
+        <label>OpenAI API Key</label>
+        <input type="password" id="key-openai" placeholder="sk-..." oninput="saveSettings()">
+      </div>
+
+      <div class="field">
+        <label>Google Gemini API Key</label>
+        <input type="password" id="key-google" placeholder="AIza..." oninput="saveSettings()">
+      </div>
+
+      <div class="mpesa-note" style="margin-top: 1rem; color: var(--tm);">
+        ℹ️ Keys are stored in your browser's <code>localStorage</code> and never sent to our servers.
       </div>
     </div>
   </div>
@@ -509,6 +546,39 @@ function switchTab(name,el){
 }
 
 // ══ AI GENERATION ══
+async function callAnthropic(prompt, key){
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access': 'true'},
+    body:JSON.stringify({model:'claude-3-5-sonnet-20240620',max_tokens:600,messages:[{role:'user',content:prompt}]})
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'Anthropic Error '+res.status);}
+  const data=await res.json();
+  return data.content.map(b=>b.text||'').join('').trim();
+}
+
+async function callOpenAI(prompt, key){
+  const res=await fetch('https://api.openai.com/v1/chat/completions',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+    body:JSON.stringify({model:'gpt-4o',messages:[{role:'user',content:prompt}]})
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'OpenAI Error '+res.status);}
+  const data=await res.json();
+  return data.choices[0].message.content.trim();
+}
+
+async function callGemini(prompt, key){
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+  });
+  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'Gemini Error '+res.status);}
+  const data=await res.json();
+  return data.candidates[0].content.parts[0].text.trim();
+}
+
 async function generate(type){
   if(!checkLimit()){
     alert('You have used all your generations this month. Please upgrade via WhatsApp: 0768 777 057');
@@ -548,15 +618,17 @@ async function generate(type){
   btn.innerHTML='<div class="spinner"></div> Generating...';
   outCard.style.display='none';
 
+  const settings=JSON.parse(localStorage.getItem('RCS_SETTINGS')||'{}');
+  const provider=settings.provider||'anthropic';
+  const keys=settings.keys||{};
+
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-3-5-sonnet-20240620',max_tokens:600,messages:[{role:'user',content:prompt}]})
-    });
-    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'API error '+res.status);}
-    const data=await res.json();
-    const text=data.content.map(b=>b.text||'').join('').trim();
+    let text='';
+    if(provider==='anthropic' && keys.anthropic) text=await callAnthropic(prompt, keys.anthropic);
+    else if(provider==='openai' && keys.openai) text=await callOpenAI(prompt, keys.openai);
+    else if(provider==='google' && keys.google) text=await callGemini(prompt, keys.google);
+    else throw new Error('No API key configured for selected provider');
+
     outText.textContent=text;
     outCard.style.background='#f0faf5';
     outCard.style.border='1px solid #9fe1cb';
@@ -568,9 +640,17 @@ async function generate(type){
     outText.textContent=prompt;
     outCard.style.background='#fffbf0';
     outCard.style.border='1px solid #fde9a8';
-    outCard.querySelector('.output-label').innerHTML=`⚠️ Direct AI restricted — Copy prompt to Claude.ai <button class="btn-copy" onclick="copyOut('${textId}',this)">Copy Prompt</button>`;
+    const enc=encodeURIComponent(prompt);
+    outCard.querySelector('.output-label').innerHTML=`
+      <span>⚠️ AI Offline — Copy prompt & pick platform</span>
+      <div style="display:flex;gap:4px;">
+        <button class="btn-copy" onclick="copyOut('${textId}',this)">Copy Prompt</button>
+        <a href="https://claude.ai" target="_blank" class="btn-copy" style="text-decoration:none">Claude</a>
+        <a href="https://chatgpt.com" target="_blank" class="btn-copy" style="text-decoration:none">ChatGPT</a>
+        <a href="https://gemini.google.com" target="_blank" class="btn-copy" style="text-decoration:none">Gemini</a>
+      </div>`;
     outCard.style.display='block';
-    console.warn('Direct AI call restricted (likely CORS or missing API Key). Providing prompt for manual fallback.', e);
+    console.warn('AI call failed or restricted. Providing prompt for manual fallback.', e);
   }
   btn.disabled=false;
   btn.innerHTML=orig;
@@ -685,7 +765,31 @@ function renderAdmin(){
   });
 }
 
+function saveSettings(){
+  const settings={
+    provider: document.getElementById('pref-provider').value,
+    keys: {
+      anthropic: document.getElementById('key-anthropic').value,
+      openai: document.getElementById('key-openai').value,
+      google: document.getElementById('key-google').value
+    }
+  };
+  localStorage.setItem('RCS_SETTINGS', JSON.stringify(settings));
+}
+
+function loadSettings(){
+  const saved=localStorage.getItem('RCS_SETTINGS');
+  if(saved){
+    const s=JSON.parse(saved);
+    document.getElementById('pref-provider').value = s.provider || 'anthropic';
+    document.getElementById('key-anthropic').value = s.keys?.anthropic || '';
+    document.getElementById('key-openai').value = s.keys?.openai || '';
+    document.getElementById('key-google').value = s.keys?.google || '';
+  }
+}
+
 function init(){
+  loadSettings();
   const saved=localStorage.getItem('RCS_USER');
   if(saved){
     const u=JSON.parse(saved);
