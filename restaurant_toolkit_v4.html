@@ -132,7 +132,7 @@
   /* ADMIN */
   .admin-card{background:#fff;border-radius:var(--r);padding:1.4rem;border:1px solid var(--bdr);margin-bottom:1rem;box-shadow:var(--sh);}
   .admin-card-title{font-size:13px;font-weight:500;color:var(--gd);margin-bottom:.875rem;}
-  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem;}
+  .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1rem;}
   .stat-box{background:var(--cream);border-radius:9px;padding:.75rem;text-align:center;}
   .stat-num{font-size:20px;font-weight:500;font-family:'Playfair Display',serif;color:var(--gd);}
   .stat-label{font-size:10px;color:var(--tl);margin-top:2px;}
@@ -370,7 +370,13 @@
       </div>
     </div>
     <div class="admin-card">
-      <p class="admin-card-title">🔑 All Access Codes</p>
+      <p class="admin-card-title" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <span>🔑 All Access Codes</span>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="admin-search" placeholder="Search code, client or plan..." style="font-size:11px;padding:5px 10px;border:1px solid var(--bdr);border-radius:6px;width:180px;font-family:inherit;" oninput="renderAdmin()">
+          <button class="btn-copy" onclick="exportToCSV()" style="font-size:10px;">💾 Export CSV</button>
+        </div>
+      </p>
       <table class="code-table">
         <thead><tr><th>Code</th><th>Plan</th><th>Client</th><th>Expiry</th><th>Used</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody id="code-tbody"></tbody>
@@ -391,7 +397,7 @@ const daysLeft=e=>Math.ceil((new Date(e)-today())/(1000*60*60*24));
 const isExpired=e=>daysLeft(e)<=0;
 
 // ══ CODES DATABASE ══
-let CODES={
+const DEFAULT_CODES={
   'ADMIN000':{plan:'Admin',   client:'Lefking Admin',  expiry:fmtDate(addDays(today(),3650)),active:true,used:0},
   'RCST1234':{plan:'Starter', client:'Demo Starter',   expiry:fmtDate(addDays(today(),30)), active:true,used:0},
   'GROW5678':{plan:'Growth',  client:'Demo Growth',    expiry:fmtDate(addDays(today(),30)), active:true,used:0},
@@ -399,7 +405,10 @@ let CODES={
   'PROMO100':{plan:'Promo',   client:'Promo User',     expiry:fmtDate(addDays(today(),7)),  active:true,used:0},
   'FREEWK1' :{plan:'Starter', client:'Free Trial',     expiry:fmtDate(addDays(today(),7)),  active:true,used:0},
 };
+let CODES=JSON.parse(localStorage.getItem('RCS_CODES'))||DEFAULT_CODES;
 let currentUser=null;
+
+function saveData(){localStorage.setItem('RCS_CODES',JSON.stringify(CODES));}
 
 // ══ MODAL ══
 function openModal(){document.getElementById('modal').classList.add('open');setTimeout(()=>document.getElementById('code-input').focus(),100);}
@@ -415,6 +424,7 @@ function checkCode(){
   if(!e.active){err.textContent='❌ This code has been deactivated. Please renew via 0768 777 057.';err.style.display='block';return;}
   if(isExpired(e.expiry)){err.textContent='⏰ Code expired on '+e.expiry+'. Renew via M-Pesa: 0768 777 057';err.style.display='block';return;}
   currentUser={code,...e};
+  localStorage.setItem('RCS_USER',JSON.stringify({code}));
   closeModal();
   launchToolkit();
 }
@@ -435,6 +445,7 @@ function launchToolkit(){
 
 function logout(){
   currentUser=null;
+  localStorage.removeItem('RCS_USER');
   document.getElementById('landing').style.display='block';
   document.getElementById('toolkit').style.display='none';
   document.querySelectorAll('.app-tab').forEach(t=>t.classList.remove('active'));
@@ -474,6 +485,7 @@ function incrementUsage(){
   if(!currentUser) return;
   CODES[currentUser.code].used=(CODES[currentUser.code].used||0)+1;
   currentUser.used=CODES[currentUser.code].used;
+  saveData();
   updateUsageBar();
 }
 
@@ -537,7 +549,7 @@ async function generate(type){
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})
+      body:JSON.stringify({model:'claude-3-5-sonnet-20240620',max_tokens:600,messages:[{role:'user',content:prompt}]})
     });
     if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'API error '+res.status);}
     const data=await res.json();
@@ -545,15 +557,16 @@ async function generate(type){
     outText.textContent=text;
     outCard.style.background='#f0faf5';
     outCard.style.border='1px solid #9fe1cb';
+    outCard.querySelector('.output-label').innerHTML=`📋 Generated Content <button class="btn-copy" onclick="copyOut('${textId}',this)">Copy</button>`;
     outCard.style.display='block';
     incrementUsage();
   } catch(e){
     // Graceful fallback
-    outText.textContent='⚠️ Direct AI connection unavailable from this browser.\n\nCopy this prompt and paste into Claude chat (claude.ai):\n\n'+prompt;
+    outText.textContent=prompt;
     outCard.style.background='#fffbf0';
     outCard.style.border='1px solid #fde9a8';
+    outCard.querySelector('.output-label').innerHTML=`⚠️ AI Offline — Copy prompt to Claude.ai <button class="btn-copy" onclick="copyOut('${textId}',this)">Copy Prompt</button>`;
     outCard.style.display='block';
-    // Still count usage on fallback? No — don't penalise for browser restriction
   }
   btn.disabled=false;
   btn.innerHTML=orig;
@@ -578,6 +591,7 @@ function generateCode(){
   const expiry=fmtDate(addDays(today(),days));
   const limitLabel=LIMITS[plan]===Infinity?'Unlimited':LIMITS[plan]+' generations';
   CODES[code]={plan,client,expiry,active:true,used:0};
+  saveData();
   document.getElementById('gen-code-val').textContent=code;
   document.getElementById('gen-code-meta').innerHTML=`Plan: <b>${plan}</b> (${limitLabel}) · Client: <b>${client}</b><br>Expires: <b>${expiry}</b> (${days} days)`;
   document.getElementById('gen-out').style.display='block';
@@ -587,24 +601,47 @@ function generateCode(){
 }
 
 function copyGenCode(){navigator.clipboard.writeText(document.getElementById('gen-code-val').textContent).then(()=>alert('Code copied!'));}
-function revokeCode(code){if(confirm('Deactivate '+code+'?')){CODES[code].active=false;renderAdmin();}}
-function renewCode(code){const d=parseInt(prompt('Renew for how many days?','30'))||30;CODES[code].expiry=fmtDate(addDays(today(),d));CODES[code].active=true;CODES[code].used=0;alert('Renewed! Usage reset to 0.');renderAdmin();}
+function revokeCode(code){if(confirm('Deactivate '+code+'?')){CODES[code].active=false;saveData();renderAdmin();}}
+function renewCode(code){const d=parseInt(prompt('Renew for how many days?','30'))||30;CODES[code].expiry=fmtDate(addDays(today(),d));CODES[code].active=true;CODES[code].used=0;saveData();alert('Renewed! Usage reset to 0.');renderAdmin();}
 function copyCode(code){navigator.clipboard.writeText(code).then(()=>alert('Copied: '+code));}
 
+function exportToCSV(){
+  const all=Object.entries(CODES).filter(([,d])=>d.plan!=='Admin');
+  let csv='Code,Plan,Client,Expiry,Used,Active\n';
+  all.forEach(([code,d])=>{
+    csv+=`${code},${d.plan},"${d.client.replace(/"/g,'""')}",${d.expiry},${d.used},${d.active}\n`;
+  });
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=`rcs_codes_${fmtDate(today())}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function renderAdmin(){
+  const search=document.getElementById('admin-search')?.value.toLowerCase()||'';
   const all=Object.entries(CODES).filter(([,d])=>d.plan!=='Admin');
   const active=all.filter(([,d])=>d.active&&!isExpired(d.expiry)).length;
   const expiring=all.filter(([,d])=>d.active&&!isExpired(d.expiry)&&daysLeft(d.expiry)<=7).length;
+  const totalGen=all.reduce((s,[,d])=>s+(d.used||0),0);
   const rev={Starter:30000,Growth:60000,Premium:100000,Promo:0};
   const mrr=all.filter(([,d])=>d.active&&!isExpired(d.expiry)).reduce((s,[,d])=>s+(rev[d.plan]||0),0);
   document.getElementById('stats-row').innerHTML=`
     <div class="stat-box"><div class="stat-num">${all.length}</div><div class="stat-label">Total codes</div></div>
     <div class="stat-box"><div class="stat-num" style="color:var(--ok)">${active}</div><div class="stat-label">Active</div></div>
     <div class="stat-box"><div class="stat-num" style="color:#d69e2e">${expiring}</div><div class="stat-label">Expiring soon</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--gl)">${totalGen}</div><div class="stat-label">Total Gen</div></div>
     <div class="stat-box"><div class="stat-num" style="font-size:14px;padding-top:3px">TSh ${mrr.toLocaleString()}</div><div class="stat-label">Monthly revenue</div></div>`;
   const tbody=document.getElementById('code-tbody');
   tbody.innerHTML='';
-  Object.entries(CODES).filter(([,d])=>d.plan!=='Admin').sort((a,b)=>new Date(b[1].expiry)-new Date(a[1].expiry)).forEach(([code,data])=>{
+  all.filter(([code,data])=>{
+    if(!search) return true;
+    return code.toLowerCase().includes(search) ||
+           data.client.toLowerCase().includes(search) ||
+           data.plan.toLowerCase().includes(search);
+  }).sort((a,b)=>new Date(b[1].expiry)-new Date(a[1].expiry)).forEach(([code,data])=>{
     const dl=daysLeft(data.expiry);
     const dead=!data.active||dl<=0;
     const warn=!dead&&dl<=7;
@@ -632,6 +669,21 @@ function renderAdmin(){
     tbody.appendChild(tr);
   });
 }
+
+function init(){
+  const saved=localStorage.getItem('RCS_USER');
+  if(saved){
+    const u=JSON.parse(saved);
+    const e=CODES[u.code];
+    if(e && e.active && !isExpired(e.expiry)){
+      currentUser={code:u.code,...e};
+      launchToolkit();
+    } else {
+      localStorage.removeItem('RCS_USER');
+    }
+  }
+}
+window.onload=init;
 </script>
 </body>
 </html>
