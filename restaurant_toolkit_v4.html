@@ -352,15 +352,13 @@
         <label>Preferred AI Provider</label>
         <select id="pref-provider" onchange="saveSettings()">
           <option value="anthropic">Anthropic (Claude)</option>
-          <option value="openai">OpenAI (ChatGPT)</option>
           <option value="google">Google (Gemini)</option>
         </select>
       </div>
       <div class="row2">
         <div class="field"><label>Anthropic API Key</label><input type="password" id="key-anthropic" placeholder="sk-ant-..." oninput="saveSettings()"></div>
-        <div class="field"><label>OpenAI API Key</label><input type="password" id="key-openai" placeholder="sk-..." oninput="saveSettings()"></div>
+        <div class="field"><label>Google Gemini API Key</label><input type="password" id="key-google" placeholder="AIza..." oninput="saveSettings()"></div>
       </div>
-      <div class="field"><label>Google Gemini API Key</label><input type="password" id="key-google" placeholder="AIza..." oninput="saveSettings()"></div>
     </div>
 
     <div class="admin-card">
@@ -537,26 +535,15 @@ async function callAnthropic(prompt, key){
   const res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access': 'true'},
-    body:JSON.stringify({model:'claude-3-5-sonnet-20240620',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:prompt}]})
   });
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'Anthropic Error '+res.status);}
   const data=await res.json();
   return data.content.map(b=>b.text||'').join('').trim();
 }
 
-async function callOpenAI(prompt, key){
-  const res=await fetch('https://api.openai.com/v1/chat/completions',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
-    body:JSON.stringify({model:'gpt-4o',messages:[{role:'user',content:prompt}]})
-  });
-  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'OpenAI Error '+res.status);}
-  const data=await res.json();
-  return data.choices[0].message.content.trim();
-}
-
 async function callGemini(prompt, key){
-  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,{
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
@@ -610,7 +597,7 @@ async function generate(type){
 
   try {
     let text='';
-    const providers=['anthropic','openai','google'];
+    const providers=['anthropic','google'];
     const startIdx=providers.indexOf(settings.provider||'anthropic');
     const loop=providers.slice(startIdx).concat(providers.slice(0,startIdx));
 
@@ -618,7 +605,6 @@ async function generate(type){
     for(const p of loop){
       try{
         if(p==='anthropic' && keys.anthropic) { text=await callAnthropic(prompt, keys.anthropic); break; }
-        if(p==='openai' && keys.openai) { text=await callOpenAI(prompt, keys.openai); break; }
         if(p==='google' && keys.google) { text=await callGemini(prompt, keys.google); break; }
       } catch(e) { lastErr=e; console.error(`Provider ${p} failed:`, e); }
     }
@@ -770,7 +756,6 @@ function saveSettings(){
     provider: document.getElementById('pref-provider').value,
     keys: {
       anthropic: document.getElementById('key-anthropic').value,
-      openai: document.getElementById('key-openai').value,
       google: document.getElementById('key-google').value
     }
   };
@@ -783,7 +768,6 @@ function loadSettings(){
     const s=JSON.parse(saved);
     document.getElementById('pref-provider').value = s.provider || 'anthropic';
     document.getElementById('key-anthropic').value = s.keys?.anthropic || '';
-    document.getElementById('key-openai').value = s.keys?.openai || '';
     document.getElementById('key-google').value = s.keys?.google || '';
   }
 }

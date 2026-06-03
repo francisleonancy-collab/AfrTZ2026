@@ -7,7 +7,7 @@ A lightweight, powerful AI toolkit designed for restaurant owners and managers t
 - **🍽️ Menu Description Generator**: Create appetizing, professional dish descriptions. Choose from various cuisines and tones (Warm, Upscale, Bold, Simple).
 - **📱 Social Media Caption Generator**: Generate ready-to-post captions for Instagram, Facebook, WhatsApp, TikTok, and Twitter. Includes emojis and hashtags.
 - **⭐ Review Reply Generator**: Respond to customer reviews professionally and humanely, protecting your restaurant's reputation.
-- **🤖 Multi-Model AI Support**: Choose between Anthropic (Claude), OpenAI (ChatGPT), and Google (Gemini) as your content provider.
+- **🤖 Multi-Model AI Support**: Choose between **Anthropic (Claude Haiku 4.5)** and **Google (Gemini 2.5 Flash Lite)** as your content provider.
 - **⚙️ Admin Dashboard**: Manage access codes, track usage, monitor revenue, and configure AI API keys.
 
 ## Getting Started
@@ -20,8 +20,8 @@ A lightweight, powerful AI toolkit designed for restaurant owners and managers t
 ## Multi-Model AI and Fallback
 
 The toolkit is designed to be flexible and resilient:
-- **Direct Generation**: For Admins, the toolkit can be configured with API keys in the Admin panel. It will attempt to generate content directly using the preferred provider (Claude, GPT-4o, or Gemini 1.5 Flash).
-- **Automatic Fallback**: If the preferred AI provider fails, the system automatically attempts to use other configured providers in a loop.
+- **Direct Generation**: For Admins, the toolkit can be configured with API keys in the Admin panel. It will attempt to generate content directly using the preferred provider (**Claude Haiku 4.5** or **Gemini 2.5 Flash Lite**).
+- **Automatic Fallback**: If the preferred AI provider fails, the system automatically attempts to use the other configured provider.
 - **Error Handling**: If all AI options fail, regular users are directed to contact support for assistance. Admins retain access to a manual fallback (Copy Prompt and direct AI links) to facilitate troubleshooting.
 
 ## Security and Persistence Notice
@@ -34,7 +34,7 @@ The toolkit is designed to be flexible and resilient:
 ## Technology Stack
 
 - **Frontend**: HTML5, CSS3, Vanilla JavaScript.
-- **AI Integration**: Anthropic Claude, OpenAI GPT, Google Gemini.
+- **AI Integration**: Anthropic Claude, Google Gemini.
 - **Persistence**: LocalStorage for session, database, and settings management.
 
 ---
