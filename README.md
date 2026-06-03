@@ -4,38 +4,33 @@ A lightweight, powerful AI toolkit designed for restaurant owners and managers t
 
 ## Features
 
-- **🍽️ Menu Description Generator**: Create appetizing, professional dish descriptions. Choose from various cuisines and tones (Warm, Upscale, Bold, Simple).
-- **📱 Social Media Caption Generator**: Generate ready-to-post captions for Instagram, Facebook, WhatsApp, TikTok, and Twitter. Includes emojis and hashtags.
-- **⭐ Review Reply Generator**: Respond to customer reviews professionally and humanely, protecting your restaurant's reputation.
-- **🤖 Multi-Model AI Support**: Choose between **Anthropic (Claude Haiku 4.5)** and **Google (Gemini 2.5 Flash Lite)** as your content provider.
-- **⚙️ Admin Dashboard**: Manage access codes, track usage, monitor revenue, and configure AI API keys.
+- **🍽️ Menu Description Generator**: Create appetizing, professional dish descriptions.
+- **📱 Social Media Caption Generator**: Generate ready-to-post captions with emojis and hashtags.
+- **⭐ Review Reply Generator**: Respond to customer reviews professionally.
+- **🤖 Multi-Model AI Support**: Primary provider **Anthropic (Claude Haiku 4.5)**, fallback to **Google (Gemini 2.5 Flash Lite)**.
+- **⚙️ Admin Dashboard**: Manage access codes, track usage, and configure AI API keys.
+- **☁️ Cloud Sync & Provisioning**: Securely share API keys and access codes across multiple devices.
 
 ## Getting Started
 
 1. Open `restaurant_toolkit_v4.html` in your web browser.
-2. Click **Access Tool**.
-3. Enter your access code to unlock the toolkit.
-4. Select a tool from the tabs and start generating!
+2. Click **Access Tool** and enter your access code.
+3. (Admins) Configure AI API keys in the Admin panel to enable direct generation.
 
-## Multi-Model AI and Fallback
+## Multi-Device Provisioning (Cloud Sync)
 
-The toolkit is designed to be flexible and resilient:
-- **Direct Generation**: For Admins, the toolkit can be configured with API keys in the Admin panel. It will attempt to generate content directly using the preferred provider (**Claude Haiku 4.5** or **Gemini 2.5 Flash Lite**).
-- **Automatic Fallback**: If the preferred AI provider fails, the system automatically attempts to use the other configured provider.
-- **Error Handling**: If all AI options fail, regular users are directed to contact support for assistance. Admins retain access to a manual fallback (Copy Prompt and direct AI links) to facilitate troubleshooting.
+To "automatically load" API keys and access codes on other devices:
+
+1. **Setup**: In the Admin panel, enter a **Sync ID** (from npoint.io) and a **Sync Password**.
+2. **Push**: Click **Push to Cloud**. Your data is encrypted in the browser before being uploaded.
+3. **Provision**: Click **Copy Provision Link**.
+4. **Share**: Send this link to your other devices. When opened, the tool will automatically decrypt and load all settings and access codes.
 
 ## Security and Persistence Notice
 
-- **Client-Side Only**: This application is entirely client-side. It does not have a backend server or database.
-- **LocalStorage Persistence**: Data such as generated access codes, user sessions, and API keys are stored in your browser's `localStorage`. This means data is **unique to each device/browser** and is not synchronized across different machines.
-- **Access Control**: The access control mechanism (Admin vs. User plans) is intended for UI organization and workflow management. Since the application is client-side, it should not be used for storing sensitive information or as a replacement for robust, server-side authentication.
-- **API Key Safety**: Your API keys are stored locally on your device and are never sent to Lefking Enterprise or any third-party server other than the AI provider you have selected.
-
-## Technology Stack
-
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript.
-- **AI Integration**: Anthropic Claude, Google Gemini.
-- **Persistence**: LocalStorage for session, database, and settings management.
+- **Encryption**: Cloud Sync data is encrypted using **AES-GCM (256-bit)**. Your API keys are never stored in plain text on the cloud.
+- **LocalStorage**: By default, data is stored locally in your browser.
+- **Access Control**: Administrative features are restricted to users with the 'Admin' plan.
 
 ---
 © 2026 Lefking Enterprise (T) Limited · Dar es Salaam

@@ -365,6 +365,21 @@
       <p class="admin-card-title">📊 Dashboard</p>
       <div class="stats-row" id="stats-row"></div>
     </div>
+
+    <div class="admin-card">
+      <p class="admin-card-title">☁️ Cloud Sync & Provisioning</p>
+      <p class="how-step-desc" style="margin-bottom:12px;">Sync your API keys and access codes across devices securely using an encrypted JSON bin.
+        <a href="https://www.npoint.io" target="_blank" style="color:var(--gm);">Get a Sync ID on npoint.io →</a>
+      </p>
+      <div class="row2">
+        <div class="field"><label>Sync ID (npoint bin)</label><input type="text" id="sync-id" placeholder="e.g. 5e55... " oninput="saveSettings()"></div>
+        <div class="field"><label>Sync Password (Encryption)</label><input type="password" id="sync-pass" placeholder="Master password" oninput="saveSettings()"></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-gen-code" style="flex:1" onclick="syncPush()">Push to Cloud</button>
+        <button class="btn-copy" onclick="copyProvisionLink()">🔗 Copy Provision Link</button>
+      </div>
+    </div>
     <div class="admin-card">
       <p class="admin-card-title">⚡ Generate Access Code</p>
       <div class="gen-form">
@@ -406,6 +421,32 @@ const LIMITS = { Starter:30, Growth:100, Premium:Infinity, Promo:10, Admin:Infin
 
 // ══ HELPERS ══
 const today=()=>new Date();
+const dec2hex=s=>Array.from(new Uint8Array(s)).map(b=>b.toString(16).padStart(2,'0')).join('');
+const hex2dec=s=>new Uint8Array(s.match(/.{1,2}/g).map(byte=>parseInt(byte,16)));
+
+async function deriveKey(password,salt){
+  const enc=new TextEncoder();
+  const baseKey=await crypto.subtle.importKey('raw',enc.encode(password),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:100000,hash:'SHA-256'},baseKey,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+
+async function encryptData(data,password){
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await deriveKey(password,salt);
+  const encrypted=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(data)));
+  return dec2hex(salt)+dec2hex(iv)+dec2hex(encrypted);
+}
+
+async function decryptData(cipherHex,password){
+  const salt=hex2dec(cipherHex.slice(0,32));
+  const iv=hex2dec(cipherHex.slice(32,56));
+  const encrypted=hex2dec(cipherHex.slice(56));
+  const key=await deriveKey(password,salt);
+  const decrypted=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,encrypted);
+  return JSON.parse(new TextDecoder().decode(decrypted));
+}
+
 const addDays=(d,n)=>{const r=new Date(d);r.setDate(r.getDate()+n);return r;};
 const fmtDate=d=>d.toISOString().split('T')[0];
 const daysLeft=e=>Math.ceil((new Date(e)-today())/(1000*60*60*24));
@@ -684,6 +725,14 @@ function renewCode(code){
 }
 function copyCode(code){navigator.clipboard.writeText(code).then(()=>alert('Copied: '+code));}
 
+function copyProvisionLink(){
+  const sid=document.getElementById('sync-id').value.trim();
+  const pass=document.getElementById('sync-pass').value.trim();
+  if(!sid||!pass){alert('Please enter Sync ID and Password first');return;}
+  const url = window.location.origin + window.location.pathname + `#sync=${sid}&pass=${pass}`;
+  navigator.clipboard.writeText(url).then(()=>alert('Provision link copied! Share this link to automatically load settings on other devices.'));
+}
+
 function exportToCSV(){
   if(!isAdmin()) return;
   const all=Object.entries(CODES).filter(([,d])=>d.plan!=='Admin');
@@ -757,7 +806,9 @@ function saveSettings(){
     keys: {
       anthropic: document.getElementById('key-anthropic').value,
       google: document.getElementById('key-google').value
-    }
+    },
+    syncId: document.getElementById('sync-id')?.value || '',
+    syncPass: document.getElementById('sync-pass')?.value || ''
   };
   localStorage.setItem('RCS_SETTINGS', JSON.stringify(settings));
 }
@@ -769,11 +820,68 @@ function loadSettings(){
     document.getElementById('pref-provider').value = s.provider || 'anthropic';
     document.getElementById('key-anthropic').value = s.keys?.anthropic || '';
     document.getElementById('key-google').value = s.keys?.google || '';
+    if(document.getElementById('sync-id')) document.getElementById('sync-id').value = s.syncId || '';
+    if(document.getElementById('sync-pass')) document.getElementById('sync-pass').value = s.syncPass || '';
   }
 }
 
-function init(){
+async function syncPush(){
+  const sid=document.getElementById('sync-id').value.trim();
+  const pass=document.getElementById('sync-pass').value.trim();
+  if(!sid||!pass){alert('Please enter Sync ID and Password');return;}
+  const settings=JSON.parse(localStorage.getItem('RCS_SETTINGS')||'{}');
+  const data={codes:CODES,settings};
+  try{
+    const encrypted=await encryptData(data,pass);
+    const res=await fetch(`https://api.npoint.io/${sid}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({payload:encrypted})
+    });
+    if(!res.ok) throw new Error('Cloud push failed');
+    alert('✅ Pushed to cloud successfully');
+  } catch(e){ alert('❌ Push error: '+e.message); }
+}
+
+async function syncPull(sid,pass){
+  if(!sid||!pass) return;
+  try{
+    const res=await fetch(`https://api.npoint.io/${sid}`);
+    if(!res.ok) throw new Error('Cloud pull failed');
+    const data=await res.json();
+    if(!data.payload) throw new Error('No cloud data found');
+    const decrypted=await decryptData(data.payload,pass);
+    CODES=decrypted.codes;
+    saveData();
+    const s=decrypted.settings;
+    s.syncId=sid; s.syncPass=pass;
+    localStorage.setItem('RCS_SETTINGS',JSON.stringify(s));
+    loadSettings();
+    renderAdmin();
+    return true;
+  } catch(e){ console.error('Sync Pull Error:', e); return false; }
+}
+
+async function init(){
   loadSettings();
+
+  // Handle Provisioning Link
+  const hash=window.location.hash.slice(1);
+  const params=new URLSearchParams(hash);
+  const sid=params.get('sync'), pass=params.get('pass');
+  if(sid && pass){
+    console.log('Provisioning device from link...');
+    const ok=await syncPull(sid,pass);
+    if(ok) {
+      window.location.hash='';
+      alert('✅ Device provisioned successfully! API keys and codes loaded.');
+    }
+  } else {
+    // Auto-sync background
+    const s=JSON.parse(localStorage.getItem('RCS_SETTINGS')||'{}');
+    if(s.syncId && s.syncPass) syncPull(s.syncId, s.syncPass);
+  }
+
   const saved=localStorage.getItem('RCS_USER');
   if(saved){
     const u=JSON.parse(saved);
