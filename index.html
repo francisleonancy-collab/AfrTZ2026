@@ -389,10 +389,10 @@
     <div class="admin-card">
       <p class="admin-card-title">☁️ Cloud Sync & Provisioning</p>
       <p class="how-step-desc" style="margin-bottom:12px;">Sync your API keys and access codes across devices securely using an encrypted JSON bin.
-        <a href="https://www.npoint.io" target="_blank" style="color:var(--gm);">Get a Sync ID on npoint.io →</a>
+        <a href="https://jsonblob.com" target="_blank" style="color:var(--gm);">Visit JsonBlob →</a>
       </p>
       <div class="row2">
-        <div class="field"><label>Sync ID (npoint bin)</label><input type="text" id="sync-id" placeholder="e.g. 5e55... " oninput="saveSettings()"></div>
+        <div class="field"><label>Sync ID (JsonBlob)</label><input type="text" id="sync-id" placeholder="e.g. 019e... " oninput="saveSettings()"></div>
         <div class="field"><label>Sync Password (Encryption)</label><input type="password" id="sync-pass" placeholder="Master password" oninput="saveSettings()"></div>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:8px;">
@@ -770,16 +770,16 @@ function copyProvisionLink(){
 async function createSyncID(){
   if(!confirm('Create a new Cloud Sync ID? This will give you a fresh ID to push your data to.')) return;
   try {
-    const res=await fetch('https://api.npoint.io/',{
+    const res=await fetch('https://jsonblob.com/api/jsonBlob',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({payload:'init'})
     });
-    const data=await res.json();
-    if(data.id){
-      document.getElementById('sync-id').value=data.id;
+    const sid=res.headers.get('x-jsonblob-id');
+    if(sid){
+      document.getElementById('sync-id').value=sid;
       saveSettings();
-      alert('✅ New Sync ID created: '+data.id+'\n\nEnter a password and click Push to Cloud.');
+      alert('✅ New Sync ID created: '+sid+'\n\nEnter a password and click Push to Cloud.');
     }
   } catch(e){ alert('Error creating Sync ID: '+e.message); }
 }
@@ -884,15 +884,12 @@ async function syncPush(){
   const data={codes:CODES,settings};
   try{
     const encrypted=await encryptData(data,pass);
-    const res=await fetch(`https://api.npoint.io/${sid}`,{
-      method:'POST',
+    const res=await fetch(`https://jsonblob.com/api/jsonBlob/${sid}`,{
+      method:'PUT',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({payload:encrypted})
     });
-    if(!res.ok) {
-      const e=await res.json().catch(()=>({}));
-      throw new Error(e.message || 'API error '+res.status);
-    }
+    if(!res.ok) throw new Error('API error '+res.status);
     alert('✅ Pushed to cloud successfully');
   } catch(e){ alert('❌ Push error: '+e.message); }
 }
@@ -900,7 +897,7 @@ async function syncPush(){
 async function syncPull(sid,pass){
   if(!sid||!pass) return;
   try{
-    const res=await fetch(`https://api.npoint.io/${sid}`);
+    const res=await fetch(`https://jsonblob.com/api/jsonBlob/${sid}`);
     if(!res.ok) throw new Error('Cloud pull failed');
     const data=await res.json();
     if(!data.payload) throw new Error('No cloud data found');
