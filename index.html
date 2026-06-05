@@ -223,6 +223,26 @@
   <div class="footer">© 2026 Lefking Enterprise (T) Limited · Dar es Salaam · <a href="https://wa.me/255768777057" style="color:var(--gold);text-decoration:none;">0768 777 057</a></div>
 </div>
 
+<!-- ══ SETUP OVERLAY ══ -->
+<div class="overlay" id="setup-overlay">
+  <div class="modal">
+    <div class="modal-logo">Lefking <span>Enterprise</span></div>
+    <h2 class="modal-title">Toolkit Setup</h2>
+    <p class="modal-sub">Create your Admin access code to initialize the toolkit. This code will NOT be stored in the HTML source.</p>
+    <div class="inp-grp">
+      <label>Set Admin Access Code</label>
+      <input type="text" id="setup-admin-code" maxlength="12" placeholder="e.g. MYADMIN123" oninput="this.value=this.value.toUpperCase().replace(/\s/g,'')">
+    </div>
+    <div class="inp-grp">
+      <label>Set Sync Password (for cloud sync)</label>
+      <input type="password" id="setup-sync-pass" placeholder="Master password">
+    </div>
+    <button class="btn-access" onclick="bootstrap()">Initialize Toolkit →</button>
+    <div class="modal-div">or</div>
+    <p class="modal-sub">If you have a Provisioning Link from another device, please use that instead.</p>
+  </div>
+</div>
+
 <!-- ══ MODAL ══ -->
 <div class="overlay" id="modal">
   <div class="modal">
@@ -454,18 +474,32 @@ const daysLeft=e=>Math.ceil((new Date(e)-today())/(1000*60*60*24));
 const isExpired=e=>daysLeft(e)<=0;
 
 // ══ CODES DATABASE ══
-const DEFAULT_CODES={
-  'ADMIN000':{plan:'Admin',   client:'Lefking Admin',  expiry:fmtDate(addDays(today(),3650)),active:true,used:0},
-  'RCST1234':{plan:'Starter', client:'Demo Starter',   expiry:fmtDate(addDays(today(),30)), active:true,used:0},
-  'GROW5678':{plan:'Growth',  client:'Demo Growth',    expiry:fmtDate(addDays(today(),30)), active:true,used:0},
-  'PREM9012':{plan:'Premium', client:'Demo Premium',   expiry:fmtDate(addDays(today(),30)), active:true,used:0},
-  'PROMO100':{plan:'Promo',   client:'Promo User',     expiry:fmtDate(addDays(today(),7)),  active:true,used:0},
-  'FREEWK1' :{plan:'Starter', client:'Free Trial',     expiry:fmtDate(addDays(today(),7)),  active:true,used:0},
-};
-let CODES=JSON.parse(localStorage.getItem('RCS_CODES'))||DEFAULT_CODES;
+let CODES=JSON.parse(localStorage.getItem('RCS_CODES'))||null;
 let currentUser=null;
 
 function saveData(){localStorage.setItem('RCS_CODES',JSON.stringify(CODES));}
+
+function bootstrap(){
+  const ac=document.getElementById('setup-admin-code').value.trim();
+  const sp=document.getElementById('setup-sync-pass').value.trim();
+  if(!ac||!sp){alert('Please set an Admin code and Sync password');return;}
+
+  CODES={
+    [ac]:{plan:'Admin',client:'Owner',expiry:fmtDate(addDays(today(),3650)),active:true,used:0}
+  };
+  saveData();
+
+  const settings={
+    provider:'anthropic',
+    keys:{anthropic:'',google:''},
+    syncId:'',
+    syncPass:sp
+  };
+  localStorage.setItem('RCS_SETTINGS',JSON.stringify(settings));
+
+  document.getElementById('setup-overlay').classList.remove('open');
+  alert('✅ Toolkit Initialized. Use code '+ac+' to access tool.');
+}
 
 // ══ MODAL ══
 function openModal(){document.getElementById('modal').classList.add('open');setTimeout(()=>document.getElementById('code-input').focus(),100);}
@@ -883,9 +917,7 @@ async function syncPull(sid,pass){
 }
 
 async function init(){
-  loadSettings();
-
-  // Handle Provisioning Link
+  // Handle Provisioning Link (MUST check before Setup Overlay)
   const hash=window.location.hash.slice(1);
   const params=new URLSearchParams(hash);
   const sid=params.get('sync');
@@ -903,11 +935,17 @@ async function init(){
         alert('❌ Provisioning failed. Check your password or Sync ID.');
       }
     }
-  } else {
-    // Auto-sync background
-    const s=JSON.parse(localStorage.getItem('RCS_SETTINGS')||'{}');
-    if(s.syncId && s.syncPass) syncPull(s.syncId, s.syncPass);
   }
+
+  if(!CODES){
+    document.getElementById('setup-overlay').classList.add('open');
+    return;
+  }
+  loadSettings();
+
+  // Auto-sync background
+  const s=JSON.parse(localStorage.getItem('RCS_SETTINGS')||'{}');
+  if(s.syncId && s.syncPass) syncPull(s.syncId, s.syncPass);
 
   const saved=localStorage.getItem('RCS_USER');
   if(saved){
