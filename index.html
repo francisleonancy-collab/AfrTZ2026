@@ -397,6 +397,7 @@
       </div>
       <div style="display:flex;gap:8px;margin-bottom:8px;">
         <button class="btn-gen-code" style="flex:1" onclick="syncPush()">Push to Cloud</button>
+        <button class="btn-copy" style="flex:1;background:var(--gm);color:#fff;border:none;" onclick="const s=JSON.parse(localStorage.getItem('RCS_SETTINGS')||'{}');syncPull(s.syncId,s.syncPass)">Pull from Cloud</button>
         <button class="btn-copy" onclick="copyProvisionLink()">🔗 Copy Provision Link</button>
       </div>
       <button class="btn-out" style="width:100%;color:var(--gm);border-color:var(--gm);" onclick="createSyncID()">✨ Create new Sync ID</button>
@@ -610,8 +611,8 @@ function switchTab(name,el){
 async function callAnthropic(prompt, key){
   const res=await fetch('https://api.anthropic.com/v1/messages',{
     method:'POST',
-    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access': 'true'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+    body:JSON.stringify({model:'claude-3-5-haiku-latest',max_tokens:600,messages:[{role:'user',content:prompt}]})
   });
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'Anthropic Error '+res.status);}
   const data=await res.json();
@@ -619,7 +620,7 @@ async function callAnthropic(prompt, key){
 }
 
 async function callGemini(prompt, key){
-  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`,{
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
@@ -775,11 +776,17 @@ async function createSyncID(){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({payload:'init'})
     });
-    const sid=res.headers.get('x-jsonblob-id');
+    let sid=res.headers.get('x-jsonblob-id');
+    if(!sid){
+      const loc = res.headers.get('Location');
+      if(loc) sid = loc.split('/').pop();
+    }
     if(sid){
       document.getElementById('sync-id').value=sid;
       saveSettings();
       alert('✅ New Sync ID created: '+sid+'\n\nEnter a password and click Push to Cloud.');
+    } else {
+      alert('⚠️ Sync ID created but could not be retrieved automatically due to browser security (CORS). Please check your browser console or network tab for the Location header to find your ID.');
     }
   } catch(e){ alert('Error creating Sync ID: '+e.message); }
 }
@@ -880,6 +887,7 @@ async function syncPush(){
   const sid=document.getElementById('sync-id').value.trim();
   const pass=document.getElementById('sync-pass').value.trim();
   if(!sid||!pass){alert('Please enter Sync ID and Password');return;}
+  if(!/^[0-9a-f-]{20,}$/i.test(sid)){alert('❌ Invalid Sync ID format');return;}
   const settings=JSON.parse(localStorage.getItem('RCS_SETTINGS')||'{}');
   const data={codes:CODES,settings};
   try{
@@ -889,7 +897,10 @@ async function syncPush(){
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({payload:encrypted})
     });
-    if(!res.ok) throw new Error('API error '+res.status);
+    if(!res.ok){
+      console.error('Push failure:', res);
+      throw new Error('API error '+res.status);
+    }
     alert('✅ Pushed to cloud successfully');
   } catch(e){ alert('❌ Push error: '+e.message); }
 }
@@ -898,7 +909,10 @@ async function syncPull(sid,pass){
   if(!sid||!pass) return;
   try{
     const res=await fetch(`https://jsonblob.com/api/jsonBlob/${sid}`);
-    if(!res.ok) throw new Error('Cloud pull failed');
+    if(!res.ok){
+      console.error('Pull failure:', res);
+      throw new Error('Cloud pull failed with status '+res.status);
+    }
     const data=await res.json();
     if(!data.payload) throw new Error('No cloud data found');
     const decrypted=await decryptData(data.payload,pass);
@@ -939,10 +953,6 @@ async function init(){
     return;
   }
   loadSettings();
-
-  // Auto-sync background
-  const s=JSON.parse(localStorage.getItem('RCS_SETTINGS')||'{}');
-  if(s.syncId && s.syncPass) syncPull(s.syncId, s.syncPass);
 
   const saved=localStorage.getItem('RCS_USER');
   if(saved){
