@@ -1,0 +1,1546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mkude — Mwanachama wa Timu ya Mkahawa Wako</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0d0d0d;--ink2:#2d2d2d;--muted:#6b7280;--pale:#f9f7f4;
+  --border:#e5e2dd;--white:#fff;
+  --gold:#c9a84c;--gold2:#f5e6c0;
+  --green:#1a6b4a;--green2:#2d9e72;--green3:#e8f5ee;
+  --red:#dc2626;--blue:#1d4ed8;--amber:#d97706;
+  --r:14px;--r2:20px;
+  --sh:0 4px 32px rgba(0,0,0,.08);--sh2:0 2px 12px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);min-height:100vh;}
+.nav{position:fixed;top:0;left:0;right:0;z-index:90;background:rgba(255,255,255,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:.875rem 2rem;display:flex;justify-content:space-between;align-items:center;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo-icon{width:36px;height:36px;background:var(--ink);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.nav-brand{font-family:'Fraunces',serif;font-size:20px;font-weight:600;color:var(--ink);}
+.nav-brand span{color:var(--gold);}
+.nav-right{display:flex;align-items:center;gap:8px;}
+.nav-links{display:flex;align-items:center;gap:1.25rem;margin-right:.5rem;}
+.nav-link{font-size:13px;color:var(--muted);text-decoration:none;transition:.15s;}
+.nav-link:hover{color:var(--ink);}
+.lang-btn{background:var(--pale);border:1px solid var(--border);color:var(--ink);font-size:11px;font-weight:600;padding:5px 12px;border-radius:99px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;}
+.lang-btn:hover{background:var(--border);}
+.btn-nav-ghost{background:transparent;color:var(--ink);border:1.5px solid var(--border);padding:8px 18px;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:.2s;}
+.btn-nav-ghost:hover{background:var(--pale);}
+.btn-nav{background:var(--ink);color:#fff;border:none;padding:8px 18px;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:.2s;}
+.btn-nav:hover{background:var(--ink2);}
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 2rem 4rem;position:relative;overflow:hidden;background:var(--ink);}
+.hero-dots{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.05) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;}
+.hero-glow{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 60%,rgba(201,168,76,.1) 0%,transparent 65%);pointer-events:none;}
+.mkude-avatar{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--gold) 0%,#e8a020 100%);display:flex;align-items:center;justify-content:center;font-size:38px;margin:0 auto 1.5rem;box-shadow:0 0 0 4px rgba(201,168,76,.2),0 0 0 8px rgba(201,168,76,.1);animation:pulse 3s ease-in-out infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 4px rgba(201,168,76,.2),0 0 0 8px rgba(201,168,76,.1);}50%{box-shadow:0 0 0 6px rgba(201,168,76,.3),0 0 0 12px rgba(201,168,76,.1);}}
+.mkude-greeting{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.85);font-size:13px;padding:6px 16px;border-radius:99px;margin-bottom:1.5rem;}
+.hero-title{font-family:'Fraunces',serif;font-size:clamp(2.2rem,5.5vw,4.2rem);color:#fff;line-height:1.1;margin-bottom:1rem;max-width:760px;}
+.hero-title em{color:var(--gold);font-style:italic;}
+.mkude-intro{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:0 18px 18px 18px;padding:1.25rem 1.5rem;max-width:560px;margin:0 auto 2.5rem;text-align:left;position:relative;}
+.mkude-intro::before{content:'Mkude';position:absolute;top:-22px;left:0;font-size:11px;color:var(--gold);font-weight:600;letter-spacing:.05em;text-transform:uppercase;}
+.mkude-intro p{font-size:15px;color:rgba(255,255,255,.8);line-height:1.75;font-weight:300;}
+.mkude-intro p strong{color:#fff;font-weight:500;}
+.mkude-intro p em{color:var(--gold);font-style:normal;}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-primary{background:var(--gold);color:var(--ink);border:none;padding:14px 32px;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:.2s;}
+.btn-primary:hover{filter:brightness(1.08);}
+.btn-ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.3);padding:14px 32px;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:15px;cursor:pointer;transition:.2s;}
+.btn-ghost:hover{border-color:#fff;background:rgba(255,255,255,.06);}
+.hero-flags{margin-top:2.5rem;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;opacity:.4;}
+.hero-flags span{font-size:22px;}
+.cuisines-strip{background:#fff;border-bottom:1px solid var(--border);padding:1rem 0;overflow:hidden;}
+.cuisines-scroll{display:flex;animation:scroll 30s linear infinite;}
+.cuisines-scroll:hover{animation-play-state:paused;}
+.cuisine-chip{display:flex;align-items:center;gap:8px;padding:.5rem 1.25rem;border-right:1px solid var(--border);white-space:nowrap;font-size:13px;color:var(--muted);}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.section{padding:5rem 2rem;max-width:1100px;margin:0 auto;}
+.section-kicker{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;}
+.section-title{font-family:'Fraunces',serif;font-size:clamp(1.8rem,3.5vw,2.8rem);color:var(--ink);line-height:1.15;margin-bottom:1rem;}
+.section-sub{font-size:15px;color:var(--muted);line-height:1.7;max-width:520px;}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:3rem;}
+.feat-card{background:#fff;border-radius:var(--r2);padding:1.75rem;border:1px solid var(--border);box-shadow:var(--sh2);transition:.2s;}
+.feat-card:hover{box-shadow:var(--sh);transform:translateY(-2px);}
+.feat-icon-wrap{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:1rem;}
+.feat-title{font-size:15px;font-weight:600;margin-bottom:.5rem;}
+.feat-desc{font-size:13px;color:var(--muted);line-height:1.7;}
+.feat-quote{font-size:12px;color:var(--green);font-style:italic;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);}
+.feat-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:.875rem;}
+.feat-tag{font-size:10px;background:var(--pale);border:1px solid var(--border);color:var(--muted);padding:2px 7px;border-radius:99px;}
+.showcase{background:#fff;border-radius:var(--r2);padding:2rem;border:1px solid var(--border);box-shadow:var(--sh2);margin-top:3rem;}
+.showcase-tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:.75rem;border-bottom:1px solid var(--border);margin-bottom:1.25rem;}
+.stab{padding:7px 14px;font-size:12px;border:none;background:none;cursor:pointer;color:var(--muted);border-radius:99px;transition:.15s;white-space:nowrap;font-family:'DM Sans',sans-serif;font-weight:500;}
+.stab.active{background:var(--ink);color:#fff;}
+.showcase-panel{display:none;animation:fadeIn .25s ease;}
+.showcase-panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.showcase-item{display:flex;gap:16px;padding:.875rem 0;border-bottom:1px solid var(--border);}
+.showcase-item:last-child{border-bottom:none;}
+.showcase-flag{font-size:26px;flex-shrink:0;}
+.showcase-name{font-size:14px;font-weight:600;margin-bottom:3px;}
+.showcase-text{font-size:12px;color:var(--muted);line-height:1.7;}
+.showcase-price{font-size:12px;font-weight:600;color:var(--green);margin-top:4px;}
+.team-section{background:var(--ink);padding:5rem 2rem;}
+.team-inner{max-width:900px;margin:0 auto;text-align:center;}
+.team-title{font-family:'Fraunces',serif;color:#fff;font-size:clamp(1.8rem,3.5vw,2.8rem);margin-bottom:1rem;}
+.team-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:2.5rem;}
+.team-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--r2);padding:1.5rem;text-align:left;}
+.team-card-role{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);margin-bottom:.5rem;font-weight:600;}
+.team-card-name{font-family:'Fraunces',serif;font-size:1.1rem;color:#fff;margin-bottom:.5rem;}
+.team-card-desc{font-size:12px;color:rgba(255,255,255,.5);line-height:1.7;}
+.team-card.mkude{border-color:var(--gold);background:rgba(201,168,76,.08);}
+.pricing-bg{background:var(--pale);padding:5rem 2rem;border-top:1px solid var(--border);}
+.pricing-inner{max-width:920px;margin:0 auto;text-align:center;}
+.pricing-title{font-family:'Fraunces',serif;color:var(--ink);font-size:clamp(1.8rem,3.5vw,2.8rem);margin-bottom:.5rem;}
+.pricing-sub{color:var(--muted);font-size:14px;margin-bottom:3rem;}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:1.5rem;}
+.plan-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r2);padding:1.75rem;text-align:left;box-shadow:var(--sh2);}
+.plan-card.featured{border-color:var(--gold);}
+.plan-featured-badge{font-size:10px;background:var(--gold);color:var(--ink);padding:3px 10px;border-radius:99px;font-weight:600;display:inline-block;margin-bottom:1rem;}
+.plan-name{font-size:13px;color:var(--muted);margin-bottom:.5rem;}
+.plan-price{font-family:'Fraunces',serif;font-size:2.5rem;color:var(--ink);line-height:1;}
+.plan-price sup{font-size:1rem;vertical-align:super;font-family:'DM Sans',sans-serif;}
+.plan-period{font-size:12px;color:var(--muted);margin-bottom:1.25rem;}
+.plan-features{list-style:none;font-size:13px;color:var(--muted);line-height:2.2;}
+.plan-features li::before{content:'✓  ';color:var(--gold);}
+.btn-plan{width:100%;margin-top:1.25rem;padding:12px;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:.2s;}
+.btn-plan-outline{background:#fff;color:var(--ink);border:1.5px solid var(--border);}
+.btn-plan-outline:hover{border-color:var(--ink);}
+.btn-plan-gold{background:var(--gold);color:var(--ink);}
+.btn-plan-gold:hover{filter:brightness(1.08);}
+.promo-banner{background:var(--green3);border:1px solid rgba(26,107,74,.2);border-radius:var(--r);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.promo-banner-text{font-size:14px;color:var(--green);}
+.promo-banner-text b{color:var(--ink);}
+.btn-promo{background:var(--green);color:#fff;border:none;padding:9px 20px;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.footer{background:var(--ink);color:rgba(255,255,255,.4);padding:3rem 2rem;text-align:center;font-size:12px;line-height:2;}
+.footer a{color:rgba(255,255,255,.4);text-decoration:none;}
+.footer a:hover{color:#fff;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;padding:1rem;}
+.overlay.open{display:flex;}
+.modal{background:#fff;border-radius:var(--r2);padding:2.5rem;width:90%;max-width:480px;box-shadow:0 24px 80px rgba(0,0,0,.2);position:relative;max-height:90vh;overflow-y:auto;}
+.modal-close{position:absolute;top:1.25rem;right:1.25rem;background:var(--pale);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--muted);}
+.modal-close:hover{background:var(--border);}
+.modal-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#e8a020);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:1.25rem;}
+.modal-title{font-family:'Fraunces',serif;font-size:1.5rem;margin-bottom:.35rem;}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:1.5rem;line-height:1.6;}
+.modal-err{background:#fff0f0;border:1px solid #fca5a5;border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:.875rem;display:none;}
+.modal-success{background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:10px 14px;font-size:13px;color:#166534;margin-bottom:.875rem;display:none;}
+.inp-grp{margin-bottom:1rem;}
+.inp-grp label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em;}
+.inp-grp input,.inp-grp select{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;transition:.15s;background:#fff;color:var(--ink);}
+.inp-grp input:focus,.inp-grp select:focus{outline:none;border-color:var(--green2);}
+.inp-code{letter-spacing:.2em;text-transform:uppercase;font-size:16px;text-align:center;font-weight:600;}
+.btn-full{width:100%;padding:13px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;border:none;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-full:disabled{opacity:.5;cursor:not-allowed;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover:not(:disabled){background:var(--green2);}
+.btn-gold-full{background:var(--gold);color:var(--ink);}
+.btn-gold-full:hover:not(:disabled){filter:brightness(1.08);}
+.btn-outline-full{background:#fff;color:var(--ink);border:1.5px solid var(--border);}
+.btn-outline-full:hover{background:var(--pale);}
+.divider{display:flex;align-items:center;gap:12px;margin:1.25rem 0;color:var(--muted);font-size:12px;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.plan-select-card{background:var(--pale);border:2px solid var(--border);border-radius:14px;padding:1rem 1.25rem;cursor:pointer;transition:.15s;margin-bottom:8px;}
+.plan-select-card:hover{border-color:var(--green2);}
+.plan-select-card.selected{border-color:var(--green);background:var(--green3);}
+.promo-limit-notice{background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:.875rem 1rem;font-size:12px;color:#166534;margin-bottom:1rem;line-height:1.7;}
+.pay-tabs{display:flex;gap:6px;margin-bottom:1.25rem;flex-wrap:wrap;}
+.pay-tab{flex:1;padding:10px 8px;border:1.5px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;text-align:center;transition:.15s;min-width:80px;}
+.pay-tab:hover{border-color:var(--green2);}
+.pay-tab.active{border-color:var(--green);background:var(--green3);color:var(--green);}
+.pay-tab .pay-tab-icon{font-size:18px;display:block;margin-bottom:3px;}
+.pay-panel{display:none;}.pay-panel.active{display:block;}
+.plan-summary{background:var(--pale);border-radius:10px;padding:1rem;margin-bottom:1.25rem;display:flex;justify-content:space-between;align-items:center;}
+.plan-summary-name{font-size:14px;font-weight:600;}
+.plan-summary-price{font-family:'Fraunces',serif;font-size:1.5rem;color:var(--green);}
+.payment-secured{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-top:.75rem;justify-content:center;}
+.mpesa-waiting{display:none;text-align:center;padding:1.25rem;background:var(--pale);border-radius:12px;margin-top:1rem;}
+.spinner-sm{width:14px;height:14px;border:2px solid rgba(0,0,0,.15);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:-2px;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+#toolkit{display:none;min-height:100vh;background:var(--pale);}
+.tk-topbar{background:var(--ink);padding:.875rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.tk-topbar-left{display:flex;align-items:center;gap:12px;}
+.tk-avatar-sm{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#e8a020);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.tk-name{font-family:'Fraunces',serif;font-size:15px;color:#fff;font-weight:600;}
+.tk-name span{color:var(--gold);}
+.tk-role{font-size:10px;color:rgba(255,255,255,.45);margin-top:1px;}
+.tk-badges{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.tk-badge{font-size:10px;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.6);}
+.tk-badge.plan-paid{background:rgba(45,158,114,.2);color:#6ee7b7;border-color:rgba(45,158,114,.3);}
+.tk-badge.plan-promo{background:rgba(217,119,6,.2);color:#fcd34d;border-color:rgba(217,119,6,.3);}
+.tk-badge.exp-ok{background:rgba(56,161,105,.2);color:#9ae6b4;border-color:rgba(56,161,105,.3);}
+.tk-badge.exp-warn{background:rgba(240,185,74,.2);color:var(--gold);border-color:rgba(240,185,74,.3);}
+.btn-signout{background:none;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);font-size:11px;padding:5px 14px;border-radius:99px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.15s;}
+.btn-signout:hover{border-color:rgba(255,0,0,.4);color:#fc8181;}
+.mkude-speaking{background:#fff;border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;gap:12px;font-size:13px;color:var(--muted);}
+.mkude-speaking-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#e8a020);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.usage-bar{background:#fff;border-bottom:1px solid var(--border);padding:.5rem 1.5rem;display:flex;align-items:center;gap:12px;font-size:12px;color:var(--muted);}
+.usage-track{flex:1;max-width:200px;height:5px;background:var(--pale);border-radius:99px;overflow:hidden;}
+.usage-fill{height:100%;border-radius:99px;transition:.4s;}
+.uf-ok{background:var(--green2);}.uf-warn{background:#f59e0b;}.uf-full{background:var(--red);}
+.upgrade-bar{background:#fffbeb;border-bottom:1px solid #fcd34d;padding:.5rem 1.5rem;font-size:12px;color:#92400e;display:none;align-items:center;justify-content:space-between;}
+.upgrade-bar a{color:#92400e;font-weight:600;cursor:pointer;}
+.promo-notice-bar{background:var(--green3);border-bottom:1px solid rgba(26,107,74,.2);padding:.5rem 1.5rem;font-size:12px;color:var(--green);display:none;align-items:center;justify-content:space-between;gap:8px;}
+.promo-notice-bar a{color:var(--green);font-weight:600;cursor:pointer;}
+.tk-tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);padding:0 1.5rem;overflow-x:auto;}
+.tk-tab{padding:13px 18px;font-size:13px;border:none;background:none;cursor:pointer;color:var(--muted);border-bottom:2.5px solid transparent;margin-bottom:-1px;white-space:nowrap;font-family:'DM Sans',sans-serif;font-weight:500;transition:.15s;}
+.tk-tab.active{color:var(--ink);border-bottom-color:var(--ink);}
+.tk-panel{display:none;padding:1.5rem;max-width:720px;margin:0 auto;}
+.tk-panel.active{display:block;}
+.tool-card{background:#fff;border-radius:var(--r2);padding:1.75rem;border:1px solid var(--border);box-shadow:var(--sh2);}
+.tool-title{font-family:'Fraunces',serif;font-size:1.2rem;color:var(--ink);margin-bottom:.25rem;}
+.tool-sub{font-size:12px;color:var(--muted);margin-bottom:1.25rem;line-height:1.6;}
+.mkude-says{background:var(--green3);border:1px solid rgba(26,107,74,.15);border-radius:12px;padding:.875rem 1.1rem;margin-bottom:1.25rem;font-size:13px;color:var(--green);line-height:1.6;display:flex;gap:10px;align-items:flex-start;}
+.mkude-says-avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#e8a020);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px;}
+.field{margin-bottom:.875rem;}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--ink2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.03em;}
+.field input,.field select,.field textarea{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;transition:.15s;background:#fff;color:var(--ink);}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--green2);}
+.field textarea{min-height:85px;resize:vertical;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.btn-generate{width:100%;background:var(--ink);color:#fff;border:none;padding:13px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;}
+.btn-generate:hover{background:var(--ink2);}
+.btn-generate:disabled{opacity:.45;cursor:not-allowed;}
+.output-wrap{margin-top:1.25rem;background:var(--green3);border:1px solid rgba(26,107,74,.15);border-radius:var(--r);padding:1.25rem;animation:fadeIn .3s ease;}
+.output-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;flex-wrap:wrap;gap:6px;}
+.output-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);display:flex;align-items:center;gap:6px;}
+.output-text{font-size:14px;line-height:1.85;color:var(--ink);white-space:pre-wrap;}
+.btn-copy{background:#fff;border:1px solid rgba(26,107,74,.25);color:var(--green);padding:5px 13px;border-radius:7px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;}
+.btn-copy:hover{background:var(--green3);}
+.spinner{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+.admin-card{background:#fff;border-radius:var(--r2);padding:1.5rem;border:1px solid var(--border);margin-bottom:1rem;box-shadow:var(--sh2);}
+.admin-card-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:.875rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-bottom:1rem;}
+.stat-box{background:var(--pale);border-radius:12px;padding:.875rem;text-align:center;}
+.stat-num{font-family:'Fraunces',serif;font-size:22px;color:var(--ink);}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+.gen-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;}
+.gen-form .field{margin:0;flex:1;min-width:110px;}
+.gen-form .field input,.gen-form .field select{height:38px;padding:0 10px;font-size:12px;}
+.btn-gen-code{background:var(--ink);color:#fff;border:none;padding:0 16px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;height:38px;white-space:nowrap;}
+.gen-out{background:var(--pale);border:2px dashed var(--gold);border-radius:14px;padding:1.25rem;text-align:center;margin-top:.875rem;display:none;}
+.gen-code-val{font-family:monospace;font-size:24px;font-weight:700;color:var(--ink);letter-spacing:.2em;}
+.gen-code-meta{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.8;}
+.wa-btn{display:inline-block;margin:6px 3px 0;background:var(--green);color:#fff;padding:7px 14px;border-radius:8px;font-size:11px;font-weight:600;text-decoration:none;}
+.email-btn-a{background:var(--blue);}
+.code-table{width:100%;border-collapse:collapse;font-size:11px;}
+.code-table th{text-align:left;padding:8px 6px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:.04em;}
+.code-table td{padding:8px 6px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.code-table tr:last-child td{border-bottom:none;}
+.s-active{color:var(--green);font-weight:600;}.s-warn{color:var(--amber);font-weight:600;}.s-dead{color:var(--red);}
+.act-btn{font-size:10px;padding:3px 7px;border-radius:5px;cursor:pointer;font-family:'DM Sans',sans-serif;border:1px solid var(--border);background:none;margin-left:2px;}
+.act-revoke{border-color:#fca5a5;color:var(--red);}.act-revoke:hover{background:#fff0f0;}
+.act-renew{border-color:#86efac;color:var(--green);}.act-renew:hover{background:var(--green3);}
+.act-copy{color:var(--muted);}.act-copy:hover{background:var(--pale);}
+.price-admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:1rem;}
+.price-box{background:var(--pale);border-radius:12px;padding:1rem;border:1px solid var(--border);}
+.price-box-name{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.5rem;}
+.price-box-inputs{display:flex;flex-direction:column;gap:6px;}
+.price-box-inputs label{font-size:10px;color:var(--muted);margin-bottom:1px;display:block;}
+.price-box-inputs input{width:100%;padding:6px 10px;border:1px solid var(--border);border-radius:7px;font-family:monospace;font-size:13px;background:#fff;}
+.price-save-btn{background:var(--green);color:#fff;border:none;padding:9px 20px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:.5rem;}
+.price-save-btn:hover{background:var(--green2);}
+.worker-cfg{background:var(--pale);border-radius:10px;padding:1rem;margin-bottom:1rem;border:1px solid var(--border);}
+.worker-cfg label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:4px;}
+.worker-cfg input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:7px;font-family:monospace;font-size:12px;margin-bottom:8px;background:#fff;}
+.worker-cfg input:last-child{margin-bottom:0;}
+@media(max-width:600px){
+  .nav-links{display:none;}
+  .plans-grid{grid-template-columns:1fr;}
+  .row2,.row3{grid-template-columns:1fr;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .price-admin-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="main-nav">
+  <a class="nav-logo" href="#"><div class="nav-logo-icon">👨‍🍳</div><span class="nav-brand">Mkude</span></a>
+  <div class="nav-links">
+    <a class="nav-link" href="#what-mkude-does" data-en="What I do" data-sw="Ninachofanya">What I do</a>
+    <a class="nav-link" href="#team" data-en="The team" data-sw="Timu">The team</a>
+    <a class="nav-link" href="#pricing" data-en="Pricing" data-sw="Bei">Pricing</a>
+  </div>
+  <div class="nav-right">
+    <button class="lang-btn" id="lang-toggle" onclick="toggleLang()">🇹🇿 Swahili</button>
+    <button class="btn-nav-ghost" onclick="openModal('login')" data-en="Sign in" data-sw="Ingia">Sign in</button>
+    <button class="btn-nav" onclick="openModal('promo')" data-en="Try for free" data-sw="Jaribu bure">Try for free</button>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<div id="landing-wrap">
+<section class="hero">
+  <div class="hero-dots"></div><div class="hero-glow"></div>
+  <div class="mkude-avatar">👨‍🍳</div>
+  <div class="mkude-greeting"><span>👋</span><span id="greeting-text">Hi there! I'm Mkude</span></div>
+  <h1 class="hero-title" id="hero-title">Your restaurant's new<br><em>content team member.</em></h1>
+  <div class="mkude-intro"><p id="hero-intro-text">Hi! My name is <strong>Mkude</strong> and I'm here to join your restaurant team. Think of me as your behind-the-scenes writer — I handle the words so you can focus on the food. 🍽️<br><br>Every day I can write your <em>menu descriptions</em>, craft your <em>social media posts</em>, and reply to your <em>customer reviews</em> — all in your voice, for any cuisine, in any language.</p></div>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="openModal('promo')" id="btn-hero-promo">👋 Meet Mkude — it's free</button>
+    <button class="btn-ghost" onclick="openModal('signup')" id="btn-hero-sub">Subscribe from $3/month</button>
+  </div>
+  <div class="hero-flags"><span>🇹🇿</span><span>🇮🇹</span><span>🇯🇵</span><span>🇮🇳</span><span>🇫🇷</span><span>🇲🇽</span><span>🇹🇭</span><span>🇨🇳</span><span>🇱🇧</span><span>🇬🇷</span><span>🇪🇸</span><span>🇺🇸</span><span>🇲🇦</span><span>🇪🇹</span><span>🇰🇷</span></div>
+</section>
+<div class="cuisines-strip"><div class="cuisines-scroll" id="cuisine-scroll"></div></div>
+
+<!-- FEATURES -->
+<section class="section" id="what-mkude-does">
+  <p class="section-kicker" id="feat-kicker">Meet the team member</p>
+  <h2 class="section-title" id="feat-title">Three things Mkude<br>handles for your team.</h2>
+  <div class="features-grid">
+    <div class="feat-card">
+      <div class="feat-icon-wrap" style="background:#f0fdf4;">📝</div>
+      <p class="feat-title" id="f1-title">Menu Descriptions</p>
+      <p class="feat-desc" id="f1-desc">Give Mkude your dish name and ingredients and he writes a description that makes customers hungry before they even order. Works for every cuisine on earth.</p>
+      <div class="feat-quote" id="f1-quote">"Leave the menu writing to me." — Mkude</div>
+      <div class="feat-tags"><span class="feat-tag">🇹🇿 Swahili</span><span class="feat-tag">🇮🇹 Italian</span><span class="feat-tag">🇯🇵 Japanese</span><span class="feat-tag">40+ more</span></div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon-wrap" style="background:#eff6ff;">📱</div>
+      <p class="feat-title" id="f2-title">Social Media Posts</p>
+      <p class="feat-desc" id="f2-desc">Tell Mkude what's happening and he writes a post ready to share on Instagram, Facebook, WhatsApp or TikTok — with the right tone every time.</p>
+      <div class="feat-quote" id="f2-quote">"Your restaurant deserves an audience." — Mkude</div>
+      <div class="feat-tags"><span class="feat-tag">Instagram</span><span class="feat-tag">Facebook</span><span class="feat-tag">WhatsApp</span><span class="feat-tag">TikTok</span></div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon-wrap" style="background:#fefce8;">⭐</div>
+      <p class="feat-title" id="f3-title">Customer Review Replies</p>
+      <p class="feat-desc" id="f3-desc">Mkude writes professional, human-sounding replies to 1–5 star reviews — protecting your reputation and keeping customers coming back.</p>
+      <div class="feat-quote" id="f3-quote">"Every review is a conversation." — Mkude</div>
+      <div class="feat-tags"><span class="feat-tag">Google Maps</span><span class="feat-tag">TripAdvisor</span><span class="feat-tag">Facebook</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- SHOWCASE -->
+<section style="padding:0 2rem 5rem;max-width:1100px;margin:0 auto;" id="in-action">
+  <p class="section-kicker" id="showcase-kicker">Mkude's work samples</p>
+  <h2 class="section-title" id="showcase-title">See what Mkude writes.</h2>
+  <div class="showcase"><div class="showcase-tabs" id="stabs"></div><div id="showcase-demos"></div></div>
+</section>
+
+<!-- TEAM -->
+<section class="team-section" id="team">
+  <div class="team-inner">
+    <p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;font-weight:600;" id="team-kicker">The restaurant team</p>
+    <h2 class="team-title" id="team-title">Mkude fits right in.</h2>
+    <p style="color:rgba(255,255,255,.5);font-size:15px;line-height:1.7;max-width:520px;margin:0 auto 3rem;" id="team-sub">Every great restaurant has a team. Mkude joins yours as the person who handles all the writing.</p>
+    <div class="team-cards">
+      <div class="team-card">
+        <p class="team-card-role" id="tc1-role">Executive Chef</p>
+        <p class="team-card-name" id="tc1-name">You & your team</p>
+        <p class="team-card-desc" id="tc1-desc">Creating dishes, managing the kitchen, making customers happy in person.</p>
+      </div>
+      <div class="team-card">
+        <p class="team-card-role" id="tc2-role">Front of House</p>
+        <p class="team-card-name" id="tc2-name">Your staff</p>
+        <p class="team-card-desc" id="tc2-desc">Welcoming guests, taking orders, delivering exceptional service every shift.</p>
+      </div>
+      <div class="team-card mkude">
+        <p class="team-card-role" id="tc3-role">Content & Communications</p>
+        <p class="team-card-name">👨‍🍳 Mkude</p>
+        <p class="team-card-desc" id="tc3-desc">Writing menu descriptions, social posts, and review replies — any time, any cuisine, any language. Never takes a day off.</p>
+      </div>
+    </div>
+    <p style="font-size:14px;color:rgba(255,255,255,.5);max-width:480px;margin:0 auto;">
+      <span id="mkude-quote">"I'm not just a tool — I'm part of the team. Tell me what you need."</span><br>
+      <span style="color:var(--gold);font-weight:500;">— Mkude</span>
+    </p>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-bg" id="pricing">
+  <div class="pricing-inner">
+    <p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;font-weight:600;" id="pricing-kicker">Bring Mkude on board</p>
+    <h2 class="pricing-title" id="pricing-title">Simple, honest pricing.</h2>
+    <p class="pricing-sub" id="pricing-sub">Pay by ClickPesa or AzamPay · Access code sent to your email · Cancel any time</p>
+    <div class="plans-grid">
+      <div class="plan-card">
+        <p class="plan-name" id="pn-starter">Starter</p>
+        <p class="plan-price" id="price-starter"><sup>$</sup>3</p>
+        <p class="plan-period" id="pp-starter">/month · 30 days</p>
+        <ul class="plan-features"><li id="pf1-starter">30 writing tasks/month</li><li id="pf2-starter">Menu descriptions</li><li id="pf3-starter">Social posts</li><li id="pf4-starter">Email support</li></ul>
+        <button class="btn-plan btn-plan-outline" onclick="openModal('signup','Starter')" id="btn-starter">Bring Mkude on board</button>
+      </div>
+      <div class="plan-card featured">
+        <div class="plan-featured-badge" id="popular-badge">Most popular</div>
+        <p class="plan-name" id="pn-growth">Growth</p>
+        <p class="plan-price" id="price-growth"><sup>$</sup>6</p>
+        <p class="plan-period" id="pp-growth">/month · 30 days</p>
+        <ul class="plan-features"><li id="pf1-growth">100 writing tasks/month</li><li id="pf2-growth">Menu + Social + Reviews</li><li id="pf3-growth">40+ world cuisines</li><li id="pf4-growth">Priority support</li></ul>
+        <button class="btn-plan btn-plan-gold" onclick="openModal('signup','Growth')" id="btn-growth">Bring Mkude on board</button>
+      </div>
+      <div class="plan-card">
+        <p class="plan-name" id="pn-premium">Premium</p>
+        <p class="plan-price" id="price-premium"><sup>$</sup>9</p>
+        <p class="plan-period" id="pp-premium">/month · 30 days</p>
+        <ul class="plan-features"><li id="pf1-premium">Unlimited writing tasks</li><li id="pf2-premium">Everything in Growth</li><li id="pf3-premium">5 team access codes</li><li id="pf4-premium">Monthly summary</li></ul>
+        <button class="btn-plan btn-plan-outline" onclick="openModal('signup','Premium')" id="btn-premium">Bring Mkude on board</button>
+      </div>
+    </div>
+    <div class="promo-banner">
+      <div class="promo-banner-text" id="promo-banner-text">👋 Want to try before subscribing? <b>Get 3 free writing tasks</b> — no card needed.</div>
+      <button class="btn-promo" onclick="openModal('promo')" id="btn-promo-banner">Meet Mkude free</button>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div style="margin-bottom:.5rem;font-size:16px;color:#fff;font-family:'Fraunces',serif;">👨‍🍳 Mkude <span style="font-size:12px;color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;">· Powered by Lefking Enterprise (T) Ltd</span></div>
+  <div>support@mkude.com · <a href="https://wa.me/255768777057">WhatsApp: 0768 777 057</a></div>
+  <div style="margin-top:.5rem;">© 2026 Lefking Enterprise (T) Limited · Dar es Salaam</div>
+</footer>
+</div><!-- end landing-wrap -->
+
+<!-- ══ MODAL: LOGIN ══ -->
+<div class="overlay" id="modal-login">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('login')">×</button>
+    <div class="modal-avatar">👨‍🍳</div>
+    <h2 class="modal-title" id="login-title">Welcome back!</h2>
+    <p class="modal-sub" id="login-sub">Enter your access code and I'll get straight to work.</p>
+    <div class="modal-err" id="login-err"></div>
+    <div class="inp-grp">
+      <label id="login-code-label">Your access code</label>
+      <input class="inp-code" type="text" id="login-code" maxlength="12" placeholder="GROW1A2B"
+        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
+        onkeydown="if(event.key==='Enter')doLogin()" autocomplete="off"/>
+    </div>
+    <button class="btn-full btn-green" id="btn-login" onclick="doLogin()">👨‍🍳 Let's get to work</button>
+    <div class="divider" id="login-divider">no code yet?</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-full btn-outline-full" style="flex:1;font-size:13px;" onclick="closeModal('login');openModal('promo')" id="btn-login-promo">👋 Free trial</button>
+      <button class="btn-full btn-gold-full" style="flex:1;font-size:13px;" onclick="closeModal('login');openModal('signup')" id="btn-login-sub">Subscribe →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: PROMO ══ -->
+<div class="overlay" id="modal-promo">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('promo')">×</button>
+    <div class="modal-avatar">👨‍🍳</div>
+    <div id="promo-step-form">
+      <h2 class="modal-title" id="promo-title">Hi! I'm Mkude 👋</h2>
+      <p class="modal-sub" id="promo-sub">Let me show you what I can do — 3 writing tasks completely free. No card needed.</p>
+      <div class="promo-limit-notice" id="promo-notice">🎁 Free trial: 3 writing tasks · 7 days · One per person</div>
+      <div class="modal-err" id="promo-err"></div>
+      <div class="inp-grp"><label id="promo-name-label">Your name</label><input type="text" id="promo-name" placeholder="e.g. Amina Hassan"/></div>
+      <div class="inp-grp"><label id="promo-email-label">Your email</label><input type="email" id="promo-email" placeholder="wewe@mkahawa.com"/></div>
+      <button class="btn-full btn-green" id="btn-promo" onclick="claimPromo()">👋 Meet Mkude — it's free</button>
+      <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:.875rem;" id="promo-note">One free trial per email address and device.</p>
+    </div>
+    <div id="promo-step-success" style="display:none;text-align:center;">
+      <div style="font-size:48px;margin-bottom:1rem;">🎉</div>
+      <h2 class="modal-title" id="promo-success-title">Nice to meet you!</h2>
+      <p class="modal-sub" id="promo-success-sub">I'm Mkude and I'm ready to help. Your code is below — also sent to your email.</p>
+      <div style="background:var(--pale);border-radius:12px;padding:1.25rem;margin:1.25rem 0;border:2px dashed var(--gold);">
+        <p style="font-size:11px;color:var(--muted);margin-bottom:6px;" id="promo-code-label">YOUR FREE TRIAL CODE</p>
+        <p style="font-family:monospace;font-size:22px;font-weight:700;letter-spacing:.18em;color:var(--ink);" id="promo-code-val">—</p>
+        <p style="font-size:11px;color:var(--muted);margin-top:4px;" id="promo-code-meta">3 writing tasks · 7 days</p>
+        <button class="btn-copy" style="margin-top:8px;" onclick="copyEl('promo-code-val',this)">📋 Copy</button>
+      </div>
+      <button class="btn-full btn-green" onclick="closeModal('promo');usePromoCode()" id="btn-use-promo">👨‍🍳 Start working with Mkude</button>
+      <p style="font-size:12px;color:var(--muted);margin-top:.875rem;" id="promo-upgrade-hint">Enjoyed it? <button onclick="closeModal('promo');openModal('signup')" style="background:none;border:none;color:var(--green);cursor:pointer;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;">Bring Mkude on full time →</button></p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: SIGNUP + PAYMENTS ══ -->
+<div class="overlay" id="modal-signup">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('signup')">×</button>
+    <div class="modal-avatar">👨‍🍳</div>
+
+    <!-- Step 1: Plan -->
+    <div id="step-plan">
+      <h2 class="modal-title" id="signup-title">Bring Mkude on board</h2>
+      <p class="modal-sub" id="signup-sub">Choose a plan — pay by ClickPesa or AzamPay. Access code arrives by email in under 60 seconds.</p>
+      <div id="plan-cards">
+        <div class="plan-select-card" data-plan="Starter" onclick="selectPlan(this)">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div><p style="font-weight:600;font-size:14px;" id="ms-starter">Starter</p><p style="font-size:12px;color:var(--muted);" id="ms-starter-desc">30 tasks · 30 days</p></div>
+            <p style="font-family:'Fraunces',serif;font-size:1.4rem;color:var(--green);" id="modal-price-starter">$3</p>
+          </div>
+        </div>
+        <div class="plan-select-card selected" data-plan="Growth" onclick="selectPlan(this)">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div><p style="font-weight:600;font-size:14px;" id="ms-growth">Growth ⭐</p><p style="font-size:12px;color:var(--muted);" id="ms-growth-desc">100 tasks · All tools · 30 days</p></div>
+            <p style="font-family:'Fraunces',serif;font-size:1.4rem;color:var(--green);" id="modal-price-growth">$6</p>
+          </div>
+        </div>
+        <div class="plan-select-card" data-plan="Premium" onclick="selectPlan(this)">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div><p style="font-weight:600;font-size:14px;" id="ms-premium">Premium</p><p style="font-size:12px;color:var(--muted);" id="ms-premium-desc">Unlimited · 5 codes · 30 days</p></div>
+            <p style="font-family:'Fraunces',serif;font-size:1.4rem;color:var(--green);" id="modal-price-premium">$9</p>
+          </div>
+        </div>
+      </div>
+      <div class="inp-grp" style="margin-top:1rem;">
+        <label id="email-label">Your email — your access code is sent here</label>
+        <input type="email" id="signup-email" placeholder="wewe@mkahawa.com"/>
+      </div>
+      <button class="btn-full btn-green" style="margin-top:.5rem;" onclick="goToPayment()" id="btn-choose-payment">Choose payment method →</button>
+    </div>
+
+    <!-- Step 2: Payment -->
+    <div id="step-payment" style="display:none;">
+      <h2 class="modal-title" id="pay-title">How would you like to pay?</h2>
+      <div class="plan-summary">
+        <div><p class="plan-summary-name" id="pay-plan-name">Growth Plan</p><p style="font-size:12px;color:var(--muted);" id="pay-plan-desc">30 days access</p></div>
+        <p class="plan-summary-price" id="pay-plan-price">$6</p>
+      </div>
+      <div class="modal-err" id="pay-err"></div>
+      <div class="modal-success" id="pay-success"></div>
+      <div class="pay-tabs">
+        <button class="pay-tab active" onclick="switchPayTab('clickpesa',this)"><span class="pay-tab-icon">📱</span>ClickPesa</button>
+        <button class="pay-tab" onclick="switchPayTab('azampay',this)"><span class="pay-tab-icon">🌍</span>AzamPay</button>
+      </div>
+
+      <!-- CLICKPESA -->
+      <div id="pay-panel-clickpesa" class="pay-panel active">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.6;" id="clickpesa-desc">Pay with M-Pesa, Mixx by Yas (Tigo Pesa), Airtel Money, HaloPesa, or any Visa/Mastercard via ClickPesa — Tanzania's trusted payment gateway.</p>
+        <div style="display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;">
+          <span style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">📱 M-Pesa</span>
+          <span style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">📱 Mixx/Tigo</span>
+          <span style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">📱 Airtel</span>
+          <span style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">📱 HaloPesa</span>
+          <span style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">VISA</span>
+          <span style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">MC</span>
+        </div>
+        <div style="background:var(--pale);border-radius:10px;padding:.875rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-size:13px;color:var(--muted);" id="clickpesa-amount-label">Amount to pay:</span>
+          <span style="font-family:'Fraunces',serif;font-size:1.3rem;color:var(--green);font-weight:600;" id="clickpesa-amount">TZS 15,000</span>
+        </div>
+        <button class="btn-full btn-green" id="btn-clickpesa" onclick="doClickPesaPay()">📱 <span id="btn-clickpesa-text">Pay with ClickPesa</span></button>
+        <p class="payment-secured" id="clickpesa-secured">🔒 Secured by ClickPesa</p>
+        <div id="clickpesa-waiting" style="display:none;text-align:center;padding:1rem;background:var(--pale);border-radius:12px;margin-top:1rem;">
+          <p style="font-weight:500;margin-bottom:.5rem;" id="clickpesa-redirect-text">Redirecting to ClickPesa checkout...</p>
+          <p style="font-size:12px;color:var(--muted);">
+            <button onclick="showSignupStep('havecode')" style="background:none;border:none;color:var(--green);cursor:pointer;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;" id="btn-clickpesa-have-code">Already paid? Enter your code →</button>
+          </p>
+        </div>
+      </div>
+
+      <!-- AZAMPAY -->
+      <div id="pay-panel-azampay" class="pay-panel">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.6;" id="azampay-desc">Pay with AzamPesa, Tigo Pesa, HaloPesa, Airtel Money via Lipia Link, or use international remittance for customers outside East Africa.</p>
+        <div style="display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;">
+          <span style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">📱 AzamPesa</span>
+          <span style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">📱 Tigo Pesa</span>
+          <span style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">📱 Airtel</span>
+          <span style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">📱 HaloPesa</span>
+          <span style="background:var(--pale);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;">🌍 Remittance</span>
+        </div>
+
+        <div class="pay-tabs" style="margin-bottom:.875rem;">
+          <button class="pay-tab active" onclick="switchAzamMode('local',this)" id="azam-tab-local"><span class="pay-tab-icon">📱</span><span id="azam-local-label">Local Mobile Money</span></button>
+          <button class="pay-tab" onclick="switchAzamMode('remit',this)" id="azam-tab-remit"><span class="pay-tab-icon">🌍</span><span id="azam-remit-label">International</span></button>
+        </div>
+
+        <!-- Local mobile money -->
+        <div id="azam-mode-local">
+          <div class="inp-grp">
+            <label id="azam-provider-label">Mobile money provider</label>
+            <select id="azam-provider">
+              <option value="Azampesa">AzamPesa</option>
+              <option value="Mpesa">M-Pesa (Vodacom)</option>
+              <option value="Tigo">Mixx by Yas (Tigo Pesa)</option>
+              <option value="Airtel">Airtel Money</option>
+              <option value="Halopesa">HaloPesa</option>
+            </select>
+          </div>
+          <div class="inp-grp">
+            <label id="azam-phone-label">Phone number</label>
+            <input type="tel" id="azam-phone" placeholder="e.g. 255768777057"/>
+            <p style="font-size:11px;color:var(--muted);margin-top:4px;" id="azam-phone-hint">Include country code: 255 Tanzania</p>
+          </div>
+          <div style="background:var(--pale);border-radius:10px;padding:.875rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;color:var(--muted);" id="azam-amount-label">Amount to pay:</span>
+            <span style="font-family:'Fraunces',serif;font-size:1.3rem;color:var(--green);font-weight:600;" id="azam-local-amount">TZS 15,000</span>
+          </div>
+          <button class="btn-full btn-green" id="btn-azampay-local" onclick="doAzamPayLocal()">📱 <span id="btn-azampay-local-text">Send payment request</span></button>
+          <div id="azampay-waiting" style="display:none;text-align:center;padding:1rem;background:var(--pale);border-radius:12px;margin-top:1rem;">
+            <div style="font-size:32px;margin-bottom:.5rem;">📱</div>
+            <p style="font-weight:500;margin-bottom:.35rem;" id="azam-check-phone">Check your phone!</p>
+            <p style="font-size:13px;color:var(--muted);line-height:1.6;" id="azam-instructions">A payment prompt has been sent to your phone. Enter your PIN — your access code arrives by email within 60 seconds.</p>
+            <p style="font-size:12px;color:var(--muted);margin-top:.875rem;">
+              <button onclick="showSignupStep('havecode')" style="background:none;border:none;color:var(--green);cursor:pointer;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;" id="btn-azam-already-paid">Already paid? Enter your code →</button>
+            </p>
+          </div>
+        </div>
+
+        <!-- International remittance -->
+        <div id="azam-mode-remit" style="display:none;">
+          <p style="font-size:13px;color:var(--muted);margin-bottom:1rem;line-height:1.6;" id="azam-remit-desc">For customers outside East Africa — you'll be redirected to a secure AzamPay checkout page to complete payment via international remittance.</p>
+          <div style="background:var(--pale);border-radius:10px;padding:.875rem;margin-bottom:1rem;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:13px;color:var(--muted);" id="azam-remit-amount-label">Amount to pay:</span>
+            <span style="font-family:'Fraunces',serif;font-size:1.3rem;color:var(--green);font-weight:600;" id="azam-remit-amount">TZS 15,000</span>
+          </div>
+          <button class="btn-full btn-green" id="btn-azampay-remit" onclick="doAzamPayRemit()">🌍 <span id="btn-azampay-remit-text">Continue to AzamPay checkout</span></button>
+          <p class="payment-secured" id="azampay-secured">🔒 Secured by AzamPay</p>
+          <div id="azampay-remit-waiting" style="display:none;text-align:center;padding:1rem;background:var(--pale);border-radius:12px;margin-top:1rem;">
+            <p style="font-weight:500;margin-bottom:.5rem;" id="azam-remit-redirect-text">Redirecting to AzamPay checkout...</p>
+            <p style="font-size:12px;color:var(--muted);">
+              <button onclick="showSignupStep('havecode')" style="background:none;border:none;color:var(--green);cursor:pointer;font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;" id="btn-azam-remit-have-code">Already paid? Enter your code →</button>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:1rem;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;">
+        <button onclick="showSignupStep('plan')" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;" id="btn-change-plan">← Change plan</button>
+        <button onclick="showSignupStep('havecode')" style="background:none;border:none;color:var(--green);font-size:12px;cursor:pointer;font-weight:500;" id="btn-have-code">Already have a code →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Have code -->
+    <div id="step-havecode" style="display:none;">
+      <h2 class="modal-title" id="hc-title">Already paid?</h2>
+      <p class="modal-sub" id="hc-sub">Enter your access code below and I'll get straight to work.</p>
+      <div class="modal-err" id="hc-err"></div>
+      <div class="inp-grp">
+        <label id="hc-code-label">Your access code</label>
+        <input class="inp-code" type="text" id="hc-code" maxlength="12" placeholder="GROW1A2B"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
+          onkeydown="if(event.key==='Enter')useHaveCode()"/>
+      </div>
+      <button class="btn-full btn-green" onclick="useHaveCode()" id="btn-hc-submit">👨‍🍳 Let's get started</button>
+      <div style="text-align:center;margin-top:.75rem;">
+        <button onclick="showSignupStep('payment')" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;" id="btn-back-payment">← Back to payment</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Success -->
+    <div id="step-success" style="display:none;text-align:center;">
+      <div style="font-size:56px;margin-bottom:1rem;">🎉</div>
+      <h2 class="modal-title" id="success-title">You're all set!</h2>
+      <p class="modal-sub">Your access code has been sent to <strong id="success-email"></strong>.</p>
+      <div style="background:var(--pale);border-radius:12px;padding:1.25rem;margin:1.25rem 0;border:2px dashed var(--gold);">
+        <p style="font-size:11px;color:var(--muted);margin-bottom:6px;" id="success-code-label">YOUR ACCESS CODE</p>
+        <p style="font-family:monospace;font-size:22px;font-weight:700;letter-spacing:.18em;color:var(--ink);" id="success-code">—</p>
+        <button class="btn-copy" style="margin-top:8px;" onclick="copyEl('success-code',this)">📋 Copy</button>
+      </div>
+      <button class="btn-full btn-green" onclick="closeModal('signup');loginWithCode(document.getElementById('success-code').textContent)" id="btn-open-toolkit">🚀 Open toolkit now</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOOLKIT ══ -->
+<div id="toolkit">
+  <div class="tk-topbar">
+    <div class="tk-topbar-left">
+      <div class="tk-avatar-sm">👨‍🍳</div>
+      <div>
+        <div class="tk-name">Mkude <span>· on duty</span></div>
+        <div class="tk-role" id="tk-role">Your restaurant content team member</div>
+      </div>
+    </div>
+    <div class="tk-badges">
+      <span class="tk-badge plan-paid" id="tk-plan">—</span>
+      <span class="tk-badge exp-ok" id="tk-exp">—</span>
+      <button class="btn-signout" onclick="doSignOut()" id="btn-signout">Sign out</button>
+    </div>
+  </div>
+  <div class="mkude-speaking" id="mkude-speaking">
+    <div class="mkude-speaking-avatar">👨‍🍳</div>
+    <div id="mkude-speaking-text">Good to see you! Tell me what you need and I'll handle the writing. 🍽️</div>
+  </div>
+  <div class="usage-bar" id="usage-bar" style="display:none;">
+    <span style="font-size:11px;" id="usage-label">Tasks this month:</span>
+    <div class="usage-track"><div class="usage-fill uf-ok" id="usage-fill" style="width:0%"></div></div>
+    <span id="usage-count" style="font-size:11px;">0/30</span>
+  </div>
+  <div class="upgrade-bar" id="upgrade-bar">
+    👨‍🍳 <span id="upgrade-msg">Mkude has finished all tasks for this month.</span>
+    <a onclick="doSignOut();setTimeout(()=>openModal('signup'),300)" id="upgrade-link">Upgrade plan →</a>
+  </div>
+  <div class="promo-notice-bar" id="promo-notice-bar">
+    👋 <span id="promo-bar-text">Free trial —</span> <span id="promo-gens-left">3</span> <span id="promo-tasks-left">tasks remaining</span> ·
+    <a onclick="doSignOut();setTimeout(()=>openModal('signup'),300)" id="promo-upgrade-link">Subscribe for more →</a>
+  </div>
+  <div class="tk-tabs">
+    <button class="tk-tab active" onclick="switchTab('menu',this)" id="tab-menu">📝 Menu</button>
+    <button class="tk-tab" onclick="switchTab('social',this)" id="tab-social">📱 Social</button>
+    <button class="tk-tab" onclick="switchTab('review',this)" id="tab-review">⭐ Reviews</button>
+    <button class="tk-tab" id="admin-tab" onclick="switchTab('admin',this)" style="display:none">⚙️ Admin</button>
+  </div>
+
+  <!-- MENU -->
+  <div id="tk-panel-menu" class="tk-panel active">
+    <div class="tool-card">
+      <p class="tool-title" id="menu-tool-title">Menu Descriptions</p>
+      <div class="mkude-says"><div class="mkude-says-avatar">👨‍🍳</div><span id="menu-mkude-says">Give me the dish name and ingredients — I'll write a description that makes your customers hungry before they even order.</span></div>
+      <div class="row2">
+        <div class="field"><label id="dish-label">Dish name *</label><input type="text" id="m-dish" placeholder="e.g. Nyama Choma Platter"/></div>
+        <div class="field"><label id="cuisine-label">Cuisine</label>
+          <select id="m-cuisine">
+            <optgroup label="🌍 African"><option>East African (Swahili)</option><option>West African</option><option>North African</option><option>Ethiopian / Eritrean</option><option>South African</option><option>Moroccan</option></optgroup>
+            <optgroup label="🌏 Asian"><option>Japanese</option><option>Chinese (Cantonese)</option><option>Chinese (Sichuan)</option><option>Indian (North)</option><option>Indian (South)</option><option>Thai</option><option>Vietnamese</option><option>Korean</option><option>Indonesian / Malaysian</option><option>Filipino</option><option>Sri Lankan</option></optgroup>
+            <optgroup label="🌍 Middle Eastern"><option>Lebanese</option><option>Turkish / Ottoman</option><option>Persian (Iranian)</option><option>Israeli</option><option>Saudi Arabian</option><option>Egyptian</option></optgroup>
+            <optgroup label="🌍 European"><option>Italian</option><option>French</option><option>Spanish / Catalan</option><option>Greek / Mediterranean</option><option>Portuguese</option><option>German</option><option>British</option><option>Scandinavian</option></optgroup>
+            <optgroup label="🌎 Americas"><option>Mexican</option><option>Brazilian</option><option>Peruvian</option><option>Argentinian</option><option>American BBQ</option><option>Caribbean</option><option>Cajun / Creole</option></optgroup>
+            <optgroup label="🌏 Pacific"><option>Hawaiian</option><option>Australian</option></optgroup>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label id="ing-label">Key ingredients</label><input type="text" id="m-ing" placeholder="e.g. slow-grilled goat, kachumbari, ugali"/></div>
+      <div class="row3">
+        <div class="field"><label id="style-label">Writing style</label>
+          <select id="m-tone"><option>Warm & friendly</option><option>Upscale & poetic</option><option>Bold & punchy</option><option>Simple & clear</option><option>Rustic & homestyle</option><option>Modern fine dining</option></select>
+        </div>
+        <div class="field"><label id="price-label">Price (optional)</label><input type="text" id="m-price" placeholder="e.g. $18 / TSh 18,000"/></div>
+        <div class="field"><label id="lang-label">Write in</label>
+          <select id="m-lang"><option>English</option><option>Swahili</option><option>French</option><option>Spanish</option><option>Arabic</option><option>Portuguese</option></select>
+        </div>
+      </div>
+      <button class="btn-generate" id="btn-menu" onclick="generate('menu')">📝 <span id="btn-menu-text">Write this description</span></button>
+      <div id="out-menu" style="display:none" class="output-wrap">
+        <div class="output-header"><span class="output-lbl"><span>👨‍🍳</span> <span id="out-menu-label">Mkude wrote this</span></span><button class="btn-copy" onclick="copyOut('out-menu-text',this)" id="copy-menu">Copy</button></div>
+        <div class="output-text" id="out-menu-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOCIAL -->
+  <div id="tk-panel-social" class="tk-panel">
+    <div class="tool-card">
+      <p class="tool-title" id="social-tool-title">Social Media Posts</p>
+      <div class="mkude-says"><div class="mkude-says-avatar">👨‍🍳</div><span id="social-mkude-says">Tell me what's happening at the restaurant today and I'll write a post ready to share.</span></div>
+      <div class="row2">
+        <div class="field"><label id="post-type-label">What's the post about?</label>
+          <select id="s-type"><option>Today's special</option><option>New dish on the menu</option><option>Weekend promotion</option><option>Behind the scenes</option><option>Happy customer</option><option>Seasonal launch</option><option>Event or holiday</option></select>
+        </div>
+        <div class="field"><label id="platform-label">Platform</label>
+          <select id="s-platform"><option>Instagram</option><option>Facebook</option><option>WhatsApp status</option><option>TikTok</option><option>Twitter / X</option><option>LinkedIn</option></select>
+        </div>
+      </div>
+      <div class="field"><label id="details-label">Tell me the details *</label><textarea id="s-context" placeholder="e.g. Friday fish fry — tilapia, chips and salad for $12. This weekend only."></textarea></div>
+      <div class="row2">
+        <div class="field"><label id="rname-label">Restaurant name (optional)</label><input type="text" id="s-rname" placeholder="e.g. Mama Jiko's Kitchen"/></div>
+        <div class="field"><label id="slang-label">Write in</label>
+          <select id="s-lang"><option>English</option><option>Swahili</option><option>French</option><option>Spanish</option><option>Arabic</option><option>Portuguese</option></select>
+        </div>
+      </div>
+      <button class="btn-generate" id="btn-social" onclick="generate('social')">📱 <span id="btn-social-text">Write this post</span></button>
+      <div id="out-social" style="display:none" class="output-wrap">
+        <div class="output-header"><span class="output-lbl"><span>👨‍🍳</span> <span id="out-social-label">Mkude wrote this</span></span><button class="btn-copy" onclick="copyOut('out-social-text',this)" id="copy-social">Copy</button></div>
+        <div class="output-text" id="out-social-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVIEWS -->
+  <div id="tk-panel-review" class="tk-panel">
+    <div class="tool-card">
+      <p class="tool-title" id="review-tool-title">Review Replies</p>
+      <div class="mkude-says"><div class="mkude-says-avatar">👨‍🍳</div><span id="review-mkude-says">Paste the review and I'll write a reply that sounds like it came straight from your team — warm, professional, and personal.</span></div>
+      <div class="field"><label id="review-label">Paste the customer review *</label><textarea id="r-review" style="min-height:100px" placeholder="Paste the customer's review here..."></textarea></div>
+      <div class="row3">
+        <div class="field"><label id="stars-label">Star rating</label>
+          <select id="r-stars"><option value="5">⭐⭐⭐⭐⭐ 5</option><option value="4">⭐⭐⭐⭐ 4</option><option value="3">⭐⭐⭐ 3</option><option value="2">⭐⭐ 2</option><option value="1">⭐ 1</option></select>
+        </div>
+        <div class="field"><label id="rtone-label">How should I sound?</label>
+          <select id="r-tone"><option>Warm & grateful</option><option>Professional</option><option>Apologetic & caring</option><option>Upbeat & friendly</option><option>Formal</option></select>
+        </div>
+        <div class="field"><label id="rlang-label">Write in</label>
+          <select id="r-lang"><option>English</option><option>Swahili</option><option>French</option><option>Spanish</option><option>Arabic</option><option>Portuguese</option></select>
+        </div>
+      </div>
+      <button class="btn-generate" id="btn-review" onclick="generate('review')">⭐ <span id="btn-review-text">Write this reply</span></button>
+      <div id="out-review" style="display:none" class="output-wrap">
+        <div class="output-header"><span class="output-lbl"><span>👨‍🍳</span> <span id="out-review-label">Mkude wrote this</span></span><button class="btn-copy" onclick="copyOut('out-review-text',this)" id="copy-review">Copy</button></div>
+        <div class="output-text" id="out-review-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="tk-panel-admin" class="tk-panel">
+    <div class="admin-card">
+      <p class="admin-card-title">🔧 Worker Configuration</p>
+      <div class="worker-cfg">
+        <label>Cloudflare Worker URL</label>
+        <input type="text" id="worker-url" placeholder="https://rcs-worker.your-subdomain.workers.dev" oninput="saveWorkerCfg()"/>
+        <label>Admin Token</label>
+        <input type="password" id="admin-token" placeholder="Your ADMIN_TOKEN secret" oninput="saveWorkerCfg()"/>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-gen-code" onclick="testWorker()" style="flex:1;">🔍 Test Connection</button>
+        <span id="worker-status" style="font-size:11px;padding:7px 12px;background:var(--pale);border-radius:99px;border:1px solid var(--border);">Not tested</span>
+      </div>
+    </div>
+
+    <!-- PRICING ADMIN -->
+    <div class="admin-card">
+      <p class="admin-card-title">
+        <span>💰 Pricing Settings</span>
+        <span style="font-size:11px;font-weight:400;color:var(--muted);">Updates site instantly · Push to Worker to persist</span>
+      </p>
+      <div class="price-admin-grid">
+        <div class="price-box">
+          <p class="price-box-name">Starter</p>
+          <div class="price-box-inputs">
+            <label>USD price</label><input type="number" id="price-usd-starter" value="3" min="1" max="99" step="0.5"/>
+            <label>TZS amount</label><input type="number" id="price-tzs-starter" value="7500" min="100"/>
+            <label>KES amount</label><input type="number" id="price-kes-starter" value="400" min="100"/>
+            <label>Tasks limit</label><input type="number" id="limit-starter" value="30" min="1"/>
+          </div>
+        </div>
+        <div class="price-box">
+          <p class="price-box-name">Growth</p>
+          <div class="price-box-inputs">
+            <label>USD price</label><input type="number" id="price-usd-growth" value="6" min="1" max="99" step="0.5"/>
+            <label>TZS amount</label><input type="number" id="price-tzs-growth" value="15000" min="100"/>
+            <label>KES amount</label><input type="number" id="price-kes-growth" value="800" min="100"/>
+            <label>Tasks limit</label><input type="number" id="limit-growth" value="100" min="1"/>
+          </div>
+        </div>
+        <div class="price-box">
+          <p class="price-box-name">Premium</p>
+          <div class="price-box-inputs">
+            <label>USD price</label><input type="number" id="price-usd-premium" value="9" min="1" max="99" step="0.5"/>
+            <label>TZS amount</label><input type="number" id="price-tzs-premium" value="22500" min="100"/>
+            <label>KES amount</label><input type="number" id="price-kes-premium" value="1200" min="100"/>
+            <label>Tasks limit (-1=unlimited)</label><input type="number" id="limit-premium" value="-1" min="-1"/>
+          </div>
+        </div>
+        <div class="price-box">
+          <p class="price-box-name">Promo Trial</p>
+          <div class="price-box-inputs">
+            <label>Tasks limit</label><input type="number" id="limit-promo" value="3" min="1" max="10"/>
+            <label>Days valid</label><input type="number" id="days-promo" value="7" min="1" max="30"/>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="price-save-btn" onclick="savePricing()">💾 Save & apply now</button>
+        <button class="act-btn act-renew" onclick="pushPricingToWorker()" style="padding:6px 14px;">☁️ Push to Worker</button>
+        <span id="price-status" style="font-size:11px;color:var(--muted);"></span>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <p class="admin-card-title"><span>📊 Dashboard</span><button class="act-btn act-copy" onclick="loadAdminData()">🔄 Refresh</button></p>
+      <div class="stats-grid" id="stats-grid"><div class="stat-box"><div class="stat-num" style="font-size:12px;color:var(--muted);">Connect Worker</div><div class="stat-lbl">to load stats</div></div></div>
+    </div>
+    <div class="admin-card">
+      <p class="admin-card-title">⚡ Issue Access Code</p>
+      <div class="gen-form">
+        <div class="field"><label>Plan</label>
+          <select id="gen-plan"><option value="Starter">Starter (30 tasks)</option><option value="Growth">Growth (100 tasks)</option><option value="Premium">Premium (Unlimited)</option><option value="Promo">Free trial (3 tasks)</option></select>
+        </div>
+        <div class="field"><label>Restaurant name</label><input type="text" id="gen-client" placeholder="e.g. Mama Jiko's"/></div>
+        <div class="field"><label>Email</label><input type="email" id="gen-email" placeholder="client@restaurant.com"/></div>
+        <div class="field"><label>Days valid</label>
+          <select id="gen-days"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option></select>
+        </div>
+        <button class="btn-gen-code" onclick="adminGenCode()">Issue code</button>
+      </div>
+      <div class="gen-out" id="gen-out">
+        <div class="gen-code-val" id="gen-code-val"></div>
+        <div class="gen-code-meta" id="gen-code-meta"></div>
+        <button class="btn-copy" onclick="copyEl('gen-code-val',this)" style="margin-top:8px;">📋 Copy</button>
+        <a id="wa-code-link" href="#" target="_blank" class="wa-btn">💬 WhatsApp</a>
+        <a id="email-code-link" href="#" class="wa-btn email-btn-a">✉️ Email</a>
+      </div>
+    </div>
+    <div class="admin-card">
+      <p class="admin-card-title">
+        <span>🔑 Access Codes</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="admin-search" placeholder="Search..." style="font-size:11px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;width:140px;font-family:inherit;" oninput="filterTable()">
+          <button class="act-btn act-copy" onclick="exportCSV()">💾 CSV</button>
+        </div>
+      </p>
+      <div style="overflow-x:auto;">
+        <table class="code-table">
+          <thead><tr><th>Code</th><th>Plan</th><th>Restaurant</th><th>Email</th><th>Expiry</th><th>Tasks</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="code-tbody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:1.5rem;">Connect Worker and refresh</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div><!-- end toolkit -->
+
+<script>
+// ══ CONFIG ════════════════════════════════════════════════
+const WK='MKD_WORKER_URL', AT='MKD_ADMIN_TOKEN', SKS='MKD_SESSION', PKS='MKD_PRICING';
+let WORKER_URL='', ADMIN_TOKEN='', currentUser=null, allCodes={};
+let selectedPlan={name:'Growth'}, promoCodeVal='', signupEmail='';
+let currentLang='en';
+
+// Live pricing — admin can update
+let PRICING=JSON.parse(localStorage.getItem(PKS)||'null')||{
+  Starter:{usd:3,  tzs:7500, kes:400, limit:30,  days:30},
+  Growth: {usd:6,  tzs:15000,kes:800, limit:100, days:30},
+  Premium:{usd:9,  tzs:22500,kes:1200,limit:-1,  days:30},
+  Promo:  {usd:0,  tzs:0,    kes:0,   limit:3,   days:7 },
+};
+
+// ── DEVICE FINGERPRINT ────────────────────────────────────
+function getDeviceId(){
+  let id=null;
+  try{id=localStorage.getItem('MKD_DEVICE_ID');}catch(e){}
+  if(!id){
+    const fp=[navigator.userAgent,navigator.language,screen.width+'x'+screen.height,screen.colorDepth,new Date().getTimezoneOffset(),navigator.hardwareConcurrency||''].join('|');
+    let h=0; for(let i=0;i<fp.length;i++){h=((h<<5)-h)+fp.charCodeAt(i);h|=0;}
+    id='mkd_'+Math.abs(h).toString(36)+'_'+Date.now().toString(36);
+    try{localStorage.setItem('MKD_DEVICE_ID',id);}catch(e){}
+  }
+  return id;
+}
+
+// ══ TRANSLATIONS ══════════════════════════════════════════
+const TRANS={
+  en:{
+    greeting:"Hi there! I'm Mkude",
+    heroTitle:"Your restaurant's new<br><em>content team member.</em>",
+    heroIntro:"Hi! My name is <strong>Mkude</strong> and I'm here to join your restaurant team. Think of me as your behind-the-scenes writer — I handle the words so you can focus on the food. 🍽️<br><br>Every day I can write your <em>menu descriptions</em>, craft your <em>social media posts</em>, and reply to your <em>customer reviews</em> — all in your voice, for any cuisine, in any language.",
+    heroBtnPromo:"👋 Meet Mkude — it's free",
+    heroBtnSub:"Subscribe from $3/month",
+    featKicker:"Meet the team member",
+    featTitle:"Three things Mkude<br>handles for your team.",
+    f1Title:"Menu Descriptions",f1Desc:"Give Mkude your dish name and ingredients and he writes a description that makes customers hungry before they even order. Works for every cuisine on earth.",f1Quote:'"Leave the menu writing to me." — Mkude',
+    f2Title:"Social Media Posts",f2Desc:"Tell Mkude what's happening and he writes a post ready to share on Instagram, Facebook, WhatsApp or TikTok.",f2Quote:'"Your restaurant deserves an audience." — Mkude',
+    f3Title:"Customer Review Replies",f3Desc:"Mkude writes professional, human-sounding replies to 1–5 star reviews — protecting your reputation.",f3Quote:'"Every review is a conversation." — Mkude',
+    showcaseKicker:"Mkude's work samples",showcaseTitle:"See what Mkude writes.",
+    teamKicker:"The restaurant team",teamTitle:"Mkude fits right in.",
+    teamSub:"Every great restaurant has a team. Mkude joins yours as the person who handles all the writing.",
+    tc1Role:"Executive Chef",tc1Name:"You & your team",tc1Desc:"Creating dishes, managing the kitchen, making customers happy in person.",
+    tc2Role:"Front of House",tc2Name:"Your staff",tc2Desc:"Welcoming guests, taking orders, delivering exceptional service every shift.",
+    tc3Role:"Content & Communications",tc3Desc:"Writing menu descriptions, social posts, and review replies — any time, any cuisine, any language.",
+    mkudeQuote:'"I\'m not just a tool — I\'m part of the team. Tell me what you need."',
+    pricingKicker:"Bring Mkude on board",pricingTitle:"Simple, honest pricing.",
+    pricingSub:"Pay by ClickPesa or AzamPay · Access code sent to your email · Cancel any time",
+    pnStarter:"Starter",pnGrowth:"Growth",pnPremium:"Premium",popularBadge:"Most popular",
+    pf1s:"30 writing tasks/month",pf2s:"Menu descriptions",pf3s:"Social posts",pf4s:"Email support",
+    pf1g:"100 writing tasks/month",pf2g:"Menu + Social + Reviews",pf3g:"40+ world cuisines",pf4g:"Priority support",
+    pf1p:"Unlimited writing tasks",pf2p:"Everything in Growth",pf3p:"5 team access codes",pf4p:"Monthly summary",
+    ppPeriod:"/month · 30 days",btnPlan:"Bring Mkude on board",
+    promoBannerText:"👋 Want to try before subscribing? <b>Get 3 free writing tasks</b> — no card needed.",
+    btnPromoBanner:"Meet Mkude free",
+    loginTitle:"Welcome back!",loginSub:"Enter your access code and I'll get straight to work.",loginCodeLabel:"Your access code",btnLogin:"👨‍🍳 Let's get to work",loginDivider:"no code yet?",btnLoginPromo:"👋 Free trial",btnLoginSub:"Subscribe →",
+    promoTitle:"Hi! I'm Mkude 👋",promoSub:"Let me show you what I can do — 3 writing tasks completely free. No card needed.",promoNotice:"🎁 Free trial: 3 writing tasks · 7 days · One per person",promoNameLabel:"Your name",promoEmailLabel:"Your email",btnPromo:"👋 Meet Mkude — it's free",promoNote:"One free trial per email address and device.",
+    promoSuccessTitle:"Nice to meet you!",promoSuccessSub:"I'm Mkude and I'm ready to help. Your code is below — also sent to your email.",promoCodeLabel:"YOUR FREE TRIAL CODE",promoCodeMeta:"3 writing tasks · 7 days",btnUsePromo:"👨‍🍳 Start working with Mkude",promoUpgradeHint:'Enjoyed it? <button onclick="closeModal(\'promo\');openModal(\'signup\')" style="background:none;border:none;color:var(--green);cursor:pointer;font-size:12px;font-weight:600;font-family:\'DM Sans\',sans-serif;">Bring Mkude on full time →</button>',
+    signupTitle:"Bring Mkude on board",signupSub:"Choose a plan — pay by ClickPesa or AzamPay. Access code arrives by email in under 60 seconds.",
+    msStarter:"Starter",msStarterDesc:"30 tasks · 30 days",msGrowth:"Growth ⭐",msGrowthDesc:"100 tasks · All tools · 30 days",msPremium:"Premium",msPremiumDesc:"Unlimited · 5 codes · 30 days",
+    emailLabel:"Your email — your access code is sent here",btnChoosePayment:"Choose payment method →",
+    payTitle:"How would you like to pay?",payPlanDesc:"30 days access",
+    clickpesaDesc:"Pay with M-Pesa, Mixx by Yas, Airtel Money, HaloPesa, or Visa/Mastercard via ClickPesa.",btnClickpesaText:"Pay with ClickPesa",clickpesaRedirectText:"Redirecting to ClickPesa checkout...",btnClickpesaHaveCode:"Already paid? Enter your code →",clickpesaSecured:"🔒 Secured by ClickPesa",
+    azampayDesc:"Pay with AzamPesa, Tigo Pesa, HaloPesa, Airtel Money, or use international remittance.",azamLocalLabel:"Local Mobile Money",azamRemitLabel:"International",azamProviderLabel:"Mobile money provider",azamPhoneLabel:"Phone number",azamPhoneHint:"Include country code: 255 Tanzania",azamAmountLabel:"Amount to pay:",btnAzamLocalText:"Send payment request",azamCheckPhone:"Check your phone!",azamInstructions:"A payment prompt has been sent to your phone. Enter your PIN — your access code arrives by email within 60 seconds.",btnAzamAlreadyPaid:"Already paid? Enter your code →",azamRemitDesc:"For customers outside East Africa — you'll be redirected to a secure AzamPay checkout.",azamRemitAmountLabel:"Amount to pay:",btnAzamRemitText:"Continue to AzamPay checkout",azamRemitRedirectText:"Redirecting to AzamPay checkout...",btnAzamRemitHaveCode:"Already paid? Enter your code →",azampaySecured:"🔒 Secured by AzamPay",
+    btnChangePlan:"← Change plan",btnHaveCode:"Already have a code →",
+    hcTitle:"Already paid?",hcSub:"Enter your access code below and I'll get straight to work.",hcCodeLabel:"Your access code",btnHcSubmit:"👨‍🍳 Let's get started",btnBackPayment:"← Back to payment",
+    successTitle:"You're all set!",successCodeLabel:"YOUR ACCESS CODE",btnOpenToolkit:"🚀 Open toolkit now",
+    tkRole:"Your restaurant content team member",btnSignout:"Sign out",usageLabel:"Tasks this month:",upgradeMsg:"Mkude has finished all tasks for this month.",upgradeLink:"Upgrade plan →",promoBarText:"Free trial —",promoTasksLeft:"tasks remaining",promoUpgradeLink:"Subscribe for more →",
+    menuToolTitle:"Menu Descriptions",menuMkudeSays:"Give me the dish name and ingredients — I'll write a description that makes your customers hungry before they even order.",dishLabel:"Dish name *",cuisineLabel:"Cuisine",ingLabel:"Key ingredients",styleLabel:"Writing style",priceLabel:"Price (optional)",langLabel:"Write in",btnMenuText:"Write this description",outMenuLabel:"Mkude wrote this",copyMenu:"Copy",
+    socialToolTitle:"Social Media Posts",socialMkudeSays:"Tell me what's happening at the restaurant today and I'll write a post ready to share.",postTypeLabel:"What's the post about?",platformLabel:"Platform",detailsLabel:"Tell me the details *",rnameLabel:"Restaurant name (optional)",slangLabel:"Write in",btnSocialText:"Write this post",outSocialLabel:"Mkude wrote this",copySocial:"Copy",
+    reviewToolTitle:"Review Replies",reviewMkudeSays:"Paste the review and I'll write a reply that sounds like it came straight from your team — warm, professional, and personal.",reviewLabel:"Paste the customer review *",starsLabel:"Star rating",rtoneLabel:"How should I sound?",rlangLabel:"Write in",btnReviewText:"Write this reply",outReviewLabel:"Mkude wrote this",copyReview:"Copy",
+  },
+  sw:{
+    greeting:"Habari! Mimi ni Mkude",
+    heroTitle:"Mwanachama mpya wa timu<br><em>ya mkahawa wako.</em>",
+    heroIntro:"Habari! Jina langu ni <strong>Mkude</strong> na niko hapa kujiunga na timu yako ya mkahawa. Fikiria mimi kama mwandishi wako wa nyuma ya pazia — ninashughulikia maneno ili uweze kuzingatia chakula. 🍽️<br><br>Kila siku ninaweza kuandika <em>maelezo ya menyu</em> yako, kuunda <em>machapisho ya mitandao ya kijamii</em>, na kujibu <em>tathmini za wateja</em> wako — katika sauti yako, kwa vyakula vyovyote, kwa lugha yoyote.",
+    heroBtnPromo:"👋 Kutana na Mkude — bila malipo",
+    heroBtnSub:"Jiandikishe kuanzia $3/mwezi",
+    featKicker:"Karibu mwanachama wa timu",
+    featTitle:"Mambo matatu Mkude<br>anayoshughulikia.",
+    f1Title:"Maelezo ya Menyu",f1Desc:"Mpe Mkude jina la sahani na viungo na ataandika maelezo yanayofanya wateja watake kula kabla ya kuagiza. Inafanya kazi kwa vyakula vyote duniani.",f1Quote:'"Niache niandike menyu." — Mkude',
+    f2Title:"Machapisho ya Mitandao ya Kijamii",f2Desc:"Mwambie Mkude kinachoendelea na ataandika chapisho tayari kushirikiwa kwenye Instagram, Facebook, WhatsApp au TikTok.",f2Quote:'"Mkahawa wako unastahili wasomaji." — Mkude',
+    f3Title:"Majibu ya Tathmini za Wateja",f3Desc:"Mkude anaandika majibu ya kitaalamu, yanayosikika ya kibinadamu kwa tathmini za nyota 1–5 — akilinda sifa yako.",f3Quote:'"Kila tathmini ni mazungumzo." — Mkude',
+    showcaseKicker:"Mifano ya kazi ya Mkude",showcaseTitle:"Angalia anachoandika Mkude.",
+    teamKicker:"Timu ya mkahawa",teamTitle:"Mkude anaingia vizuri.",
+    teamSub:"Kila mkahawa mzuri una timu. Mkude anajiunga na yako kama mtu anayeshughulikia uandishi wote.",
+    tc1Role:"Mpishi Mkuu",tc1Name:"Wewe na timu yako",tc1Desc:"Kuunda vyakula, kusimamia jiko, kufurahisha wateja binafsi.",
+    tc2Role:"Mbele ya Nyumba",tc2Name:"Wafanyakazi wako",tc2Desc:"Kukaribisha wageni, kuchukua maagizo, kutoa huduma bora kila zamu.",
+    tc3Role:"Maudhui na Mawasiliano",tc3Desc:"Kuandika maelezo ya menyu, machapisho ya kijamii, na majibu ya tathmini — wakati wowote, vyakula vyovyote, lugha yoyote.",
+    mkudeQuote:'"Mimi si zana tu — mimi ni sehemu ya timu. Niambie unahitaji nini."',
+    pricingKicker:"Mlete Mkude kwenye bodi",pricingTitle:"Bei rahisi na ya kweli.",
+    pricingSub:"Lipa kwa ClickPesa au AzamPay · Msimbo wa ufikiaji unatumwa kwa barua pepe yako · Futa wakati wowote",
+    pnStarter:"Mwanzo",pnGrowth:"Ukuaji",pnPremium:"Ya Juu",popularBadge:"Maarufu zaidi",
+    pf1s:"Kazi 30 za uandishi/mwezi",pf2s:"Maelezo ya menyu",pf3s:"Machapisho ya kijamii",pf4s:"Msaada wa barua pepe",
+    pf1g:"Kazi 100 za uandishi/mwezi",pf2g:"Menyu + Kijamii + Tathmini",pf3g:"Vyakula 40+ vya kimataifa",pf4g:"Msaada wa kipaumbele",
+    pf1p:"Kazi za uandishi bila kikomo",pf2p:"Kila kitu katika Ukuaji",pf3p:"Misimbo 5 ya timu",pf4p:"Muhtasari wa kila mwezi",
+    ppPeriod:"/mwezi · siku 30",btnPlan:"Mlete Mkude",
+    promoBannerText:"👋 Unataka kujaribu kwanza? <b>Pata kazi 3 za uandishi za bure</b> — hakuna kadi inayohitajika.",
+    btnPromoBanner:"Kutana na Mkude bure",
+    loginTitle:"Karibu tena!",loginSub:"Weka msimbo wako wa ufikiaji na nitaanza kufanya kazi mara moja.",loginCodeLabel:"Msimbo wako wa ufikiaji",btnLogin:"👨‍🍳 Tuanze kufanya kazi",loginDivider:"bado huna msimbo?",btnLoginPromo:"👋 Jaribu bure",btnLoginSub:"Jiandikishe →",
+    promoTitle:"Habari! Mimi ni Mkude 👋",promoSub:"Nionyeshe ninachoweza kufanya — kazi 3 za uandishi za bure kabisa. Hakuna kadi inayohitajika.",promoNotice:"🎁 Jaribio la bure: Kazi 3 za uandishi · Siku 7 · Moja kwa mtu",promoNameLabel:"Jina lako",promoEmailLabel:"Barua pepe yako",btnPromo:"👋 Kutana na Mkude — bila malipo",promoNote:"Jaribio moja la bure kwa kila barua pepe na kifaa.",
+    promoSuccessTitle:"Furaha kukuona!",promoSuccessSub:"Mimi ni Mkude na niko tayari kusaidia. Msimbo wako uko hapa chini — pia umetumwa kwa barua pepe yako.",promoCodeLabel:"MSIMBO WAKO WA JARIBIO LA BURE",promoCodeMeta:"Kazi 3 za uandishi · Siku 7",btnUsePromo:"👨‍🍳 Anza kufanya kazi na Mkude",promoUpgradeHint:'Ulifurahia? <button onclick="closeModal(\'promo\');openModal(\'signup\')" style="background:none;border:none;color:var(--green);cursor:pointer;font-size:12px;font-weight:600;font-family:\'DM Sans\',sans-serif;">Mlete Mkude muda wote →</button>',
+    signupTitle:"Mlete Mkude kwenye bodi",signupSub:"Chagua mpango — lipa kwa ClickPesa au AzamPay. Msimbo wa ufikiaji unafika kwa barua pepe ndani ya sekunde 60.",
+    msStarter:"Mwanzo",msStarterDesc:"Kazi 30 · Siku 30",msGrowth:"Ukuaji ⭐",msGrowthDesc:"Kazi 100 · Zana zote · Siku 30",msPremium:"Ya Juu",msPremiumDesc:"Bila kikomo · Misimbo 5 · Siku 30",
+    emailLabel:"Barua pepe yako — msimbo wako wa ufikiaji unatumwa hapa",btnChoosePayment:"Chagua njia ya malipo →",
+    payTitle:"Ungependa kulipa vipi?",payPlanDesc:"Ufikiaji wa siku 30",
+    clickpesaDesc:"Lipa kwa M-Pesa, Mixx by Yas, Airtel Money, HaloPesa, au Visa/Mastercard kupitia ClickPesa.",btnClickpesaText:"Lipa kwa ClickPesa",clickpesaRedirectText:"Inaelekeza kwa malipo ya ClickPesa...",btnClickpesaHaveCode:"Umelipa tayari? Weka msimbo wako →",clickpesaSecured:"🔒 Imelindwa na ClickPesa",
+    azampayDesc:"Lipa kwa AzamPesa, Tigo Pesa, HaloPesa, Airtel Money, au tumia malipo ya kimataifa.",azamLocalLabel:"Pesa za Simu za Ndani",azamRemitLabel:"Kimataifa",azamProviderLabel:"Mtoa huduma wa pesa za simu",azamPhoneLabel:"Nambari ya simu",azamPhoneHint:"Weka msimbo wa nchi: 255 Tanzania",azamAmountLabel:"Kiasi cha kulipa:",btnAzamLocalText:"Tuma ombi la malipo",azamCheckPhone:"Angalia simu yako!",azamInstructions:"Ombi la malipo limetumwa kwa simu yako. Weka PIN yako — msimbo wako wa ufikiaji unafika ndani ya sekunde 60.",btnAzamAlreadyPaid:"Umelipa tayari? Weka msimbo wako →",azamRemitDesc:"Kwa wateja nje ya Afrika Mashariki — utaelekezwa kwa ukurasa salama wa malipo ya AzamPay.",azamRemitAmountLabel:"Kiasi cha kulipa:",btnAzamRemitText:"Endelea kwa malipo ya AzamPay",azamRemitRedirectText:"Inaelekeza kwa malipo ya AzamPay...",btnAzamRemitHaveCode:"Umelipa tayari? Weka msimbo wako →",azampaySecured:"🔒 Imelindwa na AzamPay",
+    btnChangePlan:"← Badilisha mpango",btnHaveCode:"Una msimbo tayari →",
+    hcTitle:"Umelipa tayari?",hcSub:"Weka msimbo wako wa ufikiaji hapa chini na nitaanza mara moja.",hcCodeLabel:"Msimbo wako wa ufikiaji",btnHcSubmit:"👨‍🍳 Tuanze",btnBackPayment:"← Rudi kwa malipo",
+    successTitle:"Uko tayari!",successCodeLabel:"MSIMBO WAKO WA UFIKIAJI",btnOpenToolkit:"🚀 Fungua zana sasa",
+    tkRole:"Mwanachama wa timu ya maudhui ya mkahawa wako",btnSignout:"Toka",usageLabel:"Kazi mwezi huu:",upgradeMsg:"Mkude amekamilisha kazi zote za mwezi huu.",upgradeLink:"Boresha mpango →",promoBarText:"Jaribio la bure —",promoTasksLeft:"kazi zilizobaki",promoUpgradeLink:"Jiandikishe kwa zaidi →",
+    menuToolTitle:"Maelezo ya Menyu",menuMkudeSays:"Nipe jina la sahani na viungo — nitaandika maelezo yanayofanya wateja wako watake kula kabla ya kuagiza.",dishLabel:"Jina la sahani *",cuisineLabel:"Aina ya chakula",ingLabel:"Viungo vikuu",styleLabel:"Mtindo wa uandishi",priceLabel:"Bei (hiari)",langLabel:"Andika kwa",btnMenuText:"Andika maelezo haya",outMenuLabel:"Mkude aliandika hii",copyMenu:"Nakili",
+    socialToolTitle:"Machapisho ya Mitandao ya Kijamii",socialMkudeSays:"Niambie kinachoendelea katika mkahawa leo na nitaandika chapisho tayari kushirikiwa.",postTypeLabel:"Chapisho linahusu nini?",platformLabel:"Jukwaa",detailsLabel:"Niambie maelezo *",rnameLabel:"Jina la mkahawa (hiari)",slangLabel:"Andika kwa",btnSocialText:"Andika chapisho hili",outSocialLabel:"Mkude aliandika hii",copySocial:"Nakili",
+    reviewToolTitle:"Majibu ya Tathmini",reviewMkudeSays:"Weka tathmini na nitaandika jibu linaloosikika kama limetoka moja kwa moja kutoka kwa timu yako — joto, kitaalamu, na la kibinafsi.",reviewLabel:"Weka tathmini ya mteja *",starsLabel:"Ukadiriaji wa nyota",rtoneLabel:"Nisikike vipi?",rlangLabel:"Andika kwa",btnReviewText:"Andika jibu hili",outReviewLabel:"Mkude aliandika hii",copyReview:"Nakili",
+  }
+};
+
+function t(key){return TRANS[currentLang][key]||TRANS['en'][key]||key;}
+
+// ══ LANGUAGE TOGGLE ══════════════════════════════════════
+function toggleLang(){
+  currentLang=currentLang==='en'?'sw':'en';
+  document.getElementById('lang-toggle').textContent=currentLang==='en'?'🇹🇿 Swahili':'🇬🇧 English';
+  applyLang();
+}
+function applyLang(){
+  const L=TRANS[currentLang];
+  const s=(id,val)=>{const el=document.getElementById(id);if(el){if(val&&val.includes('<'))el.innerHTML=val;else if(val)el.textContent=val;}};
+  s('greeting-text',L.greeting);
+  s('hero-title',L.heroTitle);document.getElementById('hero-title').innerHTML=L.heroTitle;
+  s('hero-intro-text',L.heroIntro);document.getElementById('hero-intro-text').innerHTML=L.heroIntro;
+  s('btn-hero-promo',L.heroBtnPromo); s('btn-hero-sub',L.heroBtnSub);
+  s('feat-kicker',L.featKicker); document.getElementById('feat-title').innerHTML=L.featTitle;
+  s('f1-title',L.f1Title);s('f1-desc',L.f1Desc);s('f1-quote',L.f1Quote);
+  s('f2-title',L.f2Title);s('f2-desc',L.f2Desc);s('f2-quote',L.f2Quote);
+  s('f3-title',L.f3Title);s('f3-desc',L.f3Desc);s('f3-quote',L.f3Quote);
+  s('showcase-kicker',L.showcaseKicker);s('showcase-title',L.showcaseTitle);
+  s('team-kicker',L.teamKicker);s('team-title',L.teamTitle);s('team-sub',L.teamSub);
+  s('tc1-role',L.tc1Role);s('tc1-name',L.tc1Name);s('tc1-desc',L.tc1Desc);
+  s('tc2-role',L.tc2Role);s('tc2-name',L.tc2Name);s('tc2-desc',L.tc2Desc);
+  s('tc3-role',L.tc3Role);s('tc3-desc',L.tc3Desc);
+  s('mkude-quote',L.mkudeQuote);
+  s('pricing-kicker',L.pricingKicker);s('pricing-title',L.pricingTitle);s('pricing-sub',L.pricingSub);
+  s('pn-starter',L.pnStarter);s('pn-growth',L.pnGrowth);s('pn-premium',L.pnPremium);s('popular-badge',L.popularBadge);
+  s('pf1-starter',L.pf1s);s('pf2-starter',L.pf2s);s('pf3-starter',L.pf3s);s('pf4-starter',L.pf4s);
+  s('pf1-growth',L.pf1g);s('pf2-growth',L.pf2g);s('pf3-growth',L.pf3g);s('pf4-growth',L.pf4g);
+  s('pf1-premium',L.pf1p);s('pf2-premium',L.pf2p);s('pf3-premium',L.pf3p);s('pf4-premium',L.pf4p);
+  ['pp-starter','pp-growth','pp-premium'].forEach(id=>s(id,L.ppPeriod));
+  ['btn-starter','btn-growth','btn-premium'].forEach(id=>s(id,L.btnPlan));
+  document.getElementById('promo-banner-text').innerHTML=L.promoBannerText;
+  s('btn-promo-banner',L.btnPromoBanner);
+  // Modals
+  s('login-title',L.loginTitle);s('login-sub',L.loginSub);s('login-code-label',L.loginCodeLabel);s('btn-login',L.btnLogin);s('login-divider',L.loginDivider);s('btn-login-promo',L.btnLoginPromo);s('btn-login-sub',L.btnLoginSub);
+  s('promo-title',L.promoTitle);s('promo-sub',L.promoSub);s('promo-notice',L.promoNotice);s('promo-name-label',L.promoNameLabel);s('promo-email-label',L.promoEmailLabel);s('btn-promo',L.btnPromo);s('promo-note',L.promoNote);
+  s('promo-success-title',L.promoSuccessTitle);s('promo-success-sub',L.promoSuccessSub);s('promo-code-label',L.promoCodeLabel);s('promo-code-meta',L.promoCodeMeta);s('btn-use-promo',L.btnUsePromo);
+  document.getElementById('promo-upgrade-hint').innerHTML=L.promoUpgradeHint;
+  s('signup-title',L.signupTitle);s('signup-sub',L.signupSub);
+  s('ms-starter',L.msStarter);s('ms-starter-desc',L.msStarterDesc);s('ms-growth',L.msGrowth);s('ms-growth-desc',L.msGrowthDesc);s('ms-premium',L.msPremium);s('ms-premium-desc',L.msPremiumDesc);
+  s('email-label',L.emailLabel);s('btn-choose-payment',L.btnChoosePayment);
+  s('pay-title',L.payTitle);s('pay-plan-desc',L.payPlanDesc);
+  s('clickpesa-desc',L.clickpesaDesc);s('btn-clickpesa-text',L.btnClickpesaText);s('clickpesa-redirect-text',L.clickpesaRedirectText);s('btn-clickpesa-have-code',L.btnClickpesaHaveCode);s('clickpesa-secured',L.clickpesaSecured);
+  s('azampay-desc',L.azampayDesc);s('azam-local-label',L.azamLocalLabel);s('azam-remit-label',L.azamRemitLabel);s('azam-provider-label',L.azamProviderLabel);s('azam-phone-label',L.azamPhoneLabel);s('azam-phone-hint',L.azamPhoneHint);s('azam-amount-label',L.azamAmountLabel);s('btn-azampay-local-text',L.btnAzamLocalText);s('azam-check-phone',L.azamCheckPhone);s('azam-instructions',L.azamInstructions);s('btn-azam-already-paid',L.btnAzamAlreadyPaid);s('azam-remit-desc',L.azamRemitDesc);s('azam-remit-amount-label',L.azamRemitAmountLabel);s('btn-azampay-remit-text',L.btnAzamRemitText);s('azam-remit-redirect-text',L.azamRemitRedirectText);s('btn-azam-remit-have-code',L.btnAzamRemitHaveCode);s('azampay-secured',L.azampaySecured);
+  s('btn-change-plan',L.btnChangePlan);s('btn-have-code',L.btnHaveCode);
+  s('hc-title',L.hcTitle);s('hc-sub',L.hcSub);s('hc-code-label',L.hcCodeLabel);s('btn-hc-submit',L.btnHcSubmit);s('btn-back-payment',L.btnBackPayment);
+  s('success-title',L.successTitle);s('success-code-label',L.successCodeLabel);s('btn-open-toolkit',L.btnOpenToolkit);
+  // Toolkit
+  s('tk-role',L.tkRole);s('btn-signout',L.btnSignout);s('usage-label',L.usageLabel);s('upgrade-msg',L.upgradeMsg);s('upgrade-link',L.upgradeLink);s('promo-bar-text',L.promoBarText);s('promo-tasks-left',L.promoTasksLeft);s('promo-upgrade-link',L.promoUpgradeLink);
+  s('menu-tool-title',L.menuToolTitle);s('menu-mkude-says',L.menuMkudeSays);s('dish-label',L.dishLabel);s('cuisine-label',L.cuisineLabel);s('ing-label',L.ingLabel);s('style-label',L.styleLabel);s('price-label',L.priceLabel);s('lang-label',L.langLabel);s('btn-menu-text',L.btnMenuText);s('out-menu-label',L.outMenuLabel);s('copy-menu',L.copyMenu);
+  s('social-tool-title',L.socialToolTitle);s('social-mkude-says',L.socialMkudeSays);s('post-type-label',L.postTypeLabel);s('platform-label',L.platformLabel);s('details-label',L.detailsLabel);s('rname-label',L.rnameLabel);s('slang-label',L.slangLabel);s('btn-social-text',L.btnSocialText);s('out-social-label',L.outSocialLabel);s('copy-social',L.copySocial);
+  s('review-tool-title',L.reviewToolTitle);s('review-mkude-says',L.reviewMkudeSays);s('review-label',L.reviewLabel);s('stars-label',L.starsLabel);s('rtone-label',L.rtoneLabel);s('rlang-label',L.rlangLabel);s('btn-review-text',L.btnReviewText);s('out-review-label',L.outReviewLabel);s('copy-review',L.copyReview);
+  // Tab labels
+  s('tab-menu','📝 '+(currentLang==='sw'?'Menyu':'Menu'));
+  s('tab-social','📱 '+(currentLang==='sw'?'Kijamii':'Social'));
+  s('tab-review','⭐ '+(currentLang==='sw'?'Tathmini':'Reviews'));
+}
+
+// ══ SHOWCASE DATA ═════════════════════════════════════════
+const CUISINES=[
+  {flag:'🇹🇿',name:'Swahili',items:[{name:'Nyama Choma',desc:'Slow-grilled over open flame — tender, smoky, seasoned with coastal spices. Served with hand-rolled ugali and vibrant kachumbari.',price:'$12'},{name:'Wali wa Nazi',desc:'Fragrant rice slow-cooked in fresh coconut milk until each grain is plump and kissed with tropical sweetness.',price:'$10'}]},
+  {flag:'🇮🇹',name:'Italian',items:[{name:'Truffle Risotto',desc:'Arborio rice slowly coaxed into silky perfection with Parmigiano-Reggiano, finished with a generous shaving of black truffle.',price:'$24'}]},
+  {flag:'🇯🇵',name:'Japanese',items:[{name:'Wagyu Omakase',desc:'A curated journey of A5 Wagyu — lightly seared, raw, and cured — each celebrating extraordinary marbling.',price:'$85'}]},
+  {flag:'🇮🇳',name:'Indian',items:[{name:'Lamb Rogan Josh',desc:'Tender bone-in lamb shanks slow-braised in a royal Kashmiri masala of chilies, cardamom, and fennel.',price:'$22'}]},
+  {flag:'🇲🇽',name:'Mexican',items:[{name:'Mole Negro',desc:'Two days in the making — our Oaxacan mole negro weaves together twenty-seven ingredients including dark chocolate.',price:'$28'}]},
+  {flag:'🇱🇧',name:'Lebanese',items:[{name:'Mezze Platter',desc:'Hummus, smoky mutabal, tabbouleh, stuffed grape leaves, and warm pita from our wood oven.',price:'$16'}]},
+];
+const ALL_CUISINES=[{flag:'🇹🇿',name:'Swahili'},{flag:'🇮🇹',name:'Italian'},{flag:'🇯🇵',name:'Japanese'},{flag:'🇮🇳',name:'Indian'},{flag:'🇫🇷',name:'French'},{flag:'🇲🇽',name:'Mexican'},{flag:'🇹🇭',name:'Thai'},{flag:'🇨🇳',name:'Chinese'},{flag:'🇱🇧',name:'Lebanese'},{flag:'🇬🇷',name:'Greek'},{flag:'🇪🇸',name:'Spanish'},{flag:'🇧🇷',name:'Brazilian'},{flag:'🇲🇦',name:'Moroccan'},{flag:'🇪🇹',name:'Ethiopian'},{flag:'🇰🇷',name:'Korean'},{flag:'🇻🇳',name:'Vietnamese'},{flag:'🇵🇪',name:'Peruvian'},{flag:'🇩🇪',name:'German'}];
+
+function buildMarquee(){const el=document.getElementById('cuisine-scroll');el.innerHTML=[...ALL_CUISINES,...ALL_CUISINES].map(c=>`<div class="cuisine-chip"><span>${c.flag}</span>${c.name}</div>`).join('');}
+function buildShowcase(){
+  const tabs=document.getElementById('stabs'),demos=document.getElementById('showcase-demos');
+  CUISINES.forEach((c,i)=>{
+    const tb=document.createElement('button');tb.className='stab'+(i===0?' active':'');tb.textContent=c.flag+' '+c.name;
+    tb.onclick=()=>{document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.showcase-panel').forEach(d=>d.classList.remove('active'));tb.classList.add('active');document.getElementById('showcase-'+i).classList.add('active');};
+    tabs.appendChild(tb);
+    const div=document.createElement('div');div.className='showcase-panel'+(i===0?' active':'');div.id='showcase-'+i;
+    div.innerHTML=c.items.map(d=>`<div class="showcase-item"><div class="showcase-flag">${c.flag}</div><div><p class="showcase-name">${d.name}</p><p class="showcase-text">${d.desc}</p><p class="showcase-price">${d.price}</p></div></div>`).join('');
+    demos.appendChild(div);
+  });
+}
+
+// ══ PRICING ADMIN ═════════════════════════════════════════
+function loadPricingInputs(){
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v;};
+  ['starter','growth','premium'].forEach(p=>{
+    const P=p[0].toUpperCase()+p.slice(1);
+    set('price-usd-'+p,PRICING[P].usd);set('price-tzs-'+p,PRICING[P].tzs);
+    set('price-kes-'+p,PRICING[P].kes);set('limit-'+p,PRICING[P].limit);
+  });
+  const lp=document.getElementById('limit-promo');if(lp)lp.value=PRICING.Promo.limit;
+  const dp=document.getElementById('days-promo');if(dp)dp.value=PRICING.Promo.days;
+}
+function savePricing(){
+  const g=id=>parseFloat(document.getElementById(id)?.value)||0;
+  const gi=id=>parseInt(document.getElementById(id)?.value)||0;
+  PRICING={
+    Starter:{usd:g('price-usd-starter'),tzs:gi('price-tzs-starter'),kes:gi('price-kes-starter'),limit:gi('limit-starter'),days:30},
+    Growth: {usd:g('price-usd-growth'), tzs:gi('price-tzs-growth'), kes:gi('price-kes-growth'), limit:gi('limit-growth'), days:30},
+    Premium:{usd:g('price-usd-premium'),tzs:gi('price-tzs-premium'),kes:gi('price-kes-premium'),limit:gi('limit-premium'),days:30},
+    Promo:  {usd:0,tzs:0,kes:0,limit:gi('limit-promo'),days:gi('days-promo')},
+  };
+  try{localStorage.setItem(PKS,JSON.stringify(PRICING));}catch(e){}
+  updatePricingDisplay();
+  const st=document.getElementById('price-status');st.textContent='✅ Saved & applied';setTimeout(()=>st.textContent='',3000);
+}
+function updatePricingDisplay(){
+  const s=(id,v)=>{const el=document.getElementById(id);if(el)el.innerHTML=`<sup>$</sup>${v}`;};
+  s('price-starter',PRICING.Starter.usd);s('price-growth',PRICING.Growth.usd);s('price-premium',PRICING.Premium.usd);
+  const sm=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent='$'+v;};
+  sm('modal-price-starter',PRICING.Starter.usd);sm('modal-price-growth',PRICING.Growth.usd);sm('modal-price-premium',PRICING.Premium.usd);
+}
+async function pushPricingToWorker(){
+  if(!WORKER_URL||!ADMIN_TOKEN){alert('Connect your Worker first.');return;}
+  const st=document.getElementById('price-status');st.textContent='⏳ Pushing...';
+  try{await workerAdmin('/admin/pricing',PRICING);st.textContent='✅ Pushed to Worker!';}
+  catch(e){st.textContent='❌ '+e.message;}
+  setTimeout(()=>st.textContent='',5000);
+}
+
+// ══ MODALS ════════════════════════════════════════════════
+function openModal(type,plan){
+  if(plan)selectedPlan.name=plan;
+  if(type==='signup')initSignupModal();
+  if(type==='promo')initPromoModal();
+  document.getElementById('modal-'+type).classList.add('open');
+  if(type==='login')setTimeout(()=>document.getElementById('login-code').focus(),150);
+}
+function closeModal(type){document.getElementById('modal-'+type).classList.remove('open');}
+
+function switchPayTab(name,el){
+  const row = el.closest('.pay-tabs');
+  row.querySelectorAll('.pay-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('#step-payment > .pay-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');document.getElementById('pay-panel-'+name).classList.add('active');
+}
+
+function switchAzamMode(mode,el){
+  document.getElementById('azam-tab-local').classList.toggle('active',mode==='local');
+  document.getElementById('azam-tab-remit').classList.toggle('active',mode==='remit');
+  document.getElementById('azam-mode-local').style.display=mode==='local'?'block':'none';
+  document.getElementById('azam-mode-remit').style.display=mode==='remit'?'block':'none';
+}
+
+// == PROMO ====================================================
+function initPromoModal(){
+  document.getElementById('promo-step-form').style.display='block';
+  document.getElementById('promo-step-success').style.display='none';
+  document.getElementById('promo-err').style.display='none';
+}
+async function claimPromo(){
+  const name=document.getElementById('promo-name').value.trim();
+  const email=document.getElementById('promo-email').value.trim();
+  const err=document.getElementById('promo-err'),btn=document.getElementById('btn-promo');
+  err.style.display='none';
+  if(!name){err.textContent=currentLang==='sw'?'Tafadhali weka jina lako.':'Please enter your name.';err.style.display='block';return;}
+  if(!email||!email.includes('@')){err.textContent=currentLang==='sw'?'Tafadhali weka barua pepe sahihi.':'Please enter a valid email.';err.style.display='block';return;}
+  btn.disabled=true;btn.innerHTML='<div class="spinner-sm"></div>'+(currentLang==='sw'?'Sekunde moja...':'Just a moment...');
+  try{
+    const d=await workerFetch('/claim-promo',{method:'POST',body:JSON.stringify({email,name,deviceId:getDeviceId()})});
+    promoCodeVal=d.code;
+    document.getElementById('promo-code-val').textContent=d.code;
+    document.getElementById('promo-step-form').style.display='none';
+    document.getElementById('promo-step-success').style.display='block';
+  }catch(e){err.textContent='❌ '+e.message;err.style.display='block';}
+  btn.disabled=false;btn.textContent=t('btnPromo');
+}
+function usePromoCode(){if(promoCodeVal)loginWithCode(promoCodeVal);}
+
+// == SIGNUP ====================================================
+function selectPlan(el){
+  document.querySelectorAll('.plan-select-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');selectedPlan.name=el.dataset.plan;
+}
+function initSignupModal(){
+  showSignupStep('plan');
+  document.querySelectorAll('.plan-select-card').forEach(c=>c.classList.toggle('selected',c.dataset.plan===selectedPlan.name));
+  updatePricingDisplay();
+}
+function showSignupStep(s){['plan','payment','havecode','success'].forEach(n=>document.getElementById('step-'+n).style.display=n===s?'block':'none');}
+function goToPayment(){
+  const email=document.getElementById('signup-email').value.trim();
+  if(!email||!email.includes('@')){alert(currentLang==='sw'?'Tafadhali weka barua pepe yako.':'Please enter your email address.');return;}
+  signupEmail=email;
+  const p=PRICING[selectedPlan.name];
+  document.getElementById('pay-plan-name').textContent=selectedPlan.name+' Plan';
+  document.getElementById('pay-plan-price').textContent='$'+p.usd;
+  updatePaymentAmounts();
+  showSignupStep('payment');
+  // reset waiting states
+  ['clickpesa-waiting','azampay-waiting','azampay-remit-waiting'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  ['btn-clickpesa','btn-azampay-local','btn-azampay-remit'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.display='flex';
+  });
+}
+
+// == PRICING DISPLAY (TZS amounts) =============================
+function updatePaymentAmounts(){
+  const p=PRICING[selectedPlan.name];
+  if(!p)return;
+  const tzs='TZS '+p.tzs.toLocaleString();
+  const cp=document.getElementById('clickpesa-amount'); if(cp)cp.textContent=tzs;
+  const al=document.getElementById('azam-local-amount'); if(al)al.textContent=tzs;
+  const ar=document.getElementById('azam-remit-amount'); if(ar)ar.textContent=tzs;
+}
+
+// == CLICKPESA ==================================================
+async function doClickPesaPay(){
+  const errEl=document.getElementById('pay-err'),btn=document.getElementById('btn-clickpesa');
+  errEl.style.display='none';
+  btn.disabled=true;btn.innerHTML='<div class="spinner-sm"></div>'+(currentLang==='sw'?'Inaunda malipo...':'Creating checkout...');
+  try{
+    const d=await workerFetch('/clickpesa-create',{method:'POST',body:JSON.stringify({plan:selectedPlan.name,email:signupEmail,name:signupEmail})});
+    document.getElementById('clickpesa-waiting').style.display='block';btn.style.display='none';
+    window.open(d.checkoutUrl,'_blank');
+    setTimeout(()=>showSignupStep('havecode'),2500);
+  }catch(e){
+    errEl.textContent='❌ '+e.message;errEl.style.display='block';
+    btn.disabled=false;btn.innerHTML='📱 '+(currentLang==='sw'?'Lipa kwa ClickPesa':'Pay with ClickPesa');
+  }
+}
+
+// == AZAMPAY ====================================================
+async function doAzamPayLocal(){
+  let phone=document.getElementById('azam-phone').value.trim().replace(/\s/g,'');
+  const provider=document.getElementById('azam-provider').value;
+  const errEl=document.getElementById('pay-err'),btn=document.getElementById('btn-azampay-local');
+  errEl.style.display='none';
+  if(!phone){errEl.textContent=currentLang==='sw'?'Tafadhali weka nambari ya simu.':'Please enter your phone number.';errEl.style.display='block';return;}
+  if(phone.startsWith('0'))phone='255'+phone.slice(1);
+  if(!phone.startsWith('255')){errEl.textContent=currentLang==='sw'?'Weka msimbo wa nchi: 255.':'Include country code: 255.';errEl.style.display='block';return;}
+  if(phone.length<12){errEl.textContent=currentLang==='sw'?'Nambari ya simu si sahihi.':'Invalid phone number.';errEl.style.display='block';return;}
+  btn.disabled=true;btn.innerHTML='<div class="spinner-sm"></div>'+(currentLang==='sw'?'Inatuma ombi...':'Sending request...');
+  try{
+    await workerFetch('/azampay-create',{method:'POST',body:JSON.stringify({phone,provider,plan:selectedPlan.name,email:signupEmail,name:signupEmail,mode:'local'})});
+    document.getElementById('azampay-waiting').style.display='block';btn.style.display='none';
+  }catch(e){errEl.textContent='❌ '+e.message;errEl.style.display='block';btn.disabled=false;btn.innerHTML='📱 '+(currentLang==='sw'?'Tuma ombi la malipo':'Send payment request');}
+}
+
+async function doAzamPayRemit(){
+  const errEl=document.getElementById('pay-err'),btn=document.getElementById('btn-azampay-remit');
+  errEl.style.display='none';
+  btn.disabled=true;btn.innerHTML='<div class="spinner-sm"></div>'+(currentLang==='sw'?'Inaunda malipo...':'Creating checkout...');
+  try{
+    const d=await workerFetch('/azampay-create',{method:'POST',body:JSON.stringify({plan:selectedPlan.name,email:signupEmail,name:signupEmail,mode:'remittance'})});
+    document.getElementById('azampay-remit-waiting').style.display='block';btn.style.display='none';
+    if(d.checkoutUrl) window.open(d.checkoutUrl,'_blank');
+    setTimeout(()=>showSignupStep('havecode'),2500);
+  }catch(e){
+    errEl.textContent='❌ '+e.message;errEl.style.display='block';
+    btn.disabled=false;btn.innerHTML='🌍 '+(currentLang==='sw'?'Endelea kwa malipo ya AzamPay':'Continue to AzamPay checkout');
+  }
+}
+
+}
+
+function useHaveCode(){
+  const code=document.getElementById('hc-code').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const err=document.getElementById('hc-err');err.style.display='none';
+  if(!code){err.textContent=currentLang==='sw'?'Tafadhali weka msimbo wako.':'Please enter your access code.';err.style.display='block';return;}
+  closeModal('signup');loginWithCode(code);
+}
+
+// ══ LOGIN ═════════════════════════════════════════════════
+function loginWithCode(code){document.getElementById('login-code').value=code;openModal('login');setTimeout(()=>doLogin(),100);}
+async function doLogin(){
+  const code=document.getElementById('login-code').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const errEl=document.getElementById('login-err'),btn=document.getElementById('btn-login');
+  errEl.style.display='none';
+  if(!code){errEl.textContent=currentLang==='sw'?'Tafadhali weka msimbo wako.':'Please enter your access code.';errEl.style.display='block';return;}
+  loadWorkerCfg();
+  if(!WORKER_URL){
+    const DEMO={'DEMO1234':{plan:'Growth',client:'Demo Restaurant',email:'demo@test.com',daysLeft:30,used:5,limit:100,remaining:95,isPaid:true},'DEMOPROMO':{plan:'Promo',client:'Trial Restaurant',email:'trial@test.com',daysLeft:7,used:1,limit:3,remaining:2,isPaid:false},'ADMIN000':{plan:'Admin',client:'Admin',email:'admin@lefking.com',daysLeft:3650,used:0,limit:-1,remaining:-1,isPaid:true}};
+    if(DEMO[code]){currentUser={code,...DEMO[code]};try{sessionStorage.setItem(SKS,JSON.stringify({code}));}catch(e){}closeModal('login');launchToolkit();return;}
+    errEl.textContent=currentLang==='sw'?'Msimbo haukupatikana. Jaribu DEMO1234 au wasiliana naisi 0768 777 057.':'Code not found. Try DEMO1234 or contact 0768 777 057.';errEl.style.display='block';return;
+  }
+  btn.innerHTML='<div class="spinner-sm"></div>'+(currentLang==='sw'?'Inakagua...':'Checking...');btn.disabled=true;
+  try{
+    const d=await workerFetch('/validate',{method:'POST',body:JSON.stringify({code})});
+    currentUser={code,plan:d.plan,client:d.client,email:d.email||'',daysLeft:d.daysLeft,used:d.used,limit:d.limit,remaining:d.remaining,isPaid:d.isPaid};
+    try{sessionStorage.setItem(SKS,JSON.stringify({code}));}catch(e){}
+    closeModal('login');launchToolkit();
+  }catch(e){errEl.textContent='❌ '+e.message;errEl.style.display='block';}
+  btn.textContent=t('btnLogin');btn.disabled=false;
+}
+
+// ══ LAUNCH / SIGNOUT ══════════════════════════════════════
+function launchToolkit(){
+  document.getElementById('main-nav').style.display='none';
+  document.getElementById('landing-wrap').style.display='none';
+  document.getElementById('toolkit').style.display='block';
+  window.scrollTo(0,0);
+  const dl=currentUser.daysLeft||30,isPromo=currentUser.plan==='Promo';
+  const pb=document.getElementById('tk-plan');
+  pb.textContent=currentUser.plan+(currentUser.client?' · '+currentUser.client:'');
+  pb.className='tk-badge '+(isPromo?'plan-promo':'plan-paid');
+  const eb=document.getElementById('tk-exp');
+  if(dl<=3){eb.textContent='⚠️ '+dl+'d';eb.className='tk-badge exp-warn';}
+  else if(dl<=7){eb.textContent='⚠️ '+dl+' days';eb.className='tk-badge exp-warn';}
+  else{eb.textContent='✅ '+dl+' days';eb.className='tk-badge exp-ok';}
+  if(currentUser.plan==='Admin'){document.getElementById('admin-tab').style.display='inline-block';loadWorkerCfg();loadPricingInputs();}
+  document.getElementById('promo-notice-bar').style.display=isPromo?'flex':'none';
+  if(isPromo)document.getElementById('promo-gens-left').textContent=currentUser.remaining;
+  updateUsageBar();
+  const msgs=currentLang==='sw'
+    ?['Karibu tena! Niambie unahitaji nini na nitashughulikia uandishi.','Niko tayari! Leo nifanye nini kwa mkahawa?']
+    :['Good to see you! Tell me what you need and I\'ll handle the writing. 🍽️','Ready when you are! What shall I write for the restaurant today?','Hello! Give me a dish or a post idea and I\'ll get started right away.'];
+  document.getElementById('mkude-speaking-text').innerHTML='<b>Mkude:</b> '+msgs[Math.floor(Math.random()*msgs.length)];
+  document.querySelectorAll('.output-wrap').forEach(el=>el.style.display='none');
+  document.querySelectorAll('.tk-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tk-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.tk-tab').classList.add('active');
+  document.getElementById('tk-panel-menu').classList.add('active');
+}
+
+function doSignOut(){
+  currentUser=null;promoCodeVal='';signupEmail='';allCodes={};
+  try{sessionStorage.removeItem(SKS);}catch(e){}
+  document.querySelectorAll('.output-wrap').forEach(el=>el.style.display='none');
+  document.querySelectorAll('.tk-tab').forEach(tt=>tt.classList.remove('active'));
+  document.querySelectorAll('.tk-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('admin-tab').style.display='none';
+  document.getElementById('usage-bar').style.display='none';
+  document.getElementById('upgrade-bar').style.display='none';
+  document.getElementById('promo-notice-bar').style.display='none';
+  document.getElementById('login-code').value='';
+  document.getElementById('login-err').style.display='none';
+  document.querySelector('.tk-tab').classList.add('active');
+  document.getElementById('tk-panel-menu').classList.add('active');
+  document.getElementById('main-nav').style.display='flex';
+  document.getElementById('toolkit').style.display='none';
+  document.getElementById('landing-wrap').style.display='block';
+  window.scrollTo(0,0);
+}
+
+// ══ USAGE BAR ════════════════════════════════════════════
+function updateUsageBar(){
+  if(!currentUser)return;
+  const{limit,used,remaining,plan}=currentUser;
+  const bar=document.getElementById('usage-bar'),strip=document.getElementById('upgrade-bar');
+  if(limit===-1){bar.style.display='none';strip.style.display='none';return;}
+  bar.style.display='flex';
+  const pct=Math.min(100,Math.round(used/limit*100));
+  const fill=document.getElementById('usage-fill');
+  fill.style.width=pct+'%';fill.className='usage-fill '+(pct>=100?'uf-full':pct>=80?'uf-warn':'uf-ok');
+  document.getElementById('usage-count').textContent=used+'/'+limit;
+  if(remaining<=0){
+    strip.style.display='flex';document.querySelectorAll('.btn-generate').forEach(b=>b.disabled=true);
+    document.getElementById('mkude-speaking-text').innerHTML='<b>Mkude:</b> '+(currentLang==='sw'?'Nimetumia kazi zangu zote mwezi huu! Boresha mpango wako na nitarudi kufanya kazi mara moja.':'I\'ve used all my tasks this month! Upgrade your plan and I\'ll get straight back to work.');
+  }else{strip.style.display='none';document.querySelectorAll('.btn-generate').forEach(b=>b.disabled=false);}
+  if(plan==='Promo')document.getElementById('promo-gens-left').textContent=remaining;
+}
+
+// ══ TABS ══════════════════════════════════════════════════
+function switchTab(name,el){
+  if(name==='admin'&&currentUser?.plan!=='Admin'){alert(currentLang==='sw'?'Unahitaji ruhusa ya msimamizi.':'Admin access required.');return;}
+  document.querySelectorAll('.tk-tab').forEach(tt=>tt.classList.remove('active'));
+  document.querySelectorAll('.tk-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');document.getElementById('tk-panel-'+name).classList.add('active');
+  if(name==='admin'){loadWorkerCfg();loadAdminData();loadPricingInputs();}
+}
+
+// ══ GENERATE ══════════════════════════════════════════════
+async function generate(type){
+  if(!currentUser)return;
+  if(currentUser.remaining===0&&currentUser.limit!==-1){
+    document.getElementById('mkude-speaking-text').innerHTML='<b>Mkude:</b> '+(currentLang==='sw'?'Nimetumia kazi zangu zote! Tafadhali boresha mpango wako.':'I\'ve used all my tasks! Please upgrade your plan.');return;
+  }
+  let prompt='';
+  if(type==='menu'){
+    const dish=document.getElementById('m-dish').value.trim();
+    if(!dish){alert(currentLang==='sw'?'Tafadhali weka jina la sahani.':'Please enter a dish name.');return;}
+    const lang=document.getElementById('m-lang').value;
+    prompt=`Write a ${document.getElementById('m-tone').value} menu description for a ${document.getElementById('m-cuisine').value} cuisine restaurant dish called "${dish}".${document.getElementById('m-ing').value.trim()?' Key ingredients: '+document.getElementById('m-ing').value.trim()+'.':''} ${document.getElementById('m-price').value.trim()?'Price: '+document.getElementById('m-price').value.trim()+'.':''} Write 2-3 appetizing sentences only. No headers or bullets. ${lang!=='English'?'Write in '+lang+' language.':''} Output the description only.`;
+  }else if(type==='social'){
+    const ctx=document.getElementById('s-context').value.trim();
+    if(!ctx){alert(currentLang==='sw'?'Tafadhali niambie chapisho linahusu nini.':'Please describe the post.');return;}
+    const lang=document.getElementById('s-lang').value;
+    prompt=`Write a ${document.getElementById('s-platform').value} caption for a restaurant. Post type: ${document.getElementById('s-type').value}. Details: ${ctx}.${document.getElementById('s-rname').value.trim()?' Restaurant: '+document.getElementById('s-rname').value.trim()+'.':''} Include relevant emojis and 3-5 hashtags. Sound authentic. ${lang!=='English'?'Write in '+lang+' language.':''} Output only the caption.`;
+  }else{
+    const rev=document.getElementById('r-review').value.trim();
+    if(!rev){alert(currentLang==='sw'?'Tafadhali weka tathmini ya mteja.':'Please paste the customer review.');return;}
+    const stars=document.getElementById('r-stars').value,lang=document.getElementById('r-lang').value;
+    prompt=`Write a ${document.getElementById('r-tone').value} reply to this ${stars}-star restaurant review: "${rev}". 2-4 sentences. Sound human and genuine — not a template.${parseInt(stars)<=3?' Acknowledge the issue with empathy and offer to make it right.':' Express genuine gratitude.'} ${lang!=='English'?'Write in '+lang+' language.':''} Output the reply only.`;
+  }
+  const btn=document.getElementById('btn-'+type),outCard=document.getElementById('out-'+type),outText=document.getElementById('out-'+type+'-text'),orig=btn.innerHTML;
+  btn.disabled=true;
+  const working=currentLang==='sw'?['Inaandika... 📝','Sekunde moja...','Inafanya kazi...']:['Writing now... 📝','Working on it — just a moment...','On it...'];
+  document.getElementById('mkude-speaking-text').innerHTML='<b>Mkude:</b> '+working[Math.floor(Math.random()*working.length)];
+  btn.innerHTML='<div class="spinner"></div> '+(currentLang==='sw'?'Inaandika...':'Writing...');
+  outCard.style.display='none';
+  try{
+    let text='';
+    if(WORKER_URL){const d=await workerFetch('/generate',{method:'POST',body:JSON.stringify({code:currentUser.code,prompt})});text=d.text;}
+    else{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:prompt}]})});if(!res.ok)throw new Error('Writing service unavailable.');const d=await res.json();text=d.content.map(b=>b.text||'').join('').trim();}
+    outText.textContent=text;
+    outCard.style.background='var(--green3)';outCard.style.border='1px solid rgba(26,107,74,.15)';
+    outCard.style.display='block';
+    if(currentUser.limit!==-1){currentUser.used++;currentUser.remaining=Math.max(0,currentUser.remaining-1);updateUsageBar();}
+    const done=currentLang==='sw'?['Imekamilika! Nakili ukiwa tayari. 👍','Hapa ipo! Unaweza kuitumia mara moja.']:['Done! Copy it when you\'re happy. 👍','Here you go! Ready to use straight away.','All done — copy it when you\'re ready. 🍽️'];
+    document.getElementById('mkude-speaking-text').innerHTML='<b>Mkude:</b> '+done[Math.floor(Math.random()*done.length)];
+  }catch(e){
+    outText.textContent=(currentLang==='sw'?'Samahani, sikuweza kukamilisha kazi hiyo sasa hivi. Tafadhali jaribu tena.\n\nMaelezo: ':'Sorry, I couldn\'t complete that task right now. Please try again.\n\nDetails: ')+e.message;
+    outCard.style.background='#fff0f0';outCard.style.border='1px solid #fca5a5';outCard.style.display='block';
+    document.getElementById('mkude-speaking-text').innerHTML='<b>Mkude:</b> '+(currentLang==='sw'?'Samahani — nimekutana na tatizo. Tafadhali jaribu tena baadaye.':'Apologies — I ran into a problem. Please try again in a moment.');
+  }
+  btn.disabled=false;btn.innerHTML=orig;
+}
+function copyOut(id,btn){navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>{btn.textContent='✓ '+(currentLang==='sw'?'Imenakiliwa!':'Copied!');setTimeout(()=>btn.textContent=currentLang==='sw'?'Nakili':'Copy',1800);});}
+function copyEl(id,btn){navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>{btn.textContent='✓';setTimeout(()=>btn.textContent='📋 Copy',1800);});}
+
+// ══ WORKER ════════════════════════════════════════════════
+function loadWorkerCfg(){
+  try{WORKER_URL=sessionStorage.getItem(WK)||'';ADMIN_TOKEN=sessionStorage.getItem(AT)||'';}catch(e){}
+  const wu=document.getElementById('worker-url');if(wu)wu.value=WORKER_URL;
+  const at=document.getElementById('admin-token');if(at)at.value=ADMIN_TOKEN;
+}
+function saveWorkerCfg(){
+  WORKER_URL=document.getElementById('worker-url')?.value.trim()||'';
+  ADMIN_TOKEN=document.getElementById('admin-token')?.value.trim()||'';
+  try{sessionStorage.setItem(WK,WORKER_URL);sessionStorage.setItem(AT,ADMIN_TOKEN);}catch(e){}
+}
+async function workerFetch(path,opts={}){
+  if(!WORKER_URL)throw new Error(currentLang==='sw'?'Worker haijasanidiwa.':'Worker not configured.');
+  const res=await fetch(WORKER_URL.replace(/\/$/,'')+path,{...opts,headers:{'Content-Type':'application/json',...(opts.headers||{})}});
+  const d=await res.json().catch(()=>({error:'Unexpected response'}));
+  if(!res.ok)throw new Error(d.error||'Error '+res.status);
+  return d;
+}
+async function workerAdmin(path,body=null){
+  if(!ADMIN_TOKEN)throw new Error('Admin token not set.');
+  return workerFetch(path,{method:body?'POST':'GET',headers:{'X-Admin-Token':ADMIN_TOKEN},...(body?{body:JSON.stringify(body)}:{})});
+}
+async function testWorker(){
+  const b=document.getElementById('worker-status');b.textContent='⏳ Testing...';b.style.color='';
+  try{const d=await workerFetch('/health');if(d.status==='ok'){b.textContent='✅ Connected v'+d.version;b.style.color='var(--green)';loadAdminData();}else throw new Error();}
+  catch(e){b.textContent='❌ Failed';b.style.color='var(--red)';alert('Connection failed: '+e.message);}
+}
+
+// ══ ADMIN ═════════════════════════════════════════════════
+const tod=()=>new Date();
+const fmtD=d=>d.toISOString().split('T')[0];
+const addD=(d,n)=>{const r=new Date(d);r.setDate(r.getDate()+n);return r;};
+const dleft=e=>Math.ceil((new Date(e)-tod())/86400000);
+const isExpD=e=>dleft(e)<=0;
+
+async function loadAdminData(){
+  if(currentUser?.plan!=='Admin')return;
+  try{
+    const data=await workerAdmin('/admin/codes');allCodes=data.codes||{};
+    const{stats}=data,all=Object.entries(allCodes).filter(([,d])=>d.plan!=='Admin');
+    const active=all.filter(([,d])=>d.active&&!isExpD(d.expiry)).length;
+    const exp=all.filter(([,d])=>d.active&&!isExpD(d.expiry)&&dleft(d.expiry)<=7).length;
+    document.getElementById('stats-grid').innerHTML=`
+      <div class="stat-box"><div class="stat-num">${all.length}</div><div class="stat-lbl">Restaurants</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--green)">${active}</div><div class="stat-lbl">Active</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--amber)">${exp}</div><div class="stat-lbl">Renewing soon</div></div>
+      <div class="stat-box"><div class="stat-num" style="color:var(--green2)">${stats?.totalGen||0}</div><div class="stat-lbl">Tasks done</div></div>
+      <div class="stat-box"><div class="stat-num" style="font-size:14px">$${stats?.mrr||0}</div><div class="stat-lbl">Monthly</div></div>`;
+    renderTable(allCodes);
+  }catch(e){document.getElementById('stats-grid').innerHTML=`<div style="color:var(--red);font-size:12px;padding:.5rem;">${e.message}</div>`;}
+}
+function renderTable(codes){
+  const q=(document.getElementById('admin-search')?.value||'').toLowerCase();
+  const tbody=document.getElementById('code-tbody');tbody.innerHTML='';
+  const entries=Object.entries(codes).filter(([,d])=>d.plan!=='Admin')
+    .filter(([c,d])=>!q||c.toLowerCase().includes(q)||(d.client||'').toLowerCase().includes(q)||(d.email||'').toLowerCase().includes(q)||d.plan.toLowerCase().includes(q))
+    .sort((a,b)=>new Date(b[1].expiry)-new Date(a[1].expiry));
+  if(!entries.length){tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:1.5rem;">No restaurants found</td></tr>';return;}
+  entries.forEach(([code,d])=>{
+    const dl=dleft(d.expiry),dead=!d.active||dl<=0,warn=!dead&&dl<=7;
+    const sc=dead?'s-dead':warn?'s-warn':'s-active';
+    const st=!d.active?'Inactive':dead?'Expired':warn?`⚠️ ${dl}d`:'Active';
+    const lim=d.limit??30,used=d.used||0,pct=lim===-1?0:Math.min(100,Math.round(used/lim*100));
+    const bc=pct>=100?'#dc2626':pct>=80?'#f59e0b':'var(--green2)';
+    const isP=d.plan==='Promo';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-family:monospace;font-weight:700;font-size:11px;letter-spacing:.04em">${code}</td>
+      <td><span style="font-size:11px;padding:2px 7px;border-radius:99px;background:${isP?'#fffbeb':'var(--green3)'};color:${isP?'var(--amber)':'var(--green)'};">${d.plan}</span></td>
+      <td style="font-size:12px">${d.client||'—'}</td>
+      <td style="font-size:11px;color:var(--muted);max-width:130px;overflow:hidden;text-overflow:ellipsis;">${d.email||'—'}</td>
+      <td style="font-size:11px">${d.expiry}<br><span class="${sc}" style="font-size:10px;">${dead?'Expired':dl+' days'}</span></td>
+      <td style="font-size:11px">${lim===-1?used+'/∞':used+'/'+lim}${lim!==-1?`<br><div style="width:44px;height:3px;background:var(--pale);border-radius:99px;margin-top:2px"><div style="width:${pct}%;height:100%;background:${bc};border-radius:99px"></div></div>`:''}
+      </td><td class="${sc}" style="font-size:11px;">${st}</td>
+      <td>${!dead?`<button class="act-btn act-revoke" onclick="adminRevoke('${code}')">Remove</button>`:''}
+        <button class="act-btn act-renew" onclick="adminRenew('${code}')">Renew</button>
+        <button class="act-btn act-copy" onclick="copyTxt('${code}')">Copy</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function filterTable(){renderTable(allCodes);}
+async function adminGenCode(){
+  const plan=document.getElementById('gen-plan').value,client=document.getElementById('gen-client').value.trim(),
+    email=document.getElementById('gen-email').value.trim(),days=parseInt(document.getElementById('gen-days').value)||30;
+  if(!client){alert('Please enter the restaurant name.');return;}
+  try{
+    const d=await workerAdmin('/admin/generate',{plan,client,days,email});
+    document.getElementById('gen-code-val').textContent=d.code;
+    document.getElementById('gen-code-meta').innerHTML=`<b>${d.plan}</b> · <b>${d.client}</b>${email?' · '+email:''}<br>Valid until <b>${d.expiry}</b>`;
+    document.getElementById('gen-out').style.display='block';
+    const msg=encodeURIComponent(`Hi ${d.client} 👋\n\nMsimbo wako wa Mkude:\n\n🔑 *${d.code}*\n\nMpango: ${d.plan}\nHalali hadi: ${d.expiry}\n\nhttps://mkude.com\n\n— Lefking Enterprise`);
+    document.getElementById('wa-code-link').href=`https://wa.me/?text=${msg}`;
+    if(email)document.getElementById('email-code-link').href=`mailto:${email}?subject=Msimbo wako wa Mkude&body=Hi ${d.client},%0A%0AMsimbo: ${d.code}%0AMpango: ${d.plan}%0AHalali hadi: ${d.expiry}%0A%0Ahttps://mkude.com%0A%0A— Lefking Enterprise`;
+    loadAdminData();
+  }catch(e){alert('Error: '+e.message);}
+}
+async function adminRevoke(code){if(!confirm('Remove access for '+code+'?'))return;try{await workerAdmin('/admin/revoke',{code});loadAdminData();}catch(e){alert('Error: '+e.message);}}
+async function adminRenew(code){const d=parseInt(prompt('Renew for how many days?','30'))||30;try{const r=await workerAdmin('/admin/renew',{code,days:d});alert('✅ '+r.message);loadAdminData();}catch(e){alert('Error: '+e.message);}}
+function copyTxt(tx){navigator.clipboard.writeText(tx).then(()=>alert('Copied: '+tx));}
+function exportCSV(){
+  const entries=Object.entries(allCodes).filter(([,d])=>d.plan!=='Admin');
+  let csv='Code,Plan,Restaurant,Email,Expiry,Tasks Used,Active\n';
+  entries.forEach(([code,d])=>{csv+=`${code},${d.plan},"${(d.client||'').replace(/"/g,'""')}","${(d.email||'').replace(/"/g,'""')}",${d.expiry},${d.used||0},${d.active}\n`;});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`mkude_${fmtD(tod())}.csv`;a.click();
+}
+
+// ══ INIT ══════════════════════════════════════════════════
+async function init(){
+  buildMarquee();buildShowcase();loadWorkerCfg();
+
+  // Sync live pricing from Worker on every page load (cross-device pricing fix)
+  if(WORKER_URL){
+    try{
+      const res=await fetch(WORKER_URL.replace(/\/$/,'')+'/config/pricing');
+      if(res.ok){
+        const d=await res.json();
+        if(d.success&&d.pricing){
+          PRICING=d.pricing;
+          try{localStorage.setItem(PKS,JSON.stringify(PRICING));}catch(e){}
+        }
+      }
+    }catch(e){console.warn('Could not sync pricing from Worker:',e.message);}
+  }
+
+  updatePricingDisplay();
+  try{
+    const s=sessionStorage.getItem(SKS);
+    if(s){
+      const{code}=JSON.parse(s);
+      if(WORKER_URL){const d=await workerFetch('/validate',{method:'POST',body:JSON.stringify({code})});currentUser={code,plan:d.plan,client:d.client,email:d.email||'',daysLeft:d.daysLeft,used:d.used,limit:d.limit,remaining:d.remaining,isPaid:d.isPaid};launchToolkit();return;}
+      else{const DEMO={'DEMO1234':{plan:'Growth',client:'Demo Restaurant',email:'demo@test.com',daysLeft:30,used:5,limit:100,remaining:95,isPaid:true},'DEMOPROMO':{plan:'Promo',client:'Trial Restaurant',email:'trial@test.com',daysLeft:7,used:1,limit:3,remaining:2,isPaid:false},'ADMIN000':{plan:'Admin',client:'Admin',email:'admin@lefking.com',daysLeft:3650,used:0,limit:-1,remaining:-1,isPaid:true}};
+      if(DEMO[code]){currentUser={code,...DEMO[code]};launchToolkit();return;}}
+    }
+  }catch(e){try{sessionStorage.removeItem(SKS);}catch(ex){}}
+}
+window.onload=init;
+</script>
+</body>
+</html>
