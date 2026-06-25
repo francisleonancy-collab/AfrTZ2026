@@ -711,35 +711,80 @@
 
   <!-- ADMIN -->
   <div id="app-panel-admin" class="app-panel">
-    <div class="admin-card">
-      <p class="admin-card-title">📊 Dashboard</p>
-      <div class="stats-row" id="stats-row"></div>
+    <div class="app-tabs" style="padding:0; margin-bottom:1.5rem; background:var(--cream); border-radius:var(--r);">
+      <button class="app-tab active" onclick="switchAdminTab('codes',this)">🔑 Access Codes</button>
+      <button class="app-tab" onclick="switchAdminTab('ai',this)">🧠 AI Center</button>
     </div>
-    <div class="admin-card">
-      <p class="admin-card-title">⚡ Generate Access Code</p>
-      <div class="gen-form">
-        <div class="field"><label>Plan</label>
-          <select id="gen-plan"><option value="Starter">Starter — TSh 30k (30 gen)</option><option value="Growth">Growth — TSh 60k (100 gen)</option><option value="Premium">Premium — TSh 100k (Unlimited)</option><option value="Promo">Promo — Free (10 gen)</option></select>
-        </div>
-        <div class="field"><label>Client name</label><input type="text" id="gen-client" placeholder="e.g. Mama Jiko"/></div>
-        <div class="field"><label>Days valid</label>
-          <select id="gen-days"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option></select>
-        </div>
-        <button class="btn-gen-code" onclick="generateCode()">Generate</button>
+
+    <!-- ACCESS CODES SUB-PANEL -->
+    <div id="admin-panel-codes" class="admin-sub-panel active">
+      <div class="admin-card">
+        <p class="admin-card-title">📊 Dashboard</p>
+        <div class="stats-row" id="stats-row"></div>
       </div>
-      <div class="gen-out" id="gen-out">
-        <div class="gen-code-val" id="gen-code-val"></div>
-        <div class="gen-code-meta" id="gen-code-meta"></div>
-        <button class="btn-copy" onclick="copyGenCode()" style="margin-top:8px;">📋 Copy code</button>
-        <a id="wa-code-link" href="#" target="_blank" class="wa-btn">💬 Send via WhatsApp</a>
+      <div class="admin-card">
+        <p class="admin-card-title">⚡ Generate Access Code</p>
+        <div class="gen-form">
+          <div class="field"><label>Plan</label>
+            <select id="gen-plan"><option value="Starter">Starter — TSh 30k (30 gen)</option><option value="Growth">Growth — TSh 60k (100 gen)</option><option value="Premium">Premium — TSh 100k (Unlimited)</option><option value="Promo">Promo — Free (10 gen)</option></select>
+          </div>
+          <div class="field"><label>Client name</label><input type="text" id="gen-client" placeholder="e.g. Mama Jiko"/></div>
+          <div class="field"><label>Days valid</label>
+            <select id="gen-days"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option></select>
+          </div>
+          <button class="btn-gen-code" onclick="generateCode()">Generate</button>
+        </div>
+        <div class="gen-out" id="gen-out">
+          <div class="gen-code-val" id="gen-code-val"></div>
+          <div class="gen-code-meta" id="gen-code-meta"></div>
+          <button class="btn-copy" onclick="copyGenCode()" style="margin-top:8px;">📋 Copy code</button>
+          <a id="wa-code-link" href="#" target="_blank" class="wa-btn">💬 Send via WhatsApp</a>
+        </div>
+      </div>
+      <div class="admin-card">
+        <p class="admin-card-title">🔑 All Access Codes</p>
+        <table class="code-table">
+          <thead><tr><th>Code</th><th>Plan</th><th>Client</th><th>Expiry</th><th>Used</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="code-tbody"></tbody>
+        </table>
       </div>
     </div>
-    <div class="admin-card">
-      <p class="admin-card-title">🔑 All Access Codes</p>
-      <table class="code-table">
-        <thead><tr><th>Code</th><th>Plan</th><th>Client</th><th>Expiry</th><th>Used</th><th>Status</th><th>Actions</th></tr></thead>
-        <tbody id="code-tbody"></tbody>
-      </table>
+
+    <!-- AI CENTER SUB-PANEL -->
+    <div id="admin-panel-ai" class="admin-sub-panel" style="display:none">
+      <div id="ai-admin-auth" style="display:none;" class="admin-card">
+        <p class="admin-card-title">🔐 Admin Authentication Required</p>
+        <div class="field">
+          <label>Admin Token</label>
+          <input type="password" id="admin-token-input" placeholder="Enter ADMIN_TOKEN"/>
+        </div>
+        <button class="btn-gen-code" onclick="saveAdminToken()">Authenticate</button>
+      </div>
+
+      <div id="ai-center-content">
+        <div class="admin-card">
+          <p class="admin-card-title">🚀 AI Performance (Last 24h)</p>
+          <div class="stats-row">
+            <div class="stat-box"><div class="stat-num" id="ai-total-reqs">0</div><div class="stat-label">Requests</div></div>
+            <div class="stat-box"><div class="stat-num" id="ai-avg-latency">0ms</div><div class="stat-label">Avg Latency</div></div>
+            <div class="stat-box"><div class="stat-num" id="ai-avg-quality">0%</div><div class="stat-label">Quality Score</div></div>
+            <div class="stat-box"><div class="stat-num" id="ai-total-cost">$0.00</div><div class="stat-label">Total Cost</div></div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <p class="admin-card-title">💰 Cost by Module</p>
+          <div id="ai-module-costs" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+
+        <div class="admin-card">
+          <p class="admin-card-title">📝 Prompt Registry</p>
+          <table class="code-table">
+            <thead><tr><th>Module</th><th>Name</th><th>Version</th><th>Prompt Snippet</th></tr></thead>
+            <tbody id="ai-prompts-tbody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1554,6 +1599,81 @@ function copyGenCode(){navigator.clipboard.writeText(document.getElementById('ge
 function revokeCode(code){if(confirm('Deactivate '+code+'?')){CODES[code].active=false;renderAdmin();}}
 function renewCode(code){const d=parseInt(prompt('Renew for how many days?','30'))||30;CODES[code].expiry=fmtDate(addDays(today(),d));CODES[code].active=true;CODES[code].used=0;alert('Renewed! Usage reset to 0.');renderAdmin();}
 function copyCode(code){navigator.clipboard.writeText(code).then(()=>alert('Copied: '+code));}
+
+function switchAdminTab(name, el) {
+  const admin = document.getElementById('app-panel-admin');
+  admin.querySelectorAll('.app-tab').forEach(t=>t.classList.remove('active'));
+  admin.querySelectorAll('.admin-sub-panel').forEach(p=>p.style.display='none');
+  el.classList.add('active');
+  document.getElementById('admin-panel-'+name).style.display='block';
+  if (name === 'ai') renderAICenter();
+}
+
+let ADMIN_TOKEN = localStorage.getItem('RCS_ADMIN_TOKEN') || '';
+
+function saveAdminToken() {
+  const token = document.getElementById('admin-token-input').value.trim();
+  if(!token) return;
+  ADMIN_TOKEN = token;
+  localStorage.setItem('RCS_ADMIN_TOKEN', token);
+  renderAICenter();
+}
+
+async function renderAICenter() {
+  if(!ADMIN_TOKEN) {
+    document.getElementById('ai-admin-auth').style.display = 'block';
+    document.getElementById('ai-center-content').style.display = 'none';
+    return;
+  }
+  document.getElementById('ai-admin-auth').style.display = 'none';
+  document.getElementById('ai-center-content').style.display = 'block';
+
+  try {
+    const headers = { 'X-Admin-Token': ADMIN_TOKEN };
+    const baseUrl = (WORKER_URL||'').replace(/\/$/, '');
+
+    // 1. Stats
+    const statsRes = await fetch(baseUrl + '/api/ai/analytics', { headers });
+    if(statsRes.ok) {
+      const data = await statsRes.json();
+      const a = data.analytics;
+      document.getElementById('ai-total-reqs').textContent = a.requests;
+      document.getElementById('ai-avg-latency').textContent = Math.round(a.latency) + 'ms';
+      document.getElementById('ai-avg-quality').textContent = Math.round(a.quality * 100) + '%';
+      document.getElementById('ai-total-cost').textContent = '$' + a.cost.toFixed(4);
+    }
+
+    // 2. Costs
+    const costRes = await fetch(baseUrl + '/api/ai/costs', { headers });
+    if(costRes.ok) {
+      const data = await costRes.json();
+      const list = document.getElementById('ai-module-costs');
+      list.innerHTML = data.costs.map(c => `
+        <div style="display:flex; justify-content:space-between; font-size:12px; padding:6px; background:var(--cream); border-radius:6px;">
+          <span><strong>${c.module_name}</strong> (${c.tokens} tokens)</span>
+          <span>$${c.cost.toFixed(4)}</span>
+        </div>
+      `).join('');
+    }
+
+    // 3. Prompts
+    const promptRes = await fetch(baseUrl + '/api/ai/prompts', { headers });
+    if(promptRes.ok) {
+      const data = await promptRes.json();
+      const tbody = document.getElementById('ai-prompts-tbody');
+      tbody.innerHTML = data.prompts.map(p => `
+        <tr>
+          <td>${p.module_name}</td>
+          <td>${p.prompt_name}</td>
+          <td>v${p.version_number}</td>
+          <td style="color:var(--tl)">${p.prompt_content.substring(0, 40)}...</td>
+        </tr>
+      `).join('');
+    }
+  } catch(e) {
+    console.error('AI Center error:', e);
+  }
+}
 
 function renderAdmin(){
   const all=Object.entries(CODES).filter(([,d])=>d.plan!=='Admin');

@@ -56,6 +56,12 @@ export default {
       if (path==='/api/insights/generate'   && req.method==='POST') return handleGenerateInsights(req,env);
       if (path==='/api/insights'         && req.method==='GET')  return handleGetInsights(req,env);
       if (path.startsWith('/api/insights/') && req.method==='GET') return handleGetInsightById(req,env);
+      // AI Optimization (Sprint 6)
+      if (path==='/api/ai/prompts'       && req.method==='GET')  return handleGetPrompts(req,env);
+      if (path==='/api/ai/prompts'       && req.method==='POST') return handleCreatePrompt(req,env);
+      if (path==='/api/ai/evaluate'      && req.method==='POST') return handleEvaluateAI(req,env);
+      if (path==='/api/ai/analytics'     && req.method==='GET')  return handleGetAIAnalytics(req,env);
+      if (path==='/api/ai/costs'         && req.method==='GET')  return handleGetAICosts(req,env);
       // Payments
       if (path==='/clickpesa-create'     && req.method==='POST') return handleClickPesaCreate(req,env);
       if (path==='/clickpesa-callback'   && req.method==='POST') return handleClickPesaCallback(req,env);
@@ -165,6 +171,7 @@ async function handleGenerate(req, env) {
   if (!okIP)   return errR('Too many requests from your network.', 429, env);
   if (typeof prompt!=='string'||prompt.length>2000) return errR('Invalid prompt.', 400, env);
   const safe = prompt.trim().slice(0,2000);
+  const startTime = Date.now();
   let text='', source='';
   // Paid: Claude primary -> Gemini fallback. Promo: Gemini only.
   if (isPaid && env.ANTHROPIC_KEY) {
@@ -176,6 +183,15 @@ async function handleGenerate(req, env) {
     catch(e) { console.warn('Gemini failed:',e.message); }
   }
   if (!text) return errR('Writing service temporarily unavailable. Please try again shortly.', 503, env);
+
+  await trackAIUsage(env, {
+    orgId: code,
+    module: 'general',
+    model: source,
+    tokens: Math.ceil(text.length / 4),
+    latency: Date.now() - startTime
+  });
+
   cd.used = (cd.used||0)+1;
   await env.CODES_KV.put(code, JSON.stringify(cd));
   return jsonR({ success:true, text, source, isPaid }, 200, env);
@@ -337,6 +353,7 @@ Output: Return ONLY a valid JSON object with the following structure:
 
 Ensure the tone is professional, evocative, and aligned with hospitality standards. Write in English.`;
 
+  const startTime = Date.now();
   let text = '', source = '';
   const isPaid = PLANS[cd.plan]?.isPaid ?? false;
 
@@ -350,6 +367,15 @@ Ensure the tone is professional, evocative, and aligned with hospitality standar
   }
 
   if (!text) return errR('Generation service unavailable.', 503, env);
+
+  // Sprint 6: Track Usage
+  await trackAIUsage(env, {
+    orgId: v.code,
+    module: 'campaign',
+    model: source,
+    tokens: Math.ceil(text.length / 4),
+    latency: Date.now() - startTime
+  });
 
   try {
     // Basic JSON cleanup if needed
@@ -459,6 +485,7 @@ Output: Return ONLY a valid JSON object with this structure:
 
 Ensure the response matches the sentiment and addresses the guest's points accurately. Write in English.`;
 
+  const startTime = Date.now();
   let text = '', source = '';
   const isPaid = PLANS[cd.plan]?.isPaid ?? false;
 
@@ -472,6 +499,15 @@ Ensure the response matches the sentiment and addresses the guest's points accur
   }
 
   if (!text) return errR('Generation service unavailable.', 503, env);
+
+  // Sprint 6: Track Usage
+  await trackAIUsage(env, {
+    orgId: v.code,
+    module: 'review',
+    model: source,
+    tokens: Math.ceil(text.length / 4),
+    latency: Date.now() - startTime
+  });
 
   try {
     const cleanJson = text.includes('```json') ? text.split('```json')[1].split('```')[0].trim() : text.trim();
@@ -646,6 +682,7 @@ async function handleGenerateInsights(req, env) {
 
   // 2. Call AI
   const prompt = `${EXECUTIVE_ADVISOR_PROMPT}\n\nOrganization Data:\n${JSON.stringify(dataset)}`;
+  const startTime = Date.now();
   let text = '', source = '';
 
   if (env.ANTHROPIC_KEY) {
@@ -658,6 +695,15 @@ async function handleGenerateInsights(req, env) {
   }
 
   if (!text) return errR('Insight generation failed.', 503, env);
+
+  // Sprint 6: Track Usage
+  await trackAIUsage(env, {
+    orgId: v.code,
+    module: 'intelligence',
+    model: source,
+    tokens: Math.ceil(text.length / 4),
+    latency: Date.now() - startTime
+  });
 
   try {
     const cleanJson = text.includes('```json') ? text.split('```json')[1].split('```')[0].trim() : text.trim();
@@ -734,6 +780,93 @@ Output: Return ONLY a valid JSON object with the structure:
 }
 
 Ensure the insights are data-driven based on the input.`;
+
+// == AI OPTIMIZATION (Sprint 6) ============================
+async function handleGetPrompts(req, env) {
+  if (!adminOk(req, env)) return errR('Unauthorised', 401, env);
+  const { results } = await env.DB.prepare(`
+    SELECT t.*, v.prompt_content, v.version_number
+    FROM prompt_templates t
+    JOIN prompt_versions v ON t.active_version = v.id
+  `).all();
+  return jsonR({ success:true, prompts: results }, 200, env);
+}
+
+async function handleCreatePrompt(req, env) {
+  if (!adminOk(req, env)) return errR('Unauthorised', 401, env);
+  const { module, name, content } = await req.json();
+  const templateId = crypto.randomUUID();
+  const versionId = crypto.randomUUID();
+
+  await env.DB.batch([
+    env.DB.prepare(`INSERT INTO prompt_templates (id, module_name, prompt_name, active_version) VALUES (?,?,?,?)`)
+      .bind(templateId, module, name, versionId),
+    env.DB.prepare(`INSERT INTO prompt_versions (id, template_id, version_number, prompt_content) VALUES (?,?,?,?)`)
+      .bind(versionId, templateId, 1, content)
+  ]);
+
+  return jsonR({ success:true, templateId, versionId }, 200, env);
+}
+
+async function handleEvaluateAI(req, env) {
+  if (!adminOk(req, env)) return errR('Unauthorised', 401, env);
+  const { requestId, scores } = await req.json();
+  const id = crypto.randomUUID();
+  const overall = Object.values(scores).reduce((a,b)=>a+b,0) / Object.values(scores).length;
+
+  await env.DB.prepare(`
+    INSERT INTO ai_evaluations (id, request_id, quality_score, hospitality_score, brand_score, hallucination_score, overall_score)
+    VALUES (?,?,?,?,?,?,?)
+  `).bind(id, requestId, scores.quality, scores.hospitality, scores.brand, scores.hallucination || 0, overall).run();
+
+  return jsonR({ success:true, evaluationId: id, overall }, 200, env);
+}
+
+async function handleGetAIAnalytics(req, env) {
+  if (!adminOk(req, env)) return errR('Unauthorised', 401, env);
+  const stats = await env.DB.prepare(`
+    SELECT
+      COUNT(*) as total_requests,
+      SUM(total_tokens) as total_tokens,
+      SUM(estimated_cost) as total_cost,
+      AVG(response_time_ms) as avg_latency
+    FROM ai_requests
+    WHERE created_at > date('now', '-24 hours')
+  `).first();
+
+  const quality = await env.DB.prepare(`SELECT AVG(overall_score) as avg_quality FROM ai_evaluations`).first();
+
+  return jsonR({
+    success: true,
+    analytics: {
+      requests: stats.total_requests || 0,
+      tokens: stats.total_tokens || 0,
+      cost: stats.total_cost || 0,
+      latency: stats.avg_latency || 0,
+      quality: quality.avg_quality || 0
+    }
+  }, 200, env);
+}
+
+async function handleGetAICosts(req, env) {
+  if (!adminOk(req, env)) return errR('Unauthorised', 401, env);
+  const { results } = await env.DB.prepare(`
+    SELECT module_name, SUM(estimated_cost) as cost, SUM(total_tokens) as tokens
+    FROM ai_requests
+    GROUP BY module_name
+  `).all();
+  return jsonR({ success:true, costs: results }, 200, env);
+}
+
+async function trackAIUsage(env, meta) {
+  try {
+    const cost = (meta.tokens / 1000) * 0.002; // Simple estimate: $0.002 per 1k tokens
+    await env.DB.prepare(`
+      INSERT INTO ai_requests (id, organization_id, module_name, model_name, total_tokens, estimated_cost, response_time_ms)
+      VALUES (?,?,?,?,?,?,?)
+    `).bind(crypto.randomUUID(), meta.orgId, meta.module, meta.model, meta.tokens, cost, meta.latency).run();
+  } catch(e) { console.error('Usage tracking failed:', e); }
+}
 
 // == CLICKPESA =============================================
 // ClickPesa Checkout: generate a checkout link covering mobile money
