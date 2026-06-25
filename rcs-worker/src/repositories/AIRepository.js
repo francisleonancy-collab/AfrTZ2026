@@ -23,9 +23,8 @@ export class AIRepository {
       const cost = (meta.total_tokens / 1000) * 0.002;
       await this.db.prepare(`
         INSERT INTO ai_requests (id, organization_id, module_name, prompt_version_id, model_name, input_tokens, output_tokens, total_tokens, estimated_cost, response_time_ms)
-        VALUES (?,?,?,?,?,?,?,?,?,?)
+        VALUES (hex(randomblob(16)),?,?,?,?,?,?,?,?,?)
       `).bind(
-        crypto.randomUUID(),
         meta.orgId,
         meta.module,
         meta.prompt_version_id || null,
@@ -57,7 +56,7 @@ export class AIRepository {
       tokens: stats?.total_tokens || 0,
       cost: stats?.total_cost || 0,
       latency: stats?.avg_latency || 0,
-      quality: quality?.avg_quality || 0
+      quality: (quality?.avg_quality || 0) * 100
     };
   }
 }

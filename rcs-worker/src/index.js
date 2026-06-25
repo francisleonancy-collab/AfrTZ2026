@@ -15,16 +15,21 @@ import { EnterpriseController } from './controllers/EnterpriseController.js';
 
 export default {
   async fetch(req, env) {
-    if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: {
-      'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, X-Access-Code, X-Admin-Token, X-Partner-Id, X-Enterprise-Group',
-    }});
+    if (req.method === 'OPTIONS') {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, X-Access-Code, X-Admin-Token, X-Partner-Id, X-Enterprise-Group',
+        }
+      });
+    }
 
     const url = new URL(req.url);
     const path = url.pathname;
 
-    // Dependencies (IoC)
+    // Dependencies
     const codeRepo = new CodeRepository(env.CODES_KV);
     const aiRepo = new AIRepository(env.DB);
     const partnerRepo = new PartnerRepository(env.DB);
@@ -49,35 +54,27 @@ export default {
         'POST:/generate': () => core.generate(req, env),
         'POST:/claim-promo': () => core.claimPromo(req, env),
         'GET:/config/pricing': () => core.getPricing(req, env),
-
         'GET:/api/campaigns': () => campaign.list(req, env),
         'POST:/api/generate/campaign': () => campaign.generate(req, env),
-
         'GET:/api/reviews': () => review.list(req, env),
         'POST:/api/reviews': () => review.create(req, env),
         'GET:/api/reputation': () => intelligence.getReputationMetrics(req, env),
-
         'GET:/api/dashboard': () => intelligence.getDashboard(req, env),
         'GET:/api/analytics/marketing': () => intelligence.getMarketingAnalytics(req, env),
         'POST:/api/insights/generate': () => intelligence.generateInsights(req, env),
         'GET:/api/insights': () => intelligence.listInsights(req, env),
-
         'POST:/api/partners/register': () => partner.register(req, env),
         'GET:/api/partners/dashboard': () => partner.dashboard(req, env),
         'POST:/api/referrals/create': () => partner.createReferral(req, env),
         'GET:/api/referrals': () => partner.listReferrals(req, env),
-
         'POST:/clickpesa-create': () => payment.clickPesaCreate(req, env),
         'POST:/azampay-create': () => payment.azamPayCreate(req, env),
-
         'GET:/admin/codes': () => admin.listCodes(req, env),
         'POST:/admin/generate': () => admin.generateCode(req, env),
         'POST:/admin/revoke': () => admin.revokeCode(req, env),
         'POST:/admin/renew': () => admin.renewCode(req, env),
         'POST:/admin/pricing': () => admin.updatePricing(req, env),
         'GET:/api/ai/analytics': () => admin.getAIAnalytics(req, env),
-
-        // Enterprise Routes (Sprint 8)
         'POST:/api/groups': () => enterprise.createGroup(req, env),
         'GET:/api/groups': () => enterprise.listGroups(req, env),
         'POST:/api/properties': () => enterprise.createProperty(req, env),
@@ -89,7 +86,6 @@ export default {
       const routeKey = `${req.method}:${path}`;
       if (routes[routeKey]) return await routes[routeKey]();
 
-      // Dynamic Path segments
       if (path.startsWith('/api/campaigns/') && req.method === 'GET') {
         const id = path.split('/').pop();
         return campaign.getById(req, env, id);

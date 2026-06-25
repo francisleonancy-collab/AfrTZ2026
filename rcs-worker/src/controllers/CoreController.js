@@ -29,6 +29,7 @@ export class CoreController {
       expiry: v.expiry, daysLeft: daysLeft(v.expiry),
       used, limit, remaining: limit === -1 ? -1 : Math.max(0, limit - used),
       isPaid: PLANS[v.plan]?.isPaid ?? false,
+      enterpriseGroupId: v.enterpriseGroupId || null
     }, 200, env);
   }
 
@@ -42,7 +43,6 @@ export class CoreController {
   }
 
   async generate(req, env) {
-    const ip = req.headers.get('CF-Connecting-IP') || 'unknown';
     const body = await req.json().catch(() => null);
     if (!body?.prompt) return errorResponse('Missing prompt.', 400, env);
 

@@ -76,7 +76,6 @@ Goal: ${campaign_goal || 'Increase Bookings'}`;
     const startTime = Date.now();
     try {
       const isPaid = PLANS[v.plan]?.isPaid ?? false;
-      // In Clean Architecture, the AIService handles the specific provider logic
       const result = await this.aiService.generate(`${SYSTEM_PROMPT}\n\n${USER_PROMPT}`, isPaid);
 
       await this.aiRepo.trackUsage({

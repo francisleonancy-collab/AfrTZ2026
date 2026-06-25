@@ -17,7 +17,6 @@ export class ReviewController {
     const prefix = `review:${v.code}:`;
     const list = await this.codeRepo.list(prefix);
     const keys = list.keys;
-
     const reviewsData = await Promise.all(keys.map(k => this.codeRepo.get(k.name)));
 
     const reviews = reviewsData

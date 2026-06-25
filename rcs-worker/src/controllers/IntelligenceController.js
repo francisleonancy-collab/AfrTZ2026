@@ -40,8 +40,6 @@ export class IntelligenceController {
 
     const list = await this.codeRepo.list(`campaign:${v.code}:`);
     const keys = list.keys;
-
-    // Fixed: Performance optimization - parallel fetching
     const campaigns = await Promise.all(keys.map(k => this.codeRepo.get(k.name)));
 
     const typeMap = {};
@@ -73,8 +71,6 @@ export class IntelligenceController {
 
     const list = await this.codeRepo.list(`review:${v.code}:`);
     const keys = list.keys;
-
-    // Fixed: Performance optimization - parallel fetching
     const reviews = await Promise.all(keys.map(k => this.codeRepo.get(k.name)));
 
     let totalRating = 0, count = 0, positive = 0, negative = 0, escalated = 0;
@@ -173,12 +169,11 @@ export class IntelligenceController {
     return jsonResponse({ success: true, reports }, 200, env);
   }
 
-  async getInsightById(req, env) {
+  async getInsightById(req, env, id) {
     const code = req.headers.get('X-Access-Code');
     const v = await this.codeRepo.findByCode(code);
     if (!v) return errorResponse('Unauthorised', 401, env);
 
-    const id = new URL(req.url).pathname.split('/').pop();
     const report = await this.codeRepo.get(`insight:${v.code}:${id}`);
     if (!report) return errorResponse('Report not found', 404, env);
     return jsonResponse({ success: true, report }, 200, env);

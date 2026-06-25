@@ -58,8 +58,7 @@ export class AdminController {
     const d = await this.codeRepo.findByCode(code);
     if (!d) return errorResponse('Code not found.', 404, env);
     d.active = false;
-    const { code: _, ...cleanData } = d;
-    await this.codeRepo.save(code, cleanData);
+    await this.codeRepo.save(code, d);
     return jsonResponse({ success: true, message: `${code} deactivated.` }, 200, env);
   }
 
@@ -71,8 +70,7 @@ export class AdminController {
     if (!d) return errorResponse('Code not found.', 404, env);
     d.expiry = fmtDate(addDays(nowD(), Math.min(parseInt(days) || 30, 365)));
     d.active = true; d.used = 0;
-    const { code: _, ...cleanData } = d;
-    await this.codeRepo.save(code, cleanData);
+    await this.codeRepo.save(code, d);
     return jsonResponse({ success: true, message: `${code} renewed.`, newExpiry: d.expiry }, 200, env);
   }
 

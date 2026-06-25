@@ -628,7 +628,10 @@ function launchToolkit() {
     document.getElementById('toolkit').style.display = 'block';
     document.getElementById('tk-plan').textContent = currentUser.plan;
     if(currentUser.plan === 'Admin') document.getElementById('admin-tab').style.display = 'block';
-    if(currentUser.enterpriseGroupId) document.getElementById('enterprise-tab').style.display = 'block';
+    if(currentUser.enterpriseGroupId) {
+        document.getElementById('enterprise-tab').style.display = 'block';
+        renderEnterpriseDashboard();
+    }
     renderDashboard(); syncCampaigns(); syncReviews();
 }
 function doSignOut() {
@@ -731,7 +734,59 @@ function viewReview(id) {
 async function registerPartner() {
     const body = { organizationName: document.getElementById('pt-org').value, contactName: document.getElementById('pt-contact').value, email: document.getElementById('pt-email').value };
     const res = await fetch(WORKER_URL + '/api/partners/register', { method:'POST', body: JSON.stringify(body) });
-    if(res.ok) { alert('Registered!'); }
+    if(res.ok) {
+        const d = await res.json();
+        alert('Registered as Partner!');
+        document.getElementById('partner-registration-view').style.display = 'none';
+        document.getElementById('partner-dashboard-view').style.display = 'block';
+        document.getElementById('pt-ref-code').textContent = 'CODE: ' + d.referralCode;
+    }
+}
+
+async function syncPartnerDashboard() {
+    const partnerId = localStorage.getItem('MKD_PARTNER_ID');
+    if(!partnerId) return;
+    const res = await fetch(WORKER_URL + '/api/partners/dashboard', { headers: { 'X-Partner-Id': partnerId } });
+    if(res.ok) {
+        const d = await res.json();
+        document.getElementById('pt-stat-referrals').textContent = d.analytics.totalReferrals;
+        document.getElementById('pt-stat-paid').textContent = '$' + d.analytics.paidCommissions;
+    }
+}
+
+// INTELLIGENCE
+async function generateInsights() {
+    const btn = document.getElementById('btn-gen-insights');
+    btn.disabled = true; btn.textContent = 'Generating...';
+    const res = await fetch(WORKER_URL + '/api/insights/generate', { method:'POST', headers:{'X-Access-Code': currentUser.code} });
+    btn.disabled = false; btn.textContent = '✨ Generate Report';
+    if(res.ok) {
+        const d = await res.json();
+        viewInsight(d.report.id, d.report.data);
+    }
+}
+
+function viewInsight(id, data) {
+    document.getElementById('os-content').innerHTML = `
+        <h2 class="tool-title">Strategic Insights Report</h2>
+        <div class="result-section"><h3>Executive Summary</h3><p>${data.summary || 'Strategic overview generated.'}</p></div>
+        <div class="result-section"><h3>Recommendations</h3><p>${(data.recommendations || []).join('<br>• ')}</p></div>
+        <div class="result-section"><h3>Reputation Score</h3><p>${data.reputation_score || 'N/A'}</p></div>
+    `;
+    document.getElementById('overlay-os').classList.add('open');
+}
+
+// ENTERPRISE
+async function renderEnterpriseDashboard() {
+    if(!currentUser.enterpriseGroupId) return;
+    const res = await fetch(WORKER_URL + '/api/enterprise/reports?groupId=' + currentUser.enterpriseGroupId, {
+        headers: { 'X-Access-Code': currentUser.code, 'X-Enterprise-Group': currentUser.enterpriseGroupId }
+    });
+    if(res.ok) {
+        const d = await res.json();
+        document.getElementById('ent-stat-props').textContent = d.report.properties;
+        document.getElementById('ent-stat-users').textContent = d.report.users;
+    }
 }
 
 // TEMPLATES
