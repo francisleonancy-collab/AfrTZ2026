@@ -1,10 +1,12 @@
 /**
- * Mkude -- Cloudflare Worker v4
+ * Mkude -- Cloudflare Worker v6
  * -----------------------------
- * Payments: M-Pesa (Daraja) + DPO Pay + PayPal
+ * Payments: ClickPesa (local mobile money: M-Pesa, Mixx by Yas/Tigo Pesa,
+ *           Airtel Money, HaloPesa + Visa/Mastercard via Hosted Checkout)
  * AI: Claude primary (paid) + Gemini fallback / Gemini only (promo)
  * Email: Resend
  * Admin: code management + live pricing updates
+ * Note: AzamPay removed pending KYC approval -- will be re-added in v7
  */
 
 const PLANS = {
@@ -43,8 +45,6 @@ export default {
       // Payments
       if (path==='/clickpesa-create'     && req.method==='POST') return handleClickPesaCreate(req,env);
       if (path==='/clickpesa-callback'   && req.method==='POST') return handleClickPesaCallback(req,env);
-      if (path==='/azampay-create'       && req.method==='POST') return handleAzamPayCreate(req,env);
-      if (path==='/azampay-callback'     && req.method==='POST') return handleAzamPayCallback(req,env);
       // Admin
       if (path==='/admin/codes'          && req.method==='GET')  return handleAdminCodes(req,env);
       if (path==='/admin/generate'       && req.method==='POST') return handleAdminGenerate(req,env);
@@ -98,7 +98,7 @@ async function validateCode(code, env) {
 
 // -- /health -----------------------------------------------
 async function handleHealth(req, env) {
-  return jsonR({ status:'ok', ts:Date.now(), version:'5.0', payments:['clickpesa','azampay'] }, 200, env);
+  return jsonR({ status:'ok', ts:Date.now(), version:'6.0', payments:['clickpesa'] }, 200, env);
 }
 
 // -- /validate ---------------------------------------------
@@ -147,16 +147,22 @@ async function handleGenerate(req, env) {
   ]);
   if (!okCode) return errR('Too many requests. Please wait a moment.', 429, env);
   if (!okIP)   return errR('Too many requests from your network.', 429, env);
-  if (typeof prompt!=='string'||prompt.length>2000) return errR('Invalid prompt.', 400, env);
-  const safe = prompt.trim().slice(0,2000);
+  if (typeof prompt!=='string'||prompt.length>6000) return errR('Invalid prompt.', 400, env);
+  const safe = prompt.trim().slice(0,6000);
+  // Premium/Admin get higher token budget for the 7-loop Marketing OS
+  const isPremiumPlan = cd.plan==='Premium' || cd.plan==='Admin';
+  if (body.premium && !isPremiumPlan) {
+    return errR('Marketing OS is available on the Premium plan only. Upgrade to access.', 403, env);
+  }
+  const maxTok = body.premium && isPremiumPlan ? 1800 : 600;
   let text='', source='';
   // Paid: Claude primary -> Gemini fallback. Promo: Gemini only.
   if (isPaid && env.ANTHROPIC_KEY) {
-    try { text=await callClaude(safe,env.ANTHROPIC_KEY); source='claude'; }
+    try { text=await callClaude(safe,env.ANTHROPIC_KEY,maxTok); source='claude'; }
     catch(e) { console.warn('Claude failed:',e.message); }
   }
   if (!text && env.GEMINI_KEY) {
-    try { text=await callGemini(safe,env.GEMINI_KEY); source='gemini'; }
+    try { text=await callGemini(safe,env.GEMINI_KEY,maxTok); source='gemini'; }
     catch(e) { console.warn('Gemini failed:',e.message); }
   }
   if (!text) return errR('Writing service temporarily unavailable. Please try again shortly.', 503, env);
@@ -166,23 +172,28 @@ async function handleGenerate(req, env) {
 }
 
 // -- AI CALLERS --------------------------------------------
-async function callClaude(prompt, key) {
+async function callClaude(prompt, key, maxTok=600) {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:maxTok,messages:[{role:'user',content:prompt}]})
   });
   if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error?.message||'Claude '+res.status); }
   const d = await res.json();
   return d.content.map(b=>b.text||'').join('').trim();
 }
-async function callGemini(prompt, key) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-06-17:generateContent?key=${key}`;
+async function callGemini(prompt, key, maxTok=600) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${key}`;
   const res = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:600,temperature:0.7}})});
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTok,temperature:0.7}})});
   if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error?.message||'Gemini '+res.status); }
   const d = await res.json();
-  return d.candidates[0].content.parts[0].text.trim();
+  const text = d?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) {
+    const reason = d?.candidates?.[0]?.finishReason || 'unknown';
+    throw new Error('Gemini returned no content (reason: '+reason+')');
+  }
+  return text.trim();
 }
 
 // == PROMO CLAIM ===========================================
@@ -245,9 +256,10 @@ async function handleGetPricing(req, env) {
 }
 
 // == CLICKPESA =============================================
-// ClickPesa Checkout: generate a checkout link covering mobile money
-// (M-Pesa, Mixx by Yas/Tigo Pesa, Airtel Money, HaloPesa) and cards.
-// Docs: https://docs.clickpesa.com
+// ClickPesa Hosted Checkout: generates a checkout link covering mobile
+// money (M-Pesa, Mixx by Yas/Tigo Pesa, Airtel Money, HaloPesa) and cards.
+// Verified against https://docs.clickpesa.com (Generate Authorization
+// Token + Generate Checkout Link, Hosted Checkout product).
 async function handleClickPesaCreate(req, env) {
   const { plan, email, name, phone } = await req.json().catch(()=>({}));
   if (!plan||!PLANS[plan]?.isPaid) return errR('Invalid plan.', 400, env);
@@ -263,48 +275,65 @@ async function handleClickPesaCreate(req, env) {
   const pricingCfg = await env.CODES_KV.get('config:pricing','json');
   const planPricing = pricingCfg?.[plan];
   const amountTZS = planPricing?.tzs ?? ({Starter:7500,Growth:15000,Premium:22500}[plan]);
-  const ref = `MKUDE_${plan}_${Date.now()}`;
+  // ClickPesa order references must be alphanumeric only (no underscores/dashes)
+  const ref = `MKUDE${plan}${Date.now()}`.replace(/[^A-Za-z0-9]/g,'');
 
   try {
-    // 1. Get auth token
+    // 1. Generate auth token -- POST /third-parties/generate-token
+    //    with client-id and api-key as HEADERS (not body).
     const tokenRes = await fetch('https://api.clickpesa.com/third-parties/generate-token', {
       method:'POST',
       headers:{
-        'client-id':     env.CLICKPESA_CLIENT_ID,
-        'api-key':       env.CLICKPESA_API_KEY,
-        'Content-Type':  'application/json',
+        'client-id':    env.CLICKPESA_CLIENT_ID,
+        'api-key':      env.CLICKPESA_API_KEY,
+        'Content-Type': 'application/json',
       },
     });
-    if (!tokenRes.ok) throw new Error('ClickPesa auth failed ('+tokenRes.status+')');
-    const tokenData = await tokenRes.json();
-    const accessToken = tokenData.token || tokenData.access_token;
-    if (!accessToken) throw new Error('ClickPesa did not return an access token');
+    const tokenData = await tokenRes.json().catch(()=>({}));
+    if (!tokenRes.ok || !tokenData.success) {
+      throw new Error(tokenData.message || 'ClickPesa auth failed ('+tokenRes.status+')');
+    }
+    // tokenData.token already includes the "Bearer " prefix per ClickPesa docs.
+    let authHeader = tokenData.token;
+    if (!authHeader) throw new Error('ClickPesa did not return a token');
+    if (!authHeader.toLowerCase().startsWith('bearer ')) authHeader = 'Bearer '+authHeader;
 
-    // 2. Create checkout link
-    const checkoutRes = await fetch('https://api.clickpesa.com/third-parties/payments/checkout-link', {
+    // 2. Generate checkout link -- POST /third-parties/checkout-link/generate-checkout-url
+    //    Body uses totalPrice / orderReference / orderCurrency / customerXxx.
+    const checkoutBody = {
+      totalPrice:    String(amountTZS),
+      orderReference: ref,
+      orderCurrency: 'TZS',
+      customerName:  name || email,
+      customerEmail: email,
+      description:   `Mkude ${plan} Plan -- 30 days restaurant content access`,
+    };
+    if (phone) checkoutBody.customerPhone = phone.replace(/^\+/,'');
+    if (env.WORKER_PUBLIC_URL) checkoutBody.callbackUrl = `${env.WORKER_PUBLIC_URL}/clickpesa-callback`;
+
+    // ClickPesa application has checksum verification enabled -- every
+    // request body must include a checksum computed over the OTHER fields
+    // (checksum/checksumMethod themselves are excluded from the hash).
+    if (env.CLICKPESA_CHECKSUM_SECRET) {
+      checkoutBody.checksum = await clickpesaChecksum(env.CLICKPESA_CHECKSUM_SECRET, checkoutBody);
+    }
+
+    const checkoutRes = await fetch('https://api.clickpesa.com/third-parties/checkout-link/generate-checkout-url', {
       method:'POST',
       headers:{
-        'Authorization': `Bearer ${accessToken}`,
+        'Authorization': authHeader,
         'Content-Type':  'application/json',
       },
-      body: JSON.stringify({
-        amount:       String(amountTZS),
-        currency:     'TZS',
-        orderReference: ref,
-        customerEmail: email,
-        customerName:  name || email,
-        customerPhoneNumber: phone || undefined,
-        webhookURL:    `${env.WORKER_PUBLIC_URL || ''}/clickpesa-callback`,
-        redirectURL:   `${env.ALLOWED_ORIGIN || 'https://mkude.com'}/?clickpesa=success`,
-      }),
+      body: JSON.stringify(checkoutBody),
     });
+    const checkout = await checkoutRes.json().catch(()=>({}));
+    console.log('ClickPesa checkout response:', JSON.stringify(checkout));
+
     if (!checkoutRes.ok) {
-      const errBody = await checkoutRes.text();
-      throw new Error('ClickPesa checkout link failed: '+errBody.slice(0,200));
+      throw new Error(checkout.message || 'ClickPesa checkout link failed ('+checkoutRes.status+')');
     }
-    const checkout = await checkoutRes.json();
-    const checkoutUrl = checkout.checkoutUrl || checkout.url || checkout.link;
-    if (!checkoutUrl) throw new Error('ClickPesa did not return a checkout URL');
+    const checkoutUrl = checkout.checkoutLink;
+    if (!checkoutUrl) throw new Error('ClickPesa did not return a checkoutLink. Response: '+JSON.stringify(checkout).slice(0,300));
 
     // 3. Store pending payment for callback matching
     await env.CODES_KV.put(`pending:clickpesa:${ref}`, JSON.stringify({plan,email,name:name||email}), {expirationTtl:3600});
@@ -316,26 +345,31 @@ async function handleClickPesaCreate(req, env) {
   }
 }
 
-// ClickPesa webhook -- fired on successful payment.
-// Verify with checksum/IP allowlist per ClickPesa docs before trusting payload.
+// ClickPesa webhook -- fired on PAYMENT RECEIVED / PAYMENT FAILED events.
+// Verified payload shape: { event, data: { status, orderReference, ... } }
 async function handleClickPesaCallback(req, env) {
   try {
     const body = await req.json().catch(()=>({}));
-    // ClickPesa sends orderReference and status in the webhook payload
-    const ref    = body.orderReference || body.reference || body.data?.orderReference;
-    const status = (body.status || body.data?.status || '').toUpperCase();
+    console.log('ClickPesa webhook received:', JSON.stringify(body));
+
+    const event = body.event || '';
+    const data  = body.data || body;
+    const ref   = data.orderReference;
+    const status = (data.status || '').toUpperCase();
+
     if (!ref) return jsonR({ok:true}, 200, env);
 
-    // Optional checksum verification if configured
+    // Optional checksum verification (canonical recursive-sort HMAC-SHA256)
     if (env.CLICKPESA_CHECKSUM_SECRET && body.checksum) {
-      const expected = await hmacHex(env.CLICKPESA_CHECKSUM_SECRET, JSON.stringify(body.data||body));
-      if (expected !== body.checksum) {
+      const { checksum, checksumMethod, ...rest } = body;
+      const expected = await clickpesaChecksum(env.CLICKPESA_CHECKSUM_SECRET, rest);
+      if (expected !== checksum) {
         console.warn('ClickPesa checksum mismatch for', ref);
         return jsonR({ok:true}, 200, env);
       }
     }
 
-    if (!['SUCCESS','SUCCESSFUL','COMPLETED','PAID'].includes(status)) {
+    if (event !== 'PAYMENT RECEIVED' && status !== 'SUCCESS') {
       return jsonR({ok:true}, 200, env);
     }
 
@@ -363,130 +397,18 @@ async function handleClickPesaCallback(req, env) {
   }
 }
 
-// == AZAMPAY ===============================================
-// AzamPay Lipia Link / MNO checkout: local mobile money (AzamPesa,
-// Tigo Pesa/Mixx, HaloPesa, Airtel Money) and international remittance.
-// Docs: https://github.com/flexcodelabs/azampay
-async function handleAzamPayCreate(req, env) {
-  const { plan, email, name, phone, provider, mode } = await req.json().catch(()=>({}));
-  if (!plan||!PLANS[plan]?.isPaid) return errR('Invalid plan.', 400, env);
-  if (!email) return errR('Email required.', 400, env);
-  if (!env.AZAMPAY_CLIENT_ID || !env.AZAMPAY_CLIENT_SECRET || !env.AZAMPAY_APP_NAME) {
-    return errR('AzamPay not configured. Contact support.', 503, env);
-  }
-  const ip = req.headers.get('CF-Connecting-IP')||'unknown';
-  const okIP = await rateLimit(env,`azampay:${ip}:${Math.floor(Date.now()/3600000)}`,5,3600);
-  if (!okIP) return errR('Too many payment attempts. Please try again later.', 429, env);
-
-  const pricingCfg  = await env.CODES_KV.get('config:pricing','json');
-  const planPricing = pricingCfg?.[plan];
-  const amountTZS   = planPricing?.tzs ?? ({Starter:7500,Growth:15000,Premium:22500}[plan]);
-  const ref = `MKUDE_${plan}_${Date.now()}`;
-  const AUTH_BASE = env.AZAMPAY_SANDBOX==='true'
-    ? 'https://authenticator-sandbox.azampay.co.tz'
-    : 'https://authenticator.azampay.co.tz';
-  const API_BASE  = env.AZAMPAY_SANDBOX==='true'
-    ? 'https://sandbox.azampay.co.tz'
-    : 'https://checkout.azampay.co.tz';
-
-  try {
-    // 1. Get access token
-    const tokenRes = await fetch(`${AUTH_BASE}/AppRegistration/GenerateToken`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        appName:      env.AZAMPAY_APP_NAME,
-        clientId:     env.AZAMPAY_CLIENT_ID,
-        clientSecret: env.AZAMPAY_CLIENT_SECRET,
-      }),
-    });
-    if (!tokenRes.ok) throw new Error('AzamPay auth failed ('+tokenRes.status+')');
-    const tokenData  = await tokenRes.json();
-    const accessToken = tokenData.data?.accessToken || tokenData.accessToken;
-    if (!accessToken) throw new Error('AzamPay did not return an access token');
-
-    await env.CODES_KV.put(`pending:azampay:${ref}`, JSON.stringify({plan,email,name:name||email}), {expirationTtl:3600});
-
-    if (mode === 'remittance' || !phone) {
-      // International / remittance: use Post Checkout to get a hosted payment link
-      const checkoutRes = await fetch(`${API_BASE}/azampay/postcheckout`, {
-        method:'POST',
-        headers:{'Authorization':`Bearer ${accessToken}`,'Content-Type':'application/json'},
-        body: JSON.stringify({
-          amount:        String(amountTZS),
-          currencyCode:  'TZS',
-          merchantAccountNumber: env.AZAMPAY_MERCHANT_ACCOUNT || '',
-          merchantName:  'Mkude',
-          merchantMobileNumber: env.AZAMPAY_MERCHANT_PHONE || '',
-          provider:      'Halopesa',
-          externalId:    ref,
-          additionalProperties: { email, plan, customerName: name||email },
-        }),
-      });
-      const checkout = await checkoutRes.json().catch(()=>({}));
-      const checkoutUrl = checkout.data?.checkoutUrl || checkout.checkoutUrl || checkout.data?.redirectUrl;
-      if (!checkoutUrl) throw new Error('AzamPay did not return a checkout URL: '+JSON.stringify(checkout).slice(0,200));
-      return jsonR({ success:true, checkoutUrl, ref, amount:amountTZS, currency:'TZS' }, 200, env);
-    }
-
-    // Local mobile money: MNO checkout (USSD push to customer phone)
-    const mnoRes = await fetch(`${API_BASE}/azampay/mno/checkout`, {
-      method:'POST',
-      headers:{'Authorization':`Bearer ${accessToken}`,'Content-Type':'application/json'},
-      body: JSON.stringify({
-        accountNumber: phone,
-        amount:        String(amountTZS),
-        currency:      'TZS',
-        externalId:    ref,
-        provider:      provider || 'Azampesa', // Azampesa | Mpesa | Tigo | Airtel | Halopesa
-        additionalProperties: { email, plan, customerName: name||email },
-      }),
-    });
-    const mno = await mnoRes.json().catch(()=>({}));
-    if (mno.success===false || mnoRes.status>=400) {
-      throw new Error(mno.message || 'AzamPay MNO checkout failed');
-    }
-    return jsonR({ success:true, pending:true, ref, message:`Payment prompt sent to ${phone}. Please enter your PIN.` }, 200, env);
-  } catch(e) {
-    console.error('AzamPay create error:', e);
-    return errR('AzamPay payment setup failed: '+e.message, 502, env);
-  }
+// ClickPesa checksum: recursively sort all keys alphabetically at every
+// nesting level, JSON-serialize compactly, then HMAC-SHA256 hex digest.
+// Verified against https://docs.clickpesa.com/home/checksum
+function clickpesaCanonicalize(obj) {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map(clickpesaCanonicalize);
+  return Object.keys(obj).sort().reduce((acc,key)=>{ acc[key]=clickpesaCanonicalize(obj[key]); return acc; },{});
 }
-
-// AzamPay webhook -- fired on transaction completion (MNO or checkout).
-async function handleAzamPayCallback(req, env) {
-  try {
-    const body = await req.json().catch(()=>({}));
-    const ref    = body.externalId || body.externalreferenceid || body.reference || body.data?.externalId;
-    const status = (body.transactionstatus || body.status || body.data?.status || '').toString().toUpperCase();
-    if (!ref) return jsonR({ok:true}, 200, env);
-
-    if (!['SUCCESS','SUCCESSFUL','COMPLETED'].includes(status)) {
-      return jsonR({ok:true}, 200, env);
-    }
-
-    const idempKey = `azampay:paid:${ref}`;
-    if (await env.CODES_KV.get(idempKey)) return jsonR({ok:true}, 200, env);
-
-    const pending = await env.CODES_KV.get(`pending:azampay:${ref}`,'json');
-    if (!pending) return jsonR({ok:true}, 200, env);
-
-    const code   = makeCode(pending.plan);
-    const expiry = fmtDate(addDays(nowD(),30));
-    await env.CODES_KV.put(code, JSON.stringify({
-      plan:pending.plan, client:pending.name, email:pending.email, expiry,
-      active:true, used:0, limit:PLANS[pending.plan].limit, created:fmtDate(nowD()), paidVia:'azampay',
-    }));
-    await env.CODES_KV.put(idempKey, `"${code}"`, {expirationTtl:86400});
-    await env.CODES_KV.delete(`pending:azampay:${ref}`).catch(()=>{});
-    await sendAccessCodeEmail({email:pending.email,name:pending.name,code,plan:pending.plan,expiry,limit:PLANS[pending.plan].label}, env);
-
-    console.log('AzamPay payment success -- code:', code, 'for', pending.email);
-    return jsonR({ok:true,code}, 200, env);
-  } catch(e) {
-    console.error('AzamPay callback error:', e);
-    return jsonR({ok:true}, 200, env);
-  }
+async function clickpesaChecksum(secret, payload) {
+  const canonical = clickpesaCanonicalize(payload);
+  const payloadString = JSON.stringify(canonical);
+  return await hmacHex(secret, payloadString);
 }
 
 // HMAC-SHA256 hex helper (for ClickPesa checksum verification)
