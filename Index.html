@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Restaurant Content Services — Lefking Enterprise</title>
+<title>Mkude — Hospitality Marketing OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{--gd:#0a4a35;--gm:#0f6e56;--gl:#1d9e75;--gp:#9fe1cb;--gold:#f0b94a;--cream:#faf7f0;--td:#1a1a1a;--tm:#4a5568;--tl:#718096;--err:#e53e3e;--ok:#38a169;--bdr:#e2e8f0;--r:12px;--sh:0 4px 24px rgba(10,74,53,.10);}
@@ -104,6 +104,14 @@
   .app-tabs{display:flex;background:#fff;border-bottom:1px solid var(--bdr);padding:0 1.5rem;overflow-x:auto;}
   .app-tab{padding:13px 18px;font-size:13px;border:none;background:none;cursor:pointer;color:var(--tl);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:.15s;}
   .app-tab.active{color:var(--gd);border-bottom-color:var(--gd);font-weight:500;}
+  .campaign-list-item{padding:12px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:.2s;}
+  .campaign-list-item:hover{background:var(--cream);}
+  .campaign-meta{font-size:11px;color:var(--tl);margin-top:3px;}
+  .calendar-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:1rem;}
+  .calendar-table th{text-align:left;background:var(--gd);color:#fff;padding:8px;}
+  .calendar-table td{padding:8px;border-bottom:1px solid var(--bdr);}
+  .result-section{margin-bottom:1.5rem;padding:1.25rem;background:#fff;border:1px solid var(--bdr);border-radius:var(--r);}
+  .result-title{font-weight:600;margin-bottom:.75rem;color:var(--gd);display:flex;justify-content:space-between;align-items:center;}
   .app-panel{display:none;padding:1.5rem;max-width:680px;margin:0 auto;}
   .app-panel.active{display:block;}
   .tool-card{background:#fff;border-radius:var(--r);padding:1.5rem;border:1px solid var(--bdr);box-shadow:var(--sh);}
@@ -115,7 +123,7 @@
   .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gl);}
   .field textarea{min-height:80px;resize:vertical;}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .btn-gen{width:100%;background:var(--gd);color:#fff;border:none;padding:12px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:4px;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-gen{width:100%;background:var(--gd);color:#fff;border:none;padding:12px;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:4px;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
   .btn-gen:hover{background:var(--gm);}
   .btn-gen:disabled{opacity:.5;cursor:not-allowed;}
   .output-card{margin-top:1.25rem;background:#f0faf5;border:1px solid #9fe1cb;border-radius:var(--r);padding:1.25rem;animation:fadeIn .3s ease;}
@@ -136,6 +144,10 @@
   .stat-box{background:var(--cream);border-radius:9px;padding:.75rem;text-align:center;}
   .stat-num{font-size:20px;font-weight:500;font-family:'Playfair Display',serif;color:var(--gd);}
   .stat-label{font-size:10px;color:var(--tl);margin-top:2px;}
+  .esc-badge-ui{padding:4px 12px;border-radius:99px;font-size:11px;font-weight:bold;text-transform:uppercase;}
+  .esc-yes{background:#fff5f5;color:var(--err);border:1px solid #fed7d7;}
+  .esc-no{background:#f0fff4;color:var(--ok);border:1px solid #c6f6d5;}
+  .topic-tag{background:var(--gp);color:var(--gd);padding:4px 10px;border-radius:99px;font-size:11px;font-weight:500;}
   .gen-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;}
   .gen-form .field{margin:0;flex:1;min-width:110px;}
   .gen-form .field input,.gen-form .field select{height:38px;padding:0 10px;}
@@ -250,7 +262,7 @@
 <!-- ══ TOOLKIT ══ -->
 <div id="toolkit">
   <div class="app-nav">
-    <div class="app-nav-logo">Lefking <span>Restaurant Toolkit</span></div>
+    <div class="app-nav-logo">Mkude <span>Hospitality Marketing OS</span></div>
     <div class="app-nav-r">
       <span class="u-badge" id="u-badge">—</span>
       <span class="exp-badge exp-ok" id="exp-badge">—</span>
@@ -267,119 +279,524 @@
     <a href="https://wa.me/255768777057?text=Hi%2C%20I%20want%20to%20upgrade%20my%20plan" target="_blank">Upgrade via WhatsApp →</a>
   </div>
   <div class="app-tabs">
-    <button class="app-tab active" onclick="switchTab('menu',this)">🍽 Menu</button>
-    <button class="app-tab" onclick="switchTab('social',this)">📱 Social</button>
-    <button class="app-tab" onclick="switchTab('review',this)">⭐ Reviews</button>
-    <button class="app-tab" id="admin-tab" onclick="switchTab('admin',this)" style="display:none">⚙️ Admin</button>
+    <button class="app-tab active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+    <button class="app-tab" onclick="switchTab('campaigns',this)">🚀 Campaigns</button>
+    <button class="app-tab" onclick="switchTab('reviews',this)">⭐ Reviews</button>
+    <button class="app-tab" onclick="switchTab('analytics',this)">🧠 Intelligence</button>
+    <button class="app-tab" onclick="switchTab('templates',this)">📝 Templates</button>
+    <button class="app-tab" onclick="switchTab('settings',this)">⚙️ Settings</button>
+    <button class="app-tab" id="admin-tab" onclick="switchTab('admin',this)" style="display:none">👑 Admin</button>
   </div>
 
-  <!-- MENU -->
-  <div id="app-panel-menu" class="app-panel active">
+  <!-- REVIEWS -->
+  <div id="app-panel-reviews" class="app-panel">
     <div class="tool-card">
-      <p class="tool-title">Menu Description Generator</p>
-      <p class="tool-sub">Fill in the details and click Generate — your description appears instantly below.</p>
-      <div class="row2">
-        <div class="field"><label>Dish name *</label><input type="text" id="m-dish" placeholder="e.g. Nyama Choma Platter"/></div>
-        <div class="field"><label>Cuisine</label>
-          <select id="m-cuisine"><option>East African</option><option>Italian</option><option>Indian</option><option>Chinese</option><option>American BBQ</option><option>Mediterranean</option><option>French</option><option>Swahili</option></select>
-        </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <p class="tool-title">Review Inbox</p>
+        <button class="btn-gold" onclick="showNewReviewForm()" style="padding:6px 14px;font-size:12px;">+ Analyze Review</button>
       </div>
-      <div class="field"><label>Key ingredients</label><input type="text" id="m-ing" placeholder="e.g. slow-grilled goat, kachumbari, ugali"/></div>
-      <div class="row2">
-        <div class="field"><label>Tone</label>
-          <select id="m-tone"><option>Warm & friendly</option><option>Upscale & poetic</option><option>Bold & punchy</option><option>Simple & clear</option></select>
-        </div>
-        <div class="field"><label>Price (optional)</label><input type="text" id="m-price" placeholder="e.g. TSh 18,000"/></div>
-      </div>
-      <button class="btn-gen" id="btn-menu" onclick="generate('menu')">✨ Generate Description</button>
-      <div id="out-menu" style="display:none" class="output-card">
-        <div class="output-label">📋 Menu Description <button class="btn-copy" onclick="copyOut('out-menu-text',this)">Copy</button></div>
-        <div class="output-text" id="out-menu-text"></div>
+      <div id="review-list">
+        <!-- Review list items here -->
       </div>
     </div>
   </div>
 
-  <!-- SOCIAL -->
-  <div id="app-panel-social" class="app-panel">
+  <!-- NEW REVIEW FORM -->
+  <div id="app-panel-new-review" class="app-panel">
     <div class="tool-card">
-      <p class="tool-title">Social Media Caption Generator</p>
-      <p class="tool-sub">Generate ready-to-post captions for any platform instantly.</p>
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:1rem;">
+        <button class="btn-copy" onclick="switchTab('reviews', document.querySelector('[onclick*=\'reviews\']'))">← Back</button>
+        <p class="tool-title">Analyze Guest Review</p>
+      </div>
       <div class="row2">
-        <div class="field"><label>Post type</label>
-          <select id="s-type"><option>Daily special</option><option>New menu item</option><option>Weekend promotion</option><option>Behind the scenes</option><option>Customer shoutout</option><option>Holiday/event</option></select>
+        <div class="field">
+          <label for="r-source">Review Source</label>
+          <select id="r-source">
+            <option value="Google">Google Maps</option>
+            <option value="TripAdvisor">TripAdvisor</option>
+            <option value="Booking">Booking.com</option>
+            <option value="Expedia">Expedia</option>
+            <option value="Direct">Direct Feedback</option>
+            <option value="Social">Social Media</option>
+          </select>
         </div>
-        <div class="field"><label>Platform</label>
-          <select id="s-platform"><option>Instagram</option><option>Facebook</option><option>WhatsApp status</option><option>TikTok</option><option>Twitter/X</option></select>
+        <div class="field">
+          <label for="r-rating">Rating (1-5)</label>
+          <select id="r-rating">
+            <option value="5">5 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="2">2 Stars</option>
+            <option value="1">1 Star</option>
+          </select>
         </div>
       </div>
-      <div class="field"><label>What's the post about? *</label><textarea id="s-context" placeholder="e.g. Friday fish fry — whole tilapia, chips and salad for TSh 12,000. Only this weekend."></textarea></div>
-      <div class="field"><label>Restaurant name (optional)</label><input type="text" id="s-rname" placeholder="e.g. Mama Jiko's Kitchen"/></div>
-      <button class="btn-gen" id="btn-social" onclick="generate('social')">✨ Generate Caption</button>
-      <div id="out-social" style="display:none" class="output-card">
-        <div class="output-label">📱 Social Caption <button class="btn-copy" onclick="copyOut('out-social-text',this)">Copy</button></div>
-        <div class="output-text" id="out-social-text"></div>
+      <div class="field">
+        <label for="r-text">Review Text *</label>
+        <textarea id="r-text" placeholder="Paste the guest's review here..."></textarea>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="r-pname">Property Name</label>
+          <input type="text" id="r-pname" placeholder="e.g. Mkude Resort"/>
+        </div>
+        <div class="field">
+          <label for="r-ptype">Property Type</label>
+          <select id="r-ptype">
+            <option value="hotel">Hotel</option>
+            <option value="restaurant">Restaurant</option>
+            <option value="resort">Resort</option>
+            <option value="lodge">Lodge</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-gen" id="btn-create-review" onclick="createReview()">✨ Analyze & Draft Response</button>
+    </div>
+  </div>
+
+  <!-- REVIEW DETAIL -->
+  <div id="app-panel-review-detail" class="app-panel">
+    <div class="tool-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <button class="btn-copy" onclick="switchTab('reviews', document.querySelector('[onclick*=\'reviews\']'))">← Back to Inbox</button>
+        <div id="rev-escalation-badge"></div>
+      </div>
+
+      <div class="result-section" style="background:var(--cream)">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
+          <span id="rev-source" style="font-size:11px;font-weight:bold;color:var(--tl)"></span>
+          <span id="rev-rating" style="color:var(--gold)"></span>
+        </div>
+        <div id="rev-text" class="output-text" style="font-style:italic"></div>
+        <div id="rev-date" style="font-size:10px;color:var(--tl);margin-top:8px"></div>
+      </div>
+
+      <div class="row2">
+        <div class="result-section">
+          <div class="result-title">📊 Analysis</div>
+          <div style="font-size:13px; line-height:1.6">
+            <p><strong>Sentiment:</strong> <span id="rev-sentiment"></span> (<span id="rev-sentiment-score"></span>%)</p>
+            <p><strong>Risk Score:</strong> <span id="rev-risk"></span>/10</p>
+            <p><strong>Topics:</strong> <span id="rev-topics"></span></p>
+          </div>
+          <div id="rev-summary" style="font-size:12px; margin-top:10px; color:var(--tm); border-top:1px solid #eee; padding-top:10px"></div>
+        </div>
+
+        <div class="result-section">
+          <div class="result-title">✍️ Draft Response <button class="btn-copy" onclick="copySection('rev-draft')">Copy</button></div>
+          <div id="rev-draft" class="output-text" style="font-size:13px"></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- REVIEW -->
-  <div id="app-panel-review" class="app-panel">
-    <div class="tool-card">
-      <p class="tool-title">Review Reply Generator</p>
-      <p class="tool-sub">Respond to customer reviews professionally — reply appears on screen ready to copy.</p>
-      <div class="field"><label>Customer review *</label><textarea id="r-review" placeholder="Paste the customer review text here..." style="min-height:100px"></textarea></div>
-      <div class="row2">
-        <div class="field"><label>Star rating</label>
-          <select id="r-stars"><option value="5">⭐⭐⭐⭐⭐ 5 stars</option><option value="4">⭐⭐⭐⭐ 4 stars</option><option value="3">⭐⭐⭐ 3 stars</option><option value="2">⭐⭐ 2 stars</option><option value="1">⭐ 1 star</option></select>
-        </div>
-        <div class="field"><label>Reply tone</label>
-          <select id="r-tone"><option>Warm & grateful</option><option>Professional & concise</option><option>Apologetic & caring</option><option>Upbeat & friendly</option></select>
+  <!-- INTELLIGENCE / ANALYTICS -->
+  <div id="app-panel-analytics" class="app-panel">
+    <div class="app-tabs" style="padding:0; margin-bottom:1.5rem; background:var(--cream); border-radius:var(--r);">
+      <button class="app-tab active" onclick="switchIntelTab('executive',this)">👑 Executive</button>
+      <button class="app-tab" onclick="switchIntelTab('marketing',this)">🚀 Marketing</button>
+      <button class="app-tab" onclick="switchIntelTab('reputation',this)">⭐ Reputation</button>
+      <button class="app-tab" onclick="switchIntelTab('revenue',this)">💰 Revenue</button>
+      <button class="app-tab" onclick="switchIntelTab('insights',this)">🧠 Insights</button>
+    </div>
+
+    <!-- EXECUTIVE SUB-PANEL -->
+    <div id="intel-panel-executive" class="intel-panel active">
+      <div class="tool-card">
+        <p class="tool-title">Executive Health Score</p>
+        <div class="stats-row" style="margin-top:1rem;">
+          <div class="stat-box"><div class="stat-num" id="exec-campaigns">0</div><div class="stat-label">Campaigns</div></div>
+          <div class="stat-box"><div class="stat-num" id="exec-reviews">0</div><div class="stat-label">Reviews</div></div>
+          <div class="stat-box"><div class="stat-num" id="exec-usage">0%</div><div class="stat-label">Limit Used</div></div>
+          <div class="stat-box"><div class="stat-num" id="exec-days">0</div><div class="stat-label">Days Left</div></div>
         </div>
       </div>
-      <button class="btn-gen" id="btn-review" onclick="generate('review')">✨ Generate Reply</button>
-      <div id="out-review" style="display:none" class="output-card">
-        <div class="output-label">⭐ Review Reply <button class="btn-copy" onclick="copyOut('out-review-text',this)">Copy</button></div>
-        <div class="output-text" id="out-review-text"></div>
+    </div>
+
+    <!-- MARKETING SUB-PANEL -->
+    <div id="intel-panel-marketing" class="intel-panel" style="display:none">
+      <div class="tool-card">
+        <p class="tool-title">Marketing Performance</p>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-num" id="mkt-total">0</div><div class="stat-label">Total Campaigns</div></div>
+          <div class="stat-box"><div class="stat-num" id="mkt-assets">0</div><div class="stat-label">Assets Created</div></div>
+          <div class="stat-box"><div class="stat-num" id="mkt-score" style="color:var(--gl)">0</div><div class="stat-label">Marketing Score</div></div>
+        </div>
+        <div class="admin-card">
+          <p class="admin-card-title">Campaign Type Distribution</p>
+          <div id="mkt-types" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPUTATION SUB-PANEL -->
+    <div id="intel-panel-reputation" class="intel-panel" style="display:none">
+      <div class="tool-card">
+        <p class="tool-title">Reputation Analytics</p>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-num" id="ana-rating">0.0</div><div class="stat-label">Avg Rating</div></div>
+          <div class="stat-box"><div class="stat-num" id="ana-count">0</div><div class="stat-label">Total Reviews</div></div>
+          <div class="stat-box"><div class="stat-num" id="ana-pos" style="color:var(--ok)">0</div><div class="stat-label">Positive</div></div>
+          <div class="stat-box"><div class="stat-num" id="ana-neg" style="color:var(--err)">0</div><div class="stat-label">Negative</div></div>
+        </div>
+        <div class="admin-card">
+          <p class="admin-card-title">Top Mentioned Topics</p>
+          <div id="ana-topics" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+        </div>
+        <div class="admin-card">
+          <p class="admin-card-title">Escalation Rate</p>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="usage-track" style="max-width:none"><div class="usage-fill usage-full" id="ana-esc-fill" style="width:0%"></div></div>
+            <span id="ana-esc-text" style="font-size:12px;font-weight:bold">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVENUE SUB-PANEL -->
+    <div id="intel-panel-revenue" class="intel-panel" style="display:none">
+      <div class="tool-card">
+        <p class="tool-title" id="rev-title">Revenue Analytics</p>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-num" id="rev-mrr">$0</div><div class="stat-label" id="rev-mrr-label">MRR</div></div>
+          <div class="stat-box"><div class="stat-num" id="rev-arr">$0</div><div class="stat-label" id="rev-arr-label">ARR</div></div>
+          <div class="stat-box"><div class="stat-num" id="rev-subs">0</div><div class="stat-label" id="rev-subs-label">Active Subs</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSIGHTS SUB-PANEL -->
+    <div id="intel-panel-insights" class="intel-panel" style="display:none">
+      <div class="tool-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <p class="tool-title">AI Insights Center</p>
+          <button class="btn-gold" id="btn-gen-insights" onclick="generateInsights()" style="padding:6px 14px;font-size:12px;">✨ Generate New Report</button>
+        </div>
+        <div id="insights-list" style="margin-bottom:1.5rem;">
+          <!-- List of historical reports -->
+        </div>
+        <div id="insights-report-display" style="display:none;" class="result-section">
+          <h3 id="report-date" style="font-size:14px; color:var(--gd); margin-bottom:1rem; border-bottom:1px solid #eee; padding-bottom:0.5rem;"></h3>
+          <div id="report-content" style="font-size:13px; line-height:1.6;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW CAMPAIGN -->
+  <div id="app-panel-new-campaign" class="app-panel">
+    <div class="tool-card">
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:1rem;">
+        <button class="btn-copy" onclick="switchTab('campaigns', document.querySelector('[onclick*=\'campaigns\']'))">← Back</button>
+        <p class="tool-title">Create New Campaign</p>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="c-type">Business Type</label>
+          <select id="c-type">
+            <option value="hotel">Hotel</option>
+            <option value="resort">Resort</option>
+            <option value="lodge">Lodge</option>
+            <option value="restaurant">Restaurant</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="c-name">Promotion Name *</label>
+          <input type="text" id="c-name" placeholder="e.g. Summer Staycation 2026"/>
+        </div>
+      </div>
+      <div class="field">
+        <label for="c-desc">Promotion Description *</label>
+        <textarea id="c-desc" placeholder="Describe what you are promoting..."></textarea>
+      </div>
+      <div class="field">
+        <label for="c-offer">Offer</label>
+        <input type="text" id="c-offer" placeholder="e.g. 20% off all suites, include free breakfast"/>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="c-audience">Target Audience</label>
+          <input type="text" id="c-audience" placeholder="e.g. Families, Business Travelers"/>
+        </div>
+        <div class="field">
+          <label for="c-goal">Campaign Goal</label>
+          <input type="text" id="c-goal" placeholder="e.g. Maximize weekend occupancy"/>
+        </div>
+      </div>
+      <button class="btn-gen" id="btn-campaign" onclick="generateCampaign()">✨ Generate Complete Campaign</button>
+    </div>
+  </div>
+
+  <!-- CAMPAIGN RESULTS -->
+  <div id="app-panel-campaign-results" class="app-panel">
+    <div class="tool-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <button class="btn-copy" onclick="switchTab('campaigns', document.querySelector('[onclick*=\'campaigns\']'))">← Back to Campaigns</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-copy" onclick="exportCampaign('json')">Download JSON</button>
+          <button class="btn-copy" onclick="exportCampaign('csv')">Download Calendar CSV</button>
+        </div>
+      </div>
+      <h2 class="tool-title" id="res-name">Campaign Results</h2>
+      <p class="tool-sub" id="res-date"></p>
+
+      <div class="result-section">
+        <div class="result-title">📋 Campaign Brief <button class="btn-copy" onclick="copySection('res-brief')">Copy</button></div>
+        <div id="res-brief" class="output-text"></div>
+      </div>
+
+      <div class="result-section">
+        <div class="result-title">📱 Social Media Posts</div>
+        <div style="margin-bottom:1rem; border-bottom:1px solid #eee; padding-bottom:1rem;">
+          <div class="output-label">Instagram <button class="btn-copy" onclick="copySection('res-insta')">Copy</button></div>
+          <div id="res-insta" class="output-text"></div>
+        </div>
+        <div style="margin-bottom:1rem; border-bottom:1px solid #eee; padding-bottom:1rem;">
+          <div class="output-label">Facebook <button class="btn-copy" onclick="copySection('res-fb')">Copy</button></div>
+          <div id="res-fb" class="output-text"></div>
+        </div>
+        <div>
+          <div class="output-label">LinkedIn <button class="btn-copy" onclick="copySection('res-li')">Copy</button></div>
+          <div id="res-li" class="output-text"></div>
+        </div>
+      </div>
+
+      <div class="result-section">
+        <div class="result-title">✉️ Email Campaign <button class="btn-copy" onclick="copySection('res-email')">Copy</button></div>
+        <div id="res-email" class="output-text"></div>
+      </div>
+
+      <div class="result-section">
+        <div class="result-title">📅 30-Day Content Calendar</div>
+        <div style="overflow-x:auto">
+          <table class="calendar-table">
+            <thead>
+              <tr><th>Day</th><th>Platform</th><th>Topic</th><th>CTA</th></tr>
+            </thead>
+            <tbody id="res-calendar"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAMPAIGNS -->
+  <div id="app-panel-campaigns" class="app-panel">
+    <div class="tool-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <p class="tool-title">Campaigns</p>
+        <button class="btn-gold" onclick="showNewCampaignForm()" style="padding:6px 14px;font-size:12px;">+ New Campaign</button>
+      </div>
+      <div id="campaign-list">
+        <!-- Campaign list items here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="app-panel-dashboard" class="app-panel active">
+    <div class="tool-card">
+      <p class="tool-title">Performance Dashboard</p>
+      <div class="stats-row" id="dashboard-stats">
+        <div class="stat-box"><div class="stat-num" id="stat-campaigns">0</div><div class="stat-label">Campaigns</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-reviews">0</div><div class="stat-label">Reviews</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-content">0</div><div class="stat-label">Assets</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-usage">0%</div><div class="stat-label">Monthly Limit</div></div>
+      </div>
+      <div class="admin-card">
+        <p class="admin-card-title">Recent Activity</p>
+        <div id="recent-activity" style="font-size:12px;color:var(--tl)">No recent activity to show.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEMPLATES -->
+  <div id="app-panel-templates" class="app-panel">
+    <div class="app-tabs" style="padding:0; margin-bottom:1.5rem;">
+      <button class="app-tab active" onclick="switchSubTab('menu',this)">🍽 Menu</button>
+      <button class="app-tab" onclick="switchSubTab('social',this)">📱 Social</button>
+      <button class="app-tab" onclick="switchSubTab('review',this)">⭐ Reviews</button>
+    </div>
+
+    <!-- MENU TEMPLATE -->
+    <div id="sub-panel-menu" class="sub-panel active">
+      <div class="tool-card">
+        <p class="tool-title">Menu Description Generator</p>
+        <p class="tool-sub">Fill in the details and click Generate — your description appears instantly below.</p>
+        <div class="row2">
+          <div class="field"><label>Dish name *</label><input type="text" id="m-dish" placeholder="e.g. Nyama Choma Platter"/></div>
+          <div class="field"><label>Cuisine</label>
+            <select id="m-cuisine"><option>East African</option><option>Italian</option><option>Indian</option><option>Chinese</option><option>American BBQ</option><option>Mediterranean</option><option>French</option><option>Swahili</option></select>
+          </div>
+        </div>
+        <div class="field"><label>Key ingredients</label><input type="text" id="m-ing" placeholder="e.g. slow-grilled goat, kachumbari, ugali"/></div>
+        <div class="row2">
+          <div class="field"><label>Tone</label>
+            <select id="m-tone"><option>Warm & friendly</option><option>Upscale & poetic</option><option>Bold & punchy</option><option>Simple & clear</option></select>
+          </div>
+          <div class="field"><label>Price (optional)</label><input type="text" id="m-price" placeholder="e.g. TSh 18,000"/></div>
+        </div>
+        <button class="btn-gen" id="btn-menu" onclick="generate('menu')">✨ Generate Description</button>
+        <div id="out-menu" style="display:none" class="output-card">
+          <div class="output-label">📋 Menu Description <button class="btn-copy" onclick="copyOut('out-menu-text',this)">Copy</button></div>
+          <div class="output-text" id="out-menu-text"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOCIAL TEMPLATE -->
+    <div id="sub-panel-social" class="sub-panel" style="display:none">
+      <div class="tool-card">
+        <p class="tool-title">Social Media Caption Generator</p>
+        <p class="tool-sub">Generate ready-to-post captions for any platform instantly.</p>
+        <div class="row2">
+          <div class="field"><label>Post type</label>
+            <select id="s-type"><option>Daily special</option><option>New menu item</option><option>Weekend promotion</option><option>Behind the scenes</option><option>Customer shoutout</option><option>Holiday/event</option></select>
+          </div>
+          <div class="field"><label>Platform</label>
+            <select id="s-platform"><option>Instagram</option><option>Facebook</option><option>WhatsApp status</option><option>TikTok</option><option>Twitter/X</option></select>
+          </div>
+        </div>
+        <div class="field"><label>What's the post about? *</label><textarea id="s-context" placeholder="e.g. Friday fish fry — whole tilapia, chips and salad for TSh 12,000. Only this weekend."></textarea></div>
+        <div class="field"><label>Restaurant name (optional)</label><input type="text" id="s-rname" placeholder="e.g. Mama Jiko's Kitchen"/></div>
+        <button class="btn-gen" id="btn-social" onclick="generate('social')">✨ Generate Caption</button>
+        <div id="out-social" style="display:none" class="output-card">
+          <div class="output-label">📱 Social Caption <button class="btn-copy" onclick="copyOut('out-social-text',this)">Copy</button></div>
+          <div class="output-text" id="out-social-text"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVIEW TEMPLATE -->
+    <div id="sub-panel-review" class="sub-panel" style="display:none">
+      <div class="tool-card">
+        <p class="tool-title">Review Reply Generator</p>
+        <p class="tool-sub">Respond to customer reviews professionally — reply appears on screen ready to copy.</p>
+        <div class="field"><label>Customer review *</label><textarea id="r-review" placeholder="Paste the customer review text here..." style="min-height:100px"></textarea></div>
+        <div class="row2">
+          <div class="field"><label>Star rating</label>
+            <select id="r-stars"><option value="5">⭐⭐⭐⭐⭐ 5 stars</option><option value="4">⭐⭐⭐⭐ 4 stars</option><option value="3">⭐⭐⭐ 3 stars</option><option value="2">⭐⭐ 2 stars</option><option value="1">⭐ 1 star</option></select>
+          </div>
+          <div class="field"><label>Reply tone</label>
+            <select id="r-tone"><option>Warm & grateful</option><option>Professional & concise</option><option>Apologetic & caring</option><option>Upbeat & friendly</option></select>
+          </div>
+        </div>
+        <button class="btn-gen" id="btn-review" onclick="generate('review')">✨ Generate Reply</button>
+        <div id="out-review" style="display:none" class="output-card">
+          <div class="output-label">⭐ Review Reply <button class="btn-copy" onclick="copyOut('out-review-text',this)">Copy</button></div>
+          <div class="output-text" id="out-review-text"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="app-panel-settings" class="app-panel">
+    <div class="tool-card">
+      <p class="tool-title">Settings</p>
+      <div class="field">
+        <label>Account Plan</label>
+        <input type="text" id="set-plan" readonly />
+      </div>
+      <div class="field">
+        <label>Client Name</label>
+        <input type="text" id="set-client" readonly />
+      </div>
+      <div class="field">
+        <label>Expiry Date</label>
+        <input type="text" id="set-expiry" readonly />
       </div>
     </div>
   </div>
 
   <!-- ADMIN -->
   <div id="app-panel-admin" class="app-panel">
-    <div class="admin-card">
-      <p class="admin-card-title">📊 Dashboard</p>
-      <div class="stats-row" id="stats-row"></div>
+    <div class="app-tabs" style="padding:0; margin-bottom:1.5rem; background:var(--cream); border-radius:var(--r);">
+      <button class="app-tab active" onclick="switchAdminTab('codes',this)">🔑 Access Codes</button>
+      <button class="app-tab" onclick="switchAdminTab('ai',this)">🧠 AI Center</button>
     </div>
-    <div class="admin-card">
-      <p class="admin-card-title">⚡ Generate Access Code</p>
-      <div class="gen-form">
-        <div class="field"><label>Plan</label>
-          <select id="gen-plan"><option value="Starter">Starter — TSh 30k (30 gen)</option><option value="Growth">Growth — TSh 60k (100 gen)</option><option value="Premium">Premium — TSh 100k (Unlimited)</option><option value="Promo">Promo — Free (10 gen)</option></select>
-        </div>
-        <div class="field"><label>Client name</label><input type="text" id="gen-client" placeholder="e.g. Mama Jiko"/></div>
-        <div class="field"><label>Days valid</label>
-          <select id="gen-days"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option></select>
-        </div>
-        <button class="btn-gen-code" onclick="generateCode()">Generate</button>
+
+    <!-- ACCESS CODES SUB-PANEL -->
+    <div id="admin-panel-codes" class="admin-sub-panel active">
+      <div class="admin-card">
+        <p class="admin-card-title">📊 Dashboard</p>
+        <div class="stats-row" id="stats-row"></div>
       </div>
-      <div class="gen-out" id="gen-out">
-        <div class="gen-code-val" id="gen-code-val"></div>
-        <div class="gen-code-meta" id="gen-code-meta"></div>
-        <button class="btn-copy" onclick="copyGenCode()" style="margin-top:8px;">📋 Copy code</button>
-        <a id="wa-code-link" href="#" target="_blank" class="wa-btn">💬 Send via WhatsApp</a>
+      <div class="admin-card">
+        <p class="admin-card-title">⚡ Generate Access Code</p>
+        <div class="gen-form">
+          <div class="field"><label>Plan</label>
+            <select id="gen-plan"><option value="Starter">Starter — TSh 30k (30 gen)</option><option value="Growth">Growth — TSh 60k (100 gen)</option><option value="Premium">Premium — TSh 100k (Unlimited)</option><option value="Promo">Promo — Free (10 gen)</option></select>
+          </div>
+          <div class="field"><label>Client name</label><input type="text" id="gen-client" placeholder="e.g. Mama Jiko"/></div>
+          <div class="field"><label>Days valid</label>
+            <select id="gen-days"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option></select>
+          </div>
+          <button class="btn-gen-code" onclick="generateCode()">Generate</button>
+        </div>
+        <div class="gen-out" id="gen-out">
+          <div class="gen-code-val" id="gen-code-val"></div>
+          <div class="gen-code-meta" id="gen-code-meta"></div>
+          <button class="btn-copy" onclick="copyGenCode()" style="margin-top:8px;">📋 Copy code</button>
+          <a id="wa-code-link" href="#" target="_blank" class="wa-btn">💬 Send via WhatsApp</a>
+        </div>
+      </div>
+      <div class="admin-card">
+        <p class="admin-card-title">🔑 All Access Codes</p>
+        <table class="code-table">
+          <thead><tr><th>Code</th><th>Plan</th><th>Client</th><th>Expiry</th><th>Used</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="code-tbody"></tbody>
+        </table>
       </div>
     </div>
-    <div class="admin-card">
-      <p class="admin-card-title">🔑 All Access Codes</p>
-      <table class="code-table">
-        <thead><tr><th>Code</th><th>Plan</th><th>Client</th><th>Expiry</th><th>Used</th><th>Status</th><th>Actions</th></tr></thead>
-        <tbody id="code-tbody"></tbody>
-      </table>
+
+    <!-- AI CENTER SUB-PANEL -->
+    <div id="admin-panel-ai" class="admin-sub-panel" style="display:none">
+      <div id="ai-admin-auth" style="display:none;" class="admin-card">
+        <p class="admin-card-title">🔐 Admin Authentication Required</p>
+        <div class="field">
+          <label>Admin Token</label>
+          <input type="password" id="admin-token-input" placeholder="Enter ADMIN_TOKEN"/>
+        </div>
+        <button class="btn-gen-code" onclick="saveAdminToken()">Authenticate</button>
+      </div>
+
+      <div id="ai-center-content">
+        <div class="admin-card">
+          <p class="admin-card-title">🚀 AI Performance (Last 24h)</p>
+          <div class="stats-row">
+            <div class="stat-box"><div class="stat-num" id="ai-total-reqs">0</div><div class="stat-label">Requests</div></div>
+            <div class="stat-box"><div class="stat-num" id="ai-avg-latency">0ms</div><div class="stat-label">Avg Latency</div></div>
+            <div class="stat-box"><div class="stat-num" id="ai-avg-quality">0%</div><div class="stat-label">Quality Score</div></div>
+            <div class="stat-box"><div class="stat-num" id="ai-total-cost">$0.00</div><div class="stat-label">Total Cost</div></div>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <p class="admin-card-title">💰 Cost by Module</p>
+          <div id="ai-module-costs" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+
+        <div class="admin-card">
+          <p class="admin-card-title">📝 Prompt Registry</p>
+          <table class="code-table">
+            <thead><tr><th>Module</th><th>Name</th><th>Version</th><th>Prompt Snippet</th></tr></thead>
+            <tbody id="ai-prompts-tbody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
+// ══ CONFIG ══
+/**
+ * Set this to your Cloudflare Worker URL, e.g., 'https://rcs-worker.your-subdomain.workers.dev'
+ * Leave as empty string if the Worker and the frontend are on the same domain (relative paths).
+ */
+let WORKER_URL = '';
+
 // ══ PLAN LIMITS ══
 const LIMITS = { Starter:30, Growth:100, Premium:Infinity, Promo:10, Admin:Infinity };
 
@@ -391,6 +808,8 @@ const daysLeft=e=>Math.ceil((new Date(e)-today())/(1000*60*60*24));
 const isExpired=e=>daysLeft(e)<=0;
 
 // ══ CODES DATABASE ══
+let LOCAL_CAMPAIGNS = JSON.parse(localStorage.getItem('RCS_CAMPAIGNS') || '{}');
+let LOCAL_REVIEWS = JSON.parse(localStorage.getItem('RCS_REVIEWS') || '{}');
 let CODES={
   'ADMIN000':{plan:'Admin',   client:'Lefking Admin',  expiry:fmtDate(addDays(today(),3650)),active:true,used:0},
   'RCST1234':{plan:'Starter', client:'Demo Starter',   expiry:fmtDate(addDays(today(),30)), active:true,used:0},
@@ -431,16 +850,57 @@ function launchToolkit(){
   if(currentUser.plan==='Admin') document.getElementById('admin-tab').style.display='inline-block';
   updateUsageBar();
   window.scrollTo(0,0);
+  syncCampaigns();
+  syncReviews();
+  switchTab('dashboard', document.querySelector('[onclick*=\'dashboard\']'));
+}
+
+async function syncReviews() {
+  if(!currentUser) return;
+  try {
+    const baseUrl = WORKER_URL || '';
+    const url = baseUrl.replace(/\/$/, '') + '/api/reviews';
+    const res = await fetch(url, {
+      headers: { 'X-Access-Code': currentUser.code }
+    });
+    if(res.ok) {
+      const data = await res.json();
+      data.reviews.forEach(r => {
+        if(!LOCAL_REVIEWS[r.id]) LOCAL_REVIEWS[r.id] = r;
+        else Object.assign(LOCAL_REVIEWS[r.id], r);
+      });
+      localStorage.setItem('RCS_REVIEWS', JSON.stringify(LOCAL_REVIEWS));
+      renderDashboard();
+    }
+  } catch(e) { console.warn('Sync reviews failed:', e); }
+}
+
+async function syncCampaigns() {
+  if(!currentUser) return;
+  try {
+    const baseUrl = WORKER_URL || '';
+    const url = baseUrl.replace(/\/$/, '') + '/api/campaigns';
+    const res = await fetch(url, {
+      headers: { 'X-Access-Code': currentUser.code }
+    });
+    if(res.ok) {
+      const data = await res.json();
+      data.campaigns.forEach(c => {
+        LOCAL_CAMPAIGNS[c.id] = c;
+      });
+      localStorage.setItem('RCS_CAMPAIGNS', JSON.stringify(LOCAL_CAMPAIGNS));
+      renderDashboard();
+      renderCampaigns();
+    }
+  } catch(e) {
+    console.warn('Sync failed:', e);
+  }
 }
 
 function logout(){
   currentUser=null;
   document.getElementById('landing').style.display='block';
   document.getElementById('toolkit').style.display='none';
-  document.querySelectorAll('.app-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.app-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelector('.app-tab').classList.add('active');
-  document.getElementById('app-panel-menu').classList.add('active');
 }
 
 // ══ USAGE BAR ══
@@ -491,6 +951,550 @@ function switchTab(name,el){
   el.classList.add('active');
   document.getElementById('app-panel-'+name).classList.add('active');
   if(name==='admin') renderAdmin();
+  if(name==='dashboard') renderDashboard();
+  if(name==='campaigns') renderCampaigns();
+  if(name==='reviews') renderReviews();
+  if(name==='analytics') renderAnalytics();
+  if(name==='settings') renderSettings();
+}
+
+function switchSubTab(name, el) {
+  const templates = document.getElementById('app-panel-templates');
+  templates.querySelectorAll('.app-tab').forEach(t=>t.classList.remove('active'));
+  templates.querySelectorAll('.sub-panel').forEach(p=>p.style.display='none');
+  el.classList.add('active');
+  document.getElementById('sub-panel-'+name).style.display='block';
+}
+
+function renderSettings() {
+  if(!currentUser) return;
+  document.getElementById('set-plan').value = currentUser.plan;
+  document.getElementById('set-client').value = currentUser.client;
+  document.getElementById('set-expiry').value = currentUser.expiry;
+}
+
+async function generateCampaign() {
+  if(!checkLimit()){
+    alert('You have used all your generations this month. Please upgrade via WhatsApp: 0768 777 057');
+    return;
+  }
+
+  const name = document.getElementById('c-name').value.trim();
+  const desc = document.getElementById('c-desc').value.trim();
+  if(!name || !desc) { alert('Please enter at least a name and description.'); return; }
+
+  const btn = document.getElementById('btn-campaign');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Generating Strategy...';
+
+  const body = {
+    business_type: document.getElementById('c-type').value,
+    promotion_name: name,
+    promotion_description: desc,
+    offer: document.getElementById('c-offer').value,
+    target_audience: document.getElementById('c-audience').value,
+    campaign_goal: document.getElementById('c-goal').value,
+    code: currentUser.code
+  };
+
+  try {
+    const baseUrl = WORKER_URL || '';
+    const url = baseUrl.replace(/\/$/, '') + '/api/generate/campaign';
+    // Attempt worker call
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Access-Code': currentUser.code },
+      body: JSON.stringify(body)
+    });
+
+    if(res.ok) {
+      const data = await res.json();
+      LOCAL_CAMPAIGNS[data.campaign.id] = data.campaign;
+      localStorage.setItem('RCS_CAMPAIGNS', JSON.stringify(LOCAL_CAMPAIGNS));
+      incrementUsage();
+      viewCampaign(data.campaign.id);
+    } else {
+      throw new Error('API Error');
+    }
+  } catch(e) {
+    alert('Direct worker connection failed. Campaigns require a connected worker.');
+    console.error(e);
+  }
+  btn.disabled = false;
+  btn.innerHTML = orig;
+}
+
+function renderDashboard() {
+  if(!currentUser) return;
+  const campaigns = Object.values(LOCAL_CAMPAIGNS).filter(c => c.code === currentUser.code);
+  const reviews = Object.values(LOCAL_REVIEWS).filter(r => r.code === currentUser.code);
+
+  const campaignAssets = campaigns.reduce((acc, c) => acc + (c.output ? 5 : 0), 0);
+  const reviewAssets = reviews.reduce((acc, r) => acc + (r.analysis ? 2 : 0), 0); // Analysis + Response
+  const totalAssets = campaignAssets + reviewAssets;
+
+  const limit = LIMITS[currentUser.plan] || 30;
+  const used = (CODES[currentUser.code].used || 0);
+  const usagePct = limit === Infinity ? 0 : Math.round((used/limit) * 100);
+
+  document.getElementById('stat-campaigns').textContent = campaigns.length;
+  document.getElementById('stat-reviews').textContent = reviews.length;
+  document.getElementById('stat-content').textContent = totalAssets;
+  document.getElementById('stat-usage').textContent = usagePct + '%';
+
+  const activity = document.getElementById('recent-activity');
+  const allItems = [
+    ...campaigns.map(c => ({ name: `Campaign: ${c.name}`, date: c.created_at })),
+    ...reviews.map(r => ({ name: `Review: ${r.source} (${r.rating}★)`, date: r.created_at }))
+  ];
+
+  if(allItems.length === 0) {
+    activity.textContent = 'No recent activity to show.';
+  } else {
+    activity.innerHTML = allItems.sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5).map(i => `
+      <div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #eee">
+        <strong>${i.name}</strong><br>
+        <span style="font-size:10px;color:var(--tl)">${i.date}</span>
+      </div>
+    `).join('');
+  }
+}
+
+async function renderReviews() {
+  if(!currentUser) return;
+  await syncReviews();
+  const reviews = Object.values(LOCAL_REVIEWS).filter(r => r.code === currentUser.code);
+  const list = document.getElementById('review-list');
+  if(reviews.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--tl)">No reviews analyzed yet. Click "+ Analyze Review" to start.</div>';
+  } else {
+    list.innerHTML = reviews.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(r => `
+      <div class="campaign-list-item" onclick="viewReview('${r.id}')">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <strong>${r.source || 'Review'}</strong>
+            <span style="color:var(--gold);font-size:10px">${'★'.repeat(r.rating || 0)}</span>
+            ${r.escalated ? '<span style="color:var(--err);font-size:10px;font-weight:bold">⚠️ ESCALATED</span>' : ''}
+          </div>
+          <div class="campaign-meta">${r.text ? r.text.substring(0, 60) + '...' : ''}</div>
+          <div class="campaign-meta">${r.created_at}</div>
+        </div>
+        <div style="font-size:18px">→</div>
+      </div>
+    `).join('');
+  }
+}
+
+function showNewReviewForm() {
+  document.querySelectorAll('.app-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('app-panel-new-review').classList.add('active');
+  document.getElementById('r-text').value = '';
+}
+
+async function createReview() {
+  if(!checkLimit()){
+    alert('Usage limit reached.');
+    return;
+  }
+
+  const text = document.getElementById('r-text').value.trim();
+  if(!text) { alert('Please paste the review text.'); return; }
+
+  const btn = document.getElementById('btn-create-review');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Analyzing...';
+
+  const body = {
+    review_source: document.getElementById('r-source').value,
+    review_rating: document.getElementById('r-rating').value,
+    review_text: text,
+    property_name: document.getElementById('r-pname').value,
+    property_type: document.getElementById('r-ptype').value,
+    code: currentUser.code
+  };
+
+  try {
+    const baseUrl = WORKER_URL || '';
+    const url = baseUrl.replace(/\/$/, '') + '/api/reviews';
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Access-Code': currentUser.code },
+      body: JSON.stringify(body)
+    });
+
+    if(res.ok) {
+      const data = await res.json();
+      LOCAL_REVIEWS[data.review.id] = data.review;
+      localStorage.setItem('RCS_REVIEWS', JSON.stringify(LOCAL_REVIEWS));
+      incrementUsage();
+      viewReview(data.review.id);
+    } else {
+      const e = await res.json();
+      alert('Error: ' + (e.error || 'Unknown error'));
+    }
+  } catch(e) {
+    alert('Review analysis failed. Check worker connection.');
+  }
+  btn.disabled = false;
+  btn.innerHTML = orig;
+}
+
+async function viewReview(id) {
+  let r = LOCAL_REVIEWS[id];
+  if(!r) return;
+
+  // Fetch full if missing details
+  if(!r.analysis) {
+    try {
+      const baseUrl = WORKER_URL || '';
+      const url = baseUrl.replace(/\/$/, '') + '/api/reviews/' + id;
+      const res = await fetch(url, { headers: { 'X-Access-Code': currentUser.code } });
+      if(res.ok) {
+        const data = await res.json();
+        r = data.review;
+        LOCAL_REVIEWS[id] = r;
+        localStorage.setItem('RCS_REVIEWS', JSON.stringify(LOCAL_REVIEWS));
+      }
+    } catch(e) {}
+  }
+
+  document.querySelectorAll('.app-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('app-panel-review-detail').classList.add('active');
+
+  document.getElementById('rev-source').textContent = r.source || 'Review';
+  document.getElementById('rev-rating').textContent = '★'.repeat(r.rating || 0);
+  document.getElementById('rev-text').textContent = `"${r.text}"`;
+  document.getElementById('rev-date').textContent = 'Received: ' + r.created_at;
+
+  const esc = document.getElementById('rev-escalation-badge');
+  if(r.analysis?.escalation?.escalate) {
+    esc.innerHTML = `<span class="esc-badge-ui esc-yes">⚠️ ESCALATED: ${r.analysis.escalation.reason}</span>`;
+  } else {
+    esc.innerHTML = `<span class="esc-badge-ui esc-no">✅ Resolved / Standard</span>`;
+  }
+
+  document.getElementById('rev-sentiment').textContent = r.analysis?.sentiment_label || 'N/A';
+  document.getElementById('rev-sentiment-score').textContent = r.analysis?.sentiment_score || '0';
+  document.getElementById('rev-risk').textContent = r.analysis?.risk_score || '0';
+  document.getElementById('rev-topics').textContent = (r.analysis?.topics || []).join(', ');
+  document.getElementById('rev-summary').textContent = r.analysis?.summary || '';
+  document.getElementById('rev-draft').textContent = r.response?.draft || '';
+}
+
+function switchIntelTab(name, el) {
+  const analytics = document.getElementById('app-panel-analytics');
+  analytics.querySelectorAll('.app-tab').forEach(t=>t.classList.remove('active'));
+  analytics.querySelectorAll('.intel-panel').forEach(p=>p.style.display='none');
+  el.classList.add('active');
+  document.getElementById('intel-panel-'+name).style.display='block';
+  if(name==='executive') renderExecutiveDashboard();
+  if(name==='marketing') renderMarketingAnalytics();
+  if(name==='reputation') renderReputationAnalytics();
+  if(name==='revenue') renderRevenueAnalytics();
+  if(name==='insights') renderInsightsCenter();
+}
+
+async function renderExecutiveDashboard() {
+  if(!currentUser) return;
+  try {
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/dashboard', { headers: { 'X-Access-Code': currentUser.code } });
+    if(res.ok) {
+      const data = await res.json();
+      const m = data.metrics;
+      document.getElementById('exec-campaigns').textContent = m.campaignsCreated;
+      document.getElementById('exec-reviews').textContent = m.reviewsProcessed;
+      const usagePct = m.limit === -1 ? 0 : Math.round((m.usage / m.limit) * 100);
+      document.getElementById('exec-usage').textContent = usagePct + '%';
+      document.getElementById('exec-days').textContent = daysLeft(m.expiry);
+    }
+  } catch(e) {}
+}
+
+async function renderMarketingAnalytics() {
+  if(!currentUser) return;
+  try {
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/analytics/marketing', { headers: { 'X-Access-Code': currentUser.code } });
+    if(res.ok) {
+      const data = await res.json();
+      const a = data.analytics;
+      document.getElementById('mkt-total').textContent = a.totalCampaigns;
+      document.getElementById('mkt-assets').textContent = a.totalAssetsGenerated;
+      document.getElementById('mkt-score').textContent = a.marketingScore;
+      const types = document.getElementById('mkt-types');
+      types.innerHTML = Object.entries(a.campaignDistribution).map(([t,c]) => `<span class="topic-tag">${t}: ${c}</span>`).join('');
+    }
+  } catch(e) {}
+}
+
+async function renderReputationAnalytics() {
+  if(!currentUser) return;
+  try {
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/reputation', { headers: { 'X-Access-Code': currentUser.code } });
+    if(res.ok) {
+      const data = await res.json();
+      const m = data.metrics;
+      document.getElementById('ana-rating').textContent = m.avgRating;
+      document.getElementById('ana-count').textContent = m.totalReviews;
+      document.getElementById('ana-pos').textContent = m.positive;
+      document.getElementById('ana-neg').textContent = m.negative;
+      document.getElementById('ana-topics').innerHTML = m.topTopics.map(t => `<span class="topic-tag">${t}</span>`).join('');
+      const escRate = m.totalReviews > 0 ? Math.round((m.escalated / m.totalReviews) * 100) : 0;
+      document.getElementById('ana-esc-text').textContent = escRate + '%';
+      document.getElementById('ana-esc-fill').style.width = escRate + '%';
+    }
+  } catch(e) {}
+}
+
+async function renderRevenueAnalytics() {
+  if(!currentUser) return;
+  try {
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/analytics/revenue', { headers: { 'X-Access-Code': currentUser.code } });
+    if(res.ok) {
+      const data = await res.json();
+      const m = data.metrics;
+      if (currentUser.plan === 'Admin') {
+        document.getElementById('rev-title').textContent = 'Global Revenue Dashboard';
+        document.getElementById('rev-mrr').textContent = '$' + m.mrr;
+        document.getElementById('rev-arr').textContent = '$' + m.arr;
+        document.getElementById('rev-subs').textContent = m.activeSubscriptions;
+        document.getElementById('rev-mrr-label').textContent = 'Monthly Recurring';
+        document.getElementById('rev-arr-label').textContent = 'Annual Recurring';
+        document.getElementById('rev-subs-label').textContent = 'Active SaaS Subs';
+      } else {
+        document.getElementById('rev-title').textContent = 'Subscription Value';
+        document.getElementById('rev-mrr').textContent = '$' + m.monthlySubscription;
+        document.getElementById('rev-arr').textContent = '$' + m.estimatedValue;
+        document.getElementById('rev-subs').textContent = 'Active';
+        document.getElementById('rev-mrr-label').textContent = 'Plan Price';
+        document.getElementById('rev-arr-label').textContent = 'Value Generated';
+        document.getElementById('rev-subs-label').textContent = 'Status';
+      }
+    }
+  } catch(e) {}
+}
+
+async function renderInsightsCenter() {
+  if(!currentUser) return;
+  try {
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/insights', { headers: { 'X-Access-Code': currentUser.code } });
+    if(res.ok) {
+      const data = await res.json();
+      const list = document.getElementById('insights-list');
+      if(data.reports.length === 0) {
+        list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--tl);font-size:12px;">No intelligence reports generated yet.</div>';
+      } else {
+        list.innerHTML = data.reports.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).map(r => `
+          <div class="campaign-list-item" onclick="viewInsightReport('${r.id}')" style="padding:10px;">
+            <div style="font-size:12px;">Intelligence Report: ${new Date(r.created_at).toLocaleString()}</div>
+            <div style="font-size:14px">→</div>
+          </div>
+        `).join('');
+      }
+    }
+  } catch(e) {}
+}
+
+async function generateInsights() {
+  const btn = document.getElementById('btn-gen-insights');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Generating Insights...';
+
+  try {
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/insights/generate', {
+      method: 'POST',
+      headers: { 'X-Access-Code': currentUser.code }
+    });
+    if(res.ok) {
+      const data = await res.json();
+      displayInsightReport(data.report);
+      renderInsightsCenter();
+    } else {
+      alert('Insight generation failed.');
+    }
+  } catch(e) {
+    alert('Failed to connect to Intelligence Engine.');
+  }
+  btn.disabled = false;
+  btn.innerHTML = orig;
+}
+
+async function viewInsightReport(id) {
+  try {
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/insights/' + id, { headers: { 'X-Access-Code': currentUser.code } });
+    if(res.ok) {
+      const data = await res.json();
+      displayInsightReport(data.report);
+    }
+  } catch(e) {}
+}
+
+function displayInsightReport(report) {
+  const display = document.getElementById('insights-report-display');
+  const content = document.getElementById('report-content');
+  document.getElementById('report-date').textContent = 'Intelligence Report: ' + new Date(report.created_at).toLocaleString();
+
+  const d = report.data;
+  content.innerHTML = `
+    <div style="margin-bottom:1.5rem;">
+      <p style="font-weight:bold; color:var(--gd);">Executive Summary</p>
+      <p>${d.executive_summary}</p>
+    </div>
+    <div class="row2">
+      <div>
+        <p style="font-weight:bold; color:var(--gd);">Key Wins</p>
+        <ul style="padding-left:1.2rem; margin-top:0.5rem;">${d.key_wins.map(w=>`<li>${w}</li>`).join('')}</ul>
+      </div>
+      <div>
+        <p style="font-weight:bold; color:var(--err);">Critical Risks</p>
+        <ul style="padding-left:1.2rem; margin-top:0.5rem;">${d.critical_risks.map(r=>`<li>${r}</li>`).join('')}</ul>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem; background:var(--cream); padding:1rem; border-radius:var(--r);">
+      <p style="font-weight:bold; color:var(--gd);">Strategic Next Actions</p>
+      <ol style="padding-left:1.2rem; margin-top:0.5rem;">${d.next_actions.map(a=>`<li>${a}</li>`).join('')}</ol>
+    </div>
+  `;
+  display.style.display = 'block';
+  display.scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderAnalytics() {
+  // Trigger sub-tab rendering
+  const activeTab = document.querySelector('#app-panel-analytics .app-tab.active');
+  if (activeTab) activeTab.click();
+}
+
+function renderCampaigns() {
+  if(!currentUser) return;
+  const campaigns = Object.values(LOCAL_CAMPAIGNS).filter(c => c.code === currentUser.code);
+  const list = document.getElementById('campaign-list');
+  if(campaigns.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--tl)">No campaigns created yet. Click "+ New Campaign" to start.</div>';
+  } else {
+    list.innerHTML = campaigns.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(c => `
+      <div class="campaign-list-item" onclick="viewCampaign('${c.id}')">
+        <div>
+          <strong>${c.name}</strong>
+          <div class="campaign-meta">${c.created_at}</div>
+        </div>
+        <div style="font-size:18px">→</div>
+      </div>
+    `).join('');
+  }
+}
+
+function showNewCampaignForm() {
+  document.querySelectorAll('.app-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('app-panel-new-campaign').classList.add('active');
+  // Clear form
+  document.getElementById('c-name').value = '';
+  document.getElementById('c-desc').value = '';
+  document.getElementById('c-offer').value = '';
+  document.getElementById('c-audience').value = '';
+  document.getElementById('c-goal').value = '';
+}
+
+let activeCampaign = null;
+
+async function viewCampaign(id) {
+  let c = LOCAL_CAMPAIGNS[id];
+  if(!c) return;
+
+  // If summary only, fetch full
+  if(!c.output) {
+    try {
+      const baseUrl = WORKER_URL || '';
+      const url = baseUrl.replace(/\/$/, '') + '/api/campaigns/' + id;
+      const res = await fetch(url, {
+        headers: { 'X-Access-Code': currentUser.code }
+      });
+      if(res.ok) {
+        const data = await res.json();
+        c = data.campaign;
+        LOCAL_CAMPAIGNS[id] = c;
+        localStorage.setItem('RCS_CAMPAIGNS', JSON.stringify(LOCAL_CAMPAIGNS));
+      }
+    } catch(e) {
+      console.error('Fetch detail failed:', e);
+    }
+  }
+
+  activeCampaign = c;
+  if(!c.output) { alert('Campaign data not loaded.'); return; }
+  document.querySelectorAll('.app-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('app-panel-campaign-results').classList.add('active');
+
+  document.getElementById('res-name').textContent = c.name;
+  document.getElementById('res-date').textContent = 'Created: ' + c.created_at;
+
+  const o = c.output;
+  // Brief
+  document.getElementById('res-brief').innerHTML = `
+    <strong>Theme:</strong> ${o.campaign_brief.theme}<br>
+    <strong>Key Message:</strong> ${o.campaign_brief.key_message}<br>
+    <strong>Target Audience:</strong> ${o.campaign_brief.target_audience}<br>
+    <strong>Marketing Angle:</strong> ${o.campaign_brief.marketing_angle}<br>
+    <strong>CTA:</strong> ${o.campaign_brief.cta}
+  `;
+
+  // Social
+  document.getElementById('res-insta').textContent = o.social_media.instagram;
+  document.getElementById('res-fb').textContent = o.social_media.facebook;
+  document.getElementById('res-li').textContent = o.social_media.linkedin;
+
+  // Email
+  document.getElementById('res-email').innerHTML = `
+    <strong>Subject:</strong> ${o.email_campaign.subject}<br>
+    <strong>Preview:</strong> ${o.email_campaign.preview}<br><br>
+    ${o.email_campaign.body.replace(/\n/g, '<br>')}<br><br>
+    <strong>CTA:</strong> ${o.email_campaign.cta}
+  `;
+
+  // Calendar
+  document.getElementById('res-calendar').innerHTML = o.calendar.map(d => `
+    <tr>
+      <td>Day ${d.day}</td>
+      <td>${d.platform}</td>
+      <td>${d.topic} (${d.content_type})</td>
+      <td>${d.cta}</td>
+    </tr>
+  `).join('');
+}
+
+function copySection(id) {
+  const el = document.getElementById(id);
+  const text = el.innerText || el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Copied to clipboard!');
+  });
+}
+
+function exportCampaign(type) {
+  if(!activeCampaign) return;
+  const name = activeCampaign.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  if(type === 'json') {
+    const data = JSON.stringify(activeCampaign, null, 2);
+    const blob = new Blob([data], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `campaign_${name}.json`;
+    a.click();
+  } else {
+    let csv = 'Day,Platform,Topic,Content Type,CTA\n';
+    activeCampaign.output.calendar.forEach(d => {
+      csv += `${d.day},"${d.platform}","${d.topic}","${d.content_type}","${d.cta}"\n`;
+    });
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `calendar_${name}.csv`;
+    a.click();
+  }
 }
 
 // ══ AI GENERATION ══
@@ -534,14 +1538,20 @@ async function generate(type){
   outCard.style.display='none';
 
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const baseUrl = WORKER_URL || '';
+    const url = baseUrl ? baseUrl.replace(/\/$/, '') + '/generate' : '/generate';
+    const res=await fetch(url, {
       method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})
+      headers:{'Content-Type':'application/json', 'X-Access-Code': currentUser.code},
+      body:JSON.stringify({prompt, code: currentUser.code})
     });
-    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'API error '+res.status);}
+    if(!res.ok){
+      // Try direct if worker not set/fails? No, original fallback was just a message.
+      const e=await res.json().catch(()=>({}));
+      throw new Error(e.error?.message||'API error '+res.status);
+    }
     const data=await res.json();
-    const text=data.content.map(b=>b.text||'').join('').trim();
+    const text=data.text;
     outText.textContent=text;
     outCard.style.background='#f0faf5';
     outCard.style.border='1px solid #9fe1cb';
@@ -553,7 +1563,6 @@ async function generate(type){
     outCard.style.background='#fffbf0';
     outCard.style.border='1px solid #fde9a8';
     outCard.style.display='block';
-    // Still count usage on fallback? No — don't penalise for browser restriction
   }
   btn.disabled=false;
   btn.innerHTML=orig;
@@ -590,6 +1599,81 @@ function copyGenCode(){navigator.clipboard.writeText(document.getElementById('ge
 function revokeCode(code){if(confirm('Deactivate '+code+'?')){CODES[code].active=false;renderAdmin();}}
 function renewCode(code){const d=parseInt(prompt('Renew for how many days?','30'))||30;CODES[code].expiry=fmtDate(addDays(today(),d));CODES[code].active=true;CODES[code].used=0;alert('Renewed! Usage reset to 0.');renderAdmin();}
 function copyCode(code){navigator.clipboard.writeText(code).then(()=>alert('Copied: '+code));}
+
+function switchAdminTab(name, el) {
+  const admin = document.getElementById('app-panel-admin');
+  admin.querySelectorAll('.app-tab').forEach(t=>t.classList.remove('active'));
+  admin.querySelectorAll('.admin-sub-panel').forEach(p=>p.style.display='none');
+  el.classList.add('active');
+  document.getElementById('admin-panel-'+name).style.display='block';
+  if (name === 'ai') renderAICenter();
+}
+
+let ADMIN_TOKEN = localStorage.getItem('RCS_ADMIN_TOKEN') || '';
+
+function saveAdminToken() {
+  const token = document.getElementById('admin-token-input').value.trim();
+  if(!token) return;
+  ADMIN_TOKEN = token;
+  localStorage.setItem('RCS_ADMIN_TOKEN', token);
+  renderAICenter();
+}
+
+async function renderAICenter() {
+  if(!ADMIN_TOKEN) {
+    document.getElementById('ai-admin-auth').style.display = 'block';
+    document.getElementById('ai-center-content').style.display = 'none';
+    return;
+  }
+  document.getElementById('ai-admin-auth').style.display = 'none';
+  document.getElementById('ai-center-content').style.display = 'block';
+
+  try {
+    const headers = { 'X-Admin-Token': ADMIN_TOKEN };
+    const baseUrl = (WORKER_URL||'').replace(/\/$/, '');
+
+    // 1. Stats
+    const statsRes = await fetch(baseUrl + '/api/ai/analytics', { headers });
+    if(statsRes.ok) {
+      const data = await statsRes.json();
+      const a = data.analytics;
+      document.getElementById('ai-total-reqs').textContent = a.requests;
+      document.getElementById('ai-avg-latency').textContent = Math.round(a.latency) + 'ms';
+      document.getElementById('ai-avg-quality').textContent = Math.round(a.quality * 100) + '%';
+      document.getElementById('ai-total-cost').textContent = '$' + a.cost.toFixed(4);
+    }
+
+    // 2. Costs
+    const costRes = await fetch(baseUrl + '/api/ai/costs', { headers });
+    if(costRes.ok) {
+      const data = await costRes.json();
+      const list = document.getElementById('ai-module-costs');
+      list.innerHTML = data.costs.map(c => `
+        <div style="display:flex; justify-content:space-between; font-size:12px; padding:6px; background:var(--cream); border-radius:6px;">
+          <span><strong>${c.module_name}</strong> (${c.tokens} tokens)</span>
+          <span>$${c.cost.toFixed(4)}</span>
+        </div>
+      `).join('');
+    }
+
+    // 3. Prompts
+    const promptRes = await fetch(baseUrl + '/api/ai/prompts', { headers });
+    if(promptRes.ok) {
+      const data = await promptRes.json();
+      const tbody = document.getElementById('ai-prompts-tbody');
+      tbody.innerHTML = data.prompts.map(p => `
+        <tr>
+          <td>${p.module_name}</td>
+          <td>${p.prompt_name}</td>
+          <td>v${p.version_number}</td>
+          <td style="color:var(--tl)">${p.prompt_content.substring(0, 40)}...</td>
+        </tr>
+      `).join('');
+    }
+  } catch(e) {
+    console.error('AI Center error:', e);
+  }
+}
 
 function renderAdmin(){
   const all=Object.entries(CODES).filter(([,d])=>d.plan!=='Admin');

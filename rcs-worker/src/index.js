@@ -40,6 +40,28 @@ export default {
       if (path==='/generate'             && req.method==='POST') return handleGenerate(req,env);
       if (path==='/claim-promo'          && req.method==='POST') return handleClaimPromo(req,env);
       if (path==='/config/pricing'       && req.method==='GET')  return handleGetPricing(req,env);
+      // Campaigns (Sprint 2)
+      if (path==='/api/campaigns'        && req.method==='GET')  return handleGetCampaigns(req,env);
+      if (path.startsWith('/api/campaigns/') && req.method==='GET') return handleGetCampaignById(req,env);
+      if (path==='/api/generate/campaign' && req.method==='POST') return handleGenerateCampaign(req,env);
+      // Reviews (Sprint 3)
+      if (path==='/api/reviews'          && req.method==='POST') return handleCreateReview(req,env);
+      if (path==='/api/reviews'          && req.method==='GET')  return handleGetReviews(req,env);
+      if (path.startsWith('/api/reviews/') && req.method==='GET') return handleGetReviewById(req,env);
+      if (path==='/api/reputation'       && req.method==='GET')  return handleGetReputation(req,env);
+      // Intelligence (Sprint 5)
+      if (path==='/api/dashboard'        && req.method==='GET')  return handleGetDashboard(req,env);
+      if (path==='/api/analytics/marketing' && req.method==='GET') return handleGetMarketingAnalytics(req,env);
+      if (path==='/api/analytics/revenue'   && req.method==='GET') return handleGetRevenueAnalytics(req,env);
+      if (path==='/api/insights/generate'   && req.method==='POST') return handleGenerateInsights(req,env);
+      if (path==='/api/insights'         && req.method==='GET')  return handleGetInsights(req,env);
+      if (path.startsWith('/api/insights/') && req.method==='GET') return handleGetInsightById(req,env);
+      // AI Optimization (Sprint 6)
+      if (path==='/api/ai/prompts'       && req.method==='GET')  return handleGetPrompts(req,env);
+      if (path==='/api/ai/prompts'       && req.method==='POST') return handleCreatePrompt(req,env);
+      if (path==='/api/ai/evaluate'      && req.method==='POST') return handleEvaluateAI(req,env);
+      if (path==='/api/ai/analytics'     && req.method==='GET')  return handleGetAIAnalytics(req,env);
+      if (path==='/api/ai/costs'         && req.method==='GET')  return handleGetAICosts(req,env);
       // Payments
       if (path==='/clickpesa-create'     && req.method==='POST') return handleClickPesaCreate(req,env);
       if (path==='/clickpesa-callback'   && req.method==='POST') return handleClickPesaCallback(req,env);
@@ -149,6 +171,7 @@ async function handleGenerate(req, env) {
   if (!okIP)   return errR('Too many requests from your network.', 429, env);
   if (typeof prompt!=='string'||prompt.length>2000) return errR('Invalid prompt.', 400, env);
   const safe = prompt.trim().slice(0,2000);
+  const startTime = Date.now();
   let text='', source='';
   // Paid: Claude primary -> Gemini fallback. Promo: Gemini only.
   if (isPaid && env.ANTHROPIC_KEY) {
@@ -160,6 +183,15 @@ async function handleGenerate(req, env) {
     catch(e) { console.warn('Gemini failed:',e.message); }
   }
   if (!text) return errR('Writing service temporarily unavailable. Please try again shortly.', 503, env);
+
+  await trackAIUsage(env, {
+    orgId: code,
+    module: 'general',
+    model: source,
+    tokens: Math.ceil(text.length / 4),
+    latency: Date.now() - startTime
+  });
+
   cd.used = (cd.used||0)+1;
   await env.CODES_KV.put(code, JSON.stringify(cd));
   return jsonR({ success:true, text, source, isPaid }, 200, env);
@@ -242,6 +274,598 @@ async function handleGetPricing(req, env) {
     Promo:  {usd:0,  tzs:0,    kes:0,   limit:3,   days:7 },
   };
   return jsonR({ success:true, pricing }, 200, env);
+}
+
+// == CAMPAIGNS (Sprint 2) ==================================
+async function handleGetCampaigns(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const prefix = `campaign:${v.code}:`;
+  const list = await env.CODES_KV.list({ prefix });
+  const campaigns = [];
+  for (const key of list.keys) {
+    const data = await env.CODES_KV.get(key.name, 'json');
+    if (data) {
+      // For list view, we might not want the full output to save bandwidth
+      const { output, ...summary } = data;
+      campaigns.push(summary);
+    }
+  }
+  // Sort by created_at desc
+  campaigns.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  return jsonR({ success:true, campaigns }, 200, env);
+}
+
+async function handleGetCampaignById(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const id = new URL(req.url).pathname.split('/').pop();
+  if (!id) return errR('Missing campaign ID', 400, env);
+
+  const data = await env.CODES_KV.get(`campaign:${v.code}:${id}`, 'json');
+  if (!data) return errR('Campaign not found', 404, env);
+
+  return jsonR({ success:true, campaign: data }, 200, env);
+}
+
+async function handleGenerateCampaign(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const body = await req.json().catch(()=>({}));
+  const v = await validateCode(code || body.code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const { business_type, promotion_name, promotion_description, offer, target_audience, campaign_goal } = body;
+  if (!promotion_name || !promotion_description) return errR('Promotion name and description are required.', 400, env);
+
+  // Check usage limit
+  const { data:cd } = v;
+  const limit  = PLANS[cd.plan]?.limit ?? 30;
+  if (limit!==-1 && (cd.used||0)>=limit)
+    return errR('Monthly limit reached. Please upgrade your plan.', 429, env);
+
+  const prompt = `You are a Hospitality Campaign Strategist, Social Media Expert, Email Marketing Specialist, and Calendar Builder.
+Create a complete multi-channel marketing campaign for a ${business_type || 'hospitality business'}.
+
+Input Details:
+- Promotion Name: ${promotion_name}
+- Promotion Description: ${promotion_description}
+- Offer: ${offer || 'N/A'}
+- Target Audience: ${target_audience || 'General hospitality guests'}
+- Campaign Goal: ${campaign_goal || 'Increase bookings/visits'}
+
+Requirements:
+1. Campaign Brief: Theme, Key Message, Target Audience, Marketing Angle, CTA.
+2. Social Media Posts: Instagram Caption, Facebook Post, LinkedIn Post (Hospitality tone, include CTA).
+3. Email Campaign: Subject Line, Preview Text, Email Body, CTA.
+4. 30-Day Content Calendar: A list of 30 entries with Date (Day 1 to Day 30), Platform, Topic, Content Type, CTA.
+
+Output: Return ONLY a valid JSON object with the following structure:
+{
+  "campaign_brief": { "theme": "", "key_message": "", "target_audience": "", "marketing_angle": "", "cta": "" },
+  "social_media": { "instagram": "", "facebook": "", "linkedin": "" },
+  "email_campaign": { "subject": "", "preview": "", "body": "", "cta": "" },
+  "calendar": [ { "day": 1, "platform": "", "topic": "", "content_type": "", "cta": "" }, ... ]
+}
+
+Ensure the tone is professional, evocative, and aligned with hospitality standards. Write in English.`;
+
+  const startTime = Date.now();
+  let text = '', source = '';
+  const isPaid = PLANS[cd.plan]?.isPaid ?? false;
+
+  if (isPaid && env.ANTHROPIC_KEY) {
+    try { text = await callClaude(prompt, env.ANTHROPIC_KEY); source = 'claude'; }
+    catch (e) { console.warn('Claude failed:', e.message); }
+  }
+  if (!text && env.GEMINI_KEY) {
+    try { text = await callGemini(prompt, env.GEMINI_KEY); source = 'gemini'; }
+    catch (e) { console.warn('Gemini failed:', e.message); }
+  }
+
+  if (!text) return errR('Generation service unavailable.', 503, env);
+
+  // Sprint 6: Track Usage
+  await trackAIUsage(env, {
+    orgId: v.code,
+    module: 'campaign',
+    model: source,
+    tokens: Math.ceil(text.length / 4),
+    latency: Date.now() - startTime
+  });
+
+  try {
+    // Basic JSON cleanup if needed
+    const cleanJson = text.includes('```json') ? text.split('```json')[1].split('```')[0].trim() : text.trim();
+    const campaignData = JSON.parse(cleanJson);
+
+    // Save campaign (Persistence logic will be refined in the next step)
+    const campaignId = Date.now().toString();
+    const campaign = {
+      id: campaignId,
+      code: v.code,
+      name: promotion_name,
+      input: body,
+      output: campaignData,
+      created_at: nowD().toISOString()
+    };
+
+    await env.CODES_KV.put(`campaign:${v.code}:${campaignId}`, JSON.stringify(campaign));
+
+    // Increment usage
+    cd.used = (cd.used || 0) + 1;
+    await env.CODES_KV.put(v.code, JSON.stringify(cd));
+
+    return jsonR({ success: true, campaign, source }, 200, env);
+  } catch (e) {
+    console.error('JSON Parse Error:', e, text);
+    return errR('AI returned invalid JSON. Please try again.', 500, env);
+  }
+}
+
+// == REVIEWS (Sprint 3) ====================================
+async function handleGetReviews(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const prefix = `review:${v.code}:`;
+  const list = await env.CODES_KV.list({ prefix });
+  const reviews = [];
+  for (const key of list.keys) {
+    const data = await env.CODES_KV.get(key.name, 'json');
+    if (data) {
+      // Summary for list view
+      const { analysis, response, ...summary } = data;
+      reviews.push({ ...summary, sentiment: analysis?.sentiment_label, escalated: analysis?.escalation?.escalate });
+    }
+  }
+  reviews.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  return jsonR({ success:true, reviews }, 200, env);
+}
+
+async function handleGetReviewById(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const id = new URL(req.url).pathname.split('/').pop();
+  const data = await env.CODES_KV.get(`review:${v.code}:${id}`, 'json');
+  if (!data) return errR('Review not found', 404, env);
+
+  return jsonR({ success:true, review: data }, 200, env);
+}
+
+async function handleCreateReview(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const body = await req.json().catch(()=>({}));
+  const v = await validateCode(code || body.code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const { review_source, review_rating, review_text, property_type, property_name } = body;
+  if (!review_text) return errR('Review text is required.', 400, env);
+
+  // Check usage limit
+  const { data:cd } = v;
+  const limit  = PLANS[cd.plan]?.limit ?? 30;
+  if (limit!==-1 && (cd.used||0)>=limit)
+    return errR('Monthly limit reached. Please upgrade your plan.', 429, env);
+
+  const prompt = `You are a Hospitality Reputation Analyst and Guest Relations Manager.
+Analyze this review for a ${property_type || 'hospitality property'} named "${property_name || 'Our Property'}".
+
+Review Details:
+- Source: ${review_source || 'Unknown'}
+- Rating: ${review_rating || 'N/A'}/5
+- Review Text: ${review_text}
+
+Task:
+1. Sentiment Analysis: Score (1-100), Label (Positive, Neutral, Negative).
+2. Topic Detection: Identify key topics mentioned.
+3. Risk Assessment: Identify if management intervention is required (Risk Score 1-10, Escalation decision).
+   Escalate if: Rating <= 2, Safety issues, Staff misconduct, or Fraud allegations.
+4. Response Drafting: Write a professional, warm, and human-sounding response.
+   Rules: Thank the guest, address specific concerns, maintain hospitality tone, avoid legal liability admission, include invitation to return.
+
+Output: Return ONLY a valid JSON object with this structure:
+{
+  "analysis": {
+    "sentiment_score": 0,
+    "sentiment_label": "",
+    "topics": [],
+    "risk_score": 0,
+    "summary": "",
+    "escalation": { "escalate": false, "reason": "" }
+  },
+  "response": { "draft": "" }
+}
+
+Ensure the response matches the sentiment and addresses the guest's points accurately. Write in English.`;
+
+  const startTime = Date.now();
+  let text = '', source = '';
+  const isPaid = PLANS[cd.plan]?.isPaid ?? false;
+
+  if (isPaid && env.ANTHROPIC_KEY) {
+    try { text = await callClaude(prompt, env.ANTHROPIC_KEY); source = 'claude'; }
+    catch (e) { console.warn('Claude failed:', e.message); }
+  }
+  if (!text && env.GEMINI_KEY) {
+    try { text = await callGemini(prompt, env.GEMINI_KEY); source = 'gemini'; }
+    catch (e) { console.warn('Gemini failed:', e.message); }
+  }
+
+  if (!text) return errR('Generation service unavailable.', 503, env);
+
+  // Sprint 6: Track Usage
+  await trackAIUsage(env, {
+    orgId: v.code,
+    module: 'review',
+    model: source,
+    tokens: Math.ceil(text.length / 4),
+    latency: Date.now() - startTime
+  });
+
+  try {
+    const cleanJson = text.includes('```json') ? text.split('```json')[1].split('```')[0].trim() : text.trim();
+    const result = JSON.parse(cleanJson);
+
+    const reviewId = Date.now().toString();
+    const reviewData = {
+      id: reviewId,
+      code: v.code,
+      source: review_source,
+      rating: review_rating,
+      text: review_text,
+      property: { type: property_type, name: property_name },
+      analysis: result.analysis,
+      response: result.response,
+      created_at: nowD().toISOString()
+    };
+
+    await env.CODES_KV.put(`review:${v.code}:${reviewId}`, JSON.stringify(reviewData));
+
+    // Increment usage
+    cd.used = (cd.used || 0) + 1;
+    await env.CODES_KV.put(v.code, JSON.stringify(cd));
+
+    return jsonR({ success: true, review: reviewData, source }, 200, env);
+  } catch (e) {
+    console.error('JSON Parse Error:', e, text);
+    return errR('AI returned invalid JSON. Please try again.', 500, env);
+  }
+}
+
+async function handleGetReputation(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const prefix = `review:${v.code}:`;
+  const list = await env.CODES_KV.list({ prefix });
+
+  let totalRating = 0, count = 0, positive = 0, negative = 0, escalated = 0;
+  const topicsMap = {};
+
+  for (const key of list.keys) {
+    const data = await env.CODES_KV.get(key.name, 'json');
+    if (data) {
+      count++;
+      totalRating += (parseInt(data.rating) || 0);
+      if (data.analysis?.sentiment_label === 'Positive') positive++;
+      if (data.analysis?.sentiment_label === 'Negative') negative++;
+      if (data.analysis?.escalation?.escalate) escalated++;
+
+      (data.analysis?.topics || []).forEach(t => {
+        topicsMap[t] = (topicsMap[t] || 0) + 1;
+      });
+    }
+  }
+
+  const avgRating = count > 0 ? (totalRating / count).toFixed(1) : 0;
+  const topTopics = Object.entries(topicsMap).sort((a,b) => b[1] - a[1]).slice(0, 5).map(e => e[0]);
+
+  return jsonR({
+    success: true,
+    metrics: {
+      avgRating,
+      totalReviews: count,
+      positive,
+      negative,
+      escalated,
+      topTopics
+    }
+  }, 200, env);
+}
+
+// == INTELLIGENCE (Sprint 5) ===============================
+async function handleGetDashboard(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const [campaigns, reviews] = await Promise.all([
+    env.CODES_KV.list({ prefix: `campaign:${v.code}:` }),
+    env.CODES_KV.list({ prefix: `review:${v.code}:` })
+  ]);
+
+  return jsonR({
+    success: true,
+    metrics: {
+      campaignsCreated: campaigns.keys.length,
+      reviewsProcessed: reviews.keys.length,
+      plan: v.data.plan,
+      usage: v.data.used || 0,
+      limit: PLANS[v.data.plan]?.limit || 0,
+      expiry: v.data.expiry
+    }
+  }, 200, env);
+}
+
+async function handleGetMarketingAnalytics(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const list = await env.CODES_KV.list({ prefix: `campaign:${v.code}:` });
+  const typeMap = {};
+  let totalContent = 0;
+
+  for (const key of list.keys) {
+    const c = await env.CODES_KV.get(key.name, 'json');
+    if (c) {
+      const type = c.input?.business_type || 'other';
+      typeMap[type] = (typeMap[type] || 0) + 1;
+      totalContent += 5; // Brief, 3 social, 1 email
+    }
+  }
+
+  return jsonR({
+    success: true,
+    analytics: {
+      totalCampaigns: list.keys.length,
+      totalAssetsGenerated: totalContent,
+      campaignDistribution: typeMap,
+      marketingScore: Math.min(100, (list.keys.length * 10) + 20)
+    }
+  }, 200, env);
+}
+
+async function handleGetRevenueAnalytics(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  if (v.data.plan === 'Admin') {
+    const list = await env.CODES_KV.list();
+    let mrr = 0, activeCount = 0, trials = 0;
+    const planPrices = { Starter:3, Growth:6, Premium:9 };
+    for (const key of list.keys) {
+      if (key.name.length > 12) continue;
+      const d = await env.CODES_KV.get(key.name, 'json');
+      if (d && d.active && !isExp(d.expiry)) {
+        if (d.plan === 'Promo') trials++;
+        else {
+          mrr += (planPrices[d.plan] || 0);
+          activeCount++;
+        }
+      }
+    }
+    return jsonR({ success:true, metrics: { mrr, arr: mrr*12, activeSubscriptions: activeCount, activeTrials: trials } }, 200, env);
+  } else {
+    const pricing = await env.CODES_KV.get('config:pricing', 'json') || { Starter:{usd:3}, Growth:{usd:6}, Premium:{usd:9} };
+    const planPrice = pricing[v.data.plan]?.usd || 0;
+    return jsonR({ success:true, metrics: { monthlySubscription: planPrice, estimatedValue: (v.data.used||0) * 2 } }, 200, env);
+  }
+}
+
+async function handleGenerateInsights(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  // 1. Build Dataset
+  const [campaigns, reviews] = await Promise.all([
+    getAllKV(env.CODES_KV, `campaign:${v.code}:`),
+    getAllKV(env.CODES_KV, `review:${v.code}:`)
+  ]);
+
+  const dataset = {
+    organization: { plan: v.data.plan, client: v.data.client },
+    marketing: campaigns.map(c => ({ name: c.name, type: c.input?.business_type, date: c.created_at })),
+    reputation: reviews.map(r => ({ rating: r.rating, sentiment: r.analysis?.sentiment_label, topics: r.analysis?.topics, date: r.created_at })),
+    usage: { used: v.data.used, limit: PLANS[v.data.plan]?.limit }
+  };
+
+  // 2. Call AI
+  const prompt = `${EXECUTIVE_ADVISOR_PROMPT}\n\nOrganization Data:\n${JSON.stringify(dataset)}`;
+  const startTime = Date.now();
+  let text = '', source = '';
+
+  if (env.ANTHROPIC_KEY) {
+    try { text = await callClaude(prompt, env.ANTHROPIC_KEY); source = 'claude'; }
+    catch(e) { console.warn('Claude failed:', e); }
+  }
+  if (!text && env.GEMINI_KEY) {
+    try { text = await callGemini(prompt, env.GEMINI_KEY); source = 'gemini'; }
+    catch(e) { console.warn('Gemini failed:', e); }
+  }
+
+  if (!text) return errR('Insight generation failed.', 503, env);
+
+  // Sprint 6: Track Usage
+  await trackAIUsage(env, {
+    orgId: v.code,
+    module: 'intelligence',
+    model: source,
+    tokens: Math.ceil(text.length / 4),
+    latency: Date.now() - startTime
+  });
+
+  try {
+    const cleanJson = text.includes('```json') ? text.split('```json')[1].split('```')[0].trim() : text.trim();
+    const reportData = JSON.parse(cleanJson);
+
+    const reportId = Date.now().toString();
+    const report = {
+      id: reportId,
+      code: v.code,
+      data: reportData,
+      created_at: nowD().toISOString()
+    };
+
+    await env.CODES_KV.put(`insight:${v.code}:${reportId}`, JSON.stringify(report));
+    return jsonR({ success:true, report, source }, 200, env);
+  } catch(e) {
+    return errR('AI returned invalid report format.', 500, env);
+  }
+}
+
+async function handleGetInsights(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const list = await env.CODES_KV.list({ prefix: `insight:${v.code}:` });
+  const reports = [];
+  for (const key of list.keys) {
+    const r = await env.CODES_KV.get(key.name, 'json');
+    if (r) reports.push({ id: r.id, created_at: r.created_at });
+  }
+  return jsonR({ success:true, reports }, 200, env);
+}
+
+async function handleGetInsightById(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const id = new URL(req.url).pathname.split('/').pop();
+  const report = await env.CODES_KV.get(`insight:${v.code}:${id}`, 'json');
+  if (!report) return errR('Report not found', 404, env);
+  return jsonR({ success:true, report }, 200, env);
+}
+
+// Helpers for Intelligence
+async function getAllKV(kv, prefix) {
+  const list = await kv.list({ prefix });
+  const results = [];
+  for (const key of list.keys) {
+    const val = await kv.get(key.name, 'json');
+    if (val) results.push(val);
+  }
+  return results;
+}
+
+const EXECUTIVE_ADVISOR_PROMPT = `You are the Mkude Hospitality Intelligence Executive Advisor.
+Analyze the provided organization data (Marketing, Reputation, and Usage) to generate a comprehensive Executive Report.
+
+Your report must include:
+1. Executive Summary: High-level property health.
+2. Marketing Insights: Top campaign types, performance summary, and growth recommendations.
+3. Reputation Insights: Top compliments/complaints, service risks, and improvement opportunities.
+4. Operational Recommendations: Next actions for the General Manager.
+
+Output: Return ONLY a valid JSON object with the structure:
+{
+  "executive_summary": "",
+  "marketing": { "insights": [], "recommendations": [] },
+  "reputation": { "insights": [], "risks": [], "opportunities": [] },
+  "key_wins": [],
+  "critical_risks": [],
+  "next_actions": []
+}
+
+Ensure the insights are data-driven based on the input.`;
+
+// == AI OPTIMIZATION (Sprint 6) ============================
+async function handleGetPrompts(req, env) {
+  if (!adminOk(req, env)) return errR('Unauthorised', 401, env);
+  const { results } = await env.DB.prepare(`
+    SELECT t.*, v.prompt_content, v.version_number
+    FROM prompt_templates t
+    JOIN prompt_versions v ON t.active_version = v.id
+  `).all();
+  return jsonR({ success:true, prompts: results }, 200, env);
+}
+
+async function handleCreatePrompt(req, env) {
+  if (!adminOk(req, env)) return errR('Unauthorised', 401, env);
+  const { module, name, content } = await req.json();
+  const templateId = crypto.randomUUID();
+  const versionId = crypto.randomUUID();
+
+  await env.DB.batch([
+    env.DB.prepare(`INSERT INTO prompt_templates (id, module_name, prompt_name, active_version) VALUES (?,?,?,?)`)
+      .bind(templateId, module, name, versionId),
+    env.DB.prepare(`INSERT INTO prompt_versions (id, template_id, version_number, prompt_content) VALUES (?,?,?,?)`)
+      .bind(versionId, templateId, 1, content)
+  ]);
+
+  return jsonR({ success:true, templateId, versionId }, 200, env);
+}
+
+async function handleEvaluateAI(req, env) {
+  if (!adminOk(req, env)) return errR('Unauthorised', 401, env);
+  const { requestId, scores } = await req.json();
+  const id = crypto.randomUUID();
+  const overall = Object.values(scores).reduce((a,b)=>a+b,0) / Object.values(scores).length;
+
+  await env.DB.prepare(`
+    INSERT INTO ai_evaluations (id, request_id, quality_score, hospitality_score, brand_score, hallucination_score, overall_score)
+    VALUES (?,?,?,?,?,?,?)
+  `).bind(id, requestId, scores.quality, scores.hospitality, scores.brand, scores.hallucination || 0, overall).run();
+
+  return jsonR({ success:true, evaluationId: id, overall }, 200, env);
+}
+
+async function handleGetAIAnalytics(req, env) {
+  if (!adminOk(req, env)) return errR('Unauthorised', 401, env);
+  const stats = await env.DB.prepare(`
+    SELECT
+      COUNT(*) as total_requests,
+      SUM(total_tokens) as total_tokens,
+      SUM(estimated_cost) as total_cost,
+      AVG(response_time_ms) as avg_latency
+    FROM ai_requests
+    WHERE created_at > date('now', '-24 hours')
+  `).first();
+
+  const quality = await env.DB.prepare(`SELECT AVG(overall_score) as avg_quality FROM ai_evaluations`).first();
+
+  return jsonR({
+    success: true,
+    analytics: {
+      requests: stats.total_requests || 0,
+      tokens: stats.total_tokens || 0,
+      cost: stats.total_cost || 0,
+      latency: stats.avg_latency || 0,
+      quality: quality.avg_quality || 0
+    }
+  }, 200, env);
+}
+
+async function handleGetAICosts(req, env) {
+  if (!adminOk(req, env)) return errR('Unauthorised', 401, env);
+  const { results } = await env.DB.prepare(`
+    SELECT module_name, SUM(estimated_cost) as cost, SUM(total_tokens) as tokens
+    FROM ai_requests
+    GROUP BY module_name
+  `).all();
+  return jsonR({ success:true, costs: results }, 200, env);
+}
+
+async function trackAIUsage(env, meta) {
+  try {
+    const cost = (meta.tokens / 1000) * 0.002; // Simple estimate: $0.002 per 1k tokens
+    await env.DB.prepare(`
+      INSERT INTO ai_requests (id, organization_id, module_name, model_name, total_tokens, estimated_cost, response_time_ms)
+      VALUES (?,?,?,?,?,?,?)
+    `).bind(crypto.randomUUID(), meta.orgId, meta.module, meta.model, meta.tokens, cost, meta.latency).run();
+  } catch(e) { console.error('Usage tracking failed:', e); }
 }
 
 // == CLICKPESA =============================================
