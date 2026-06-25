@@ -48,28 +48,41 @@ export class CampaignController {
     const v = await this.codeRepo.findByCode(code || body.code);
     if (!v) return errorResponse('Unauthorised', 401, env);
 
-    const { promotion_name, promotion_description } = body;
+    const { business_type, promotion_name, promotion_description, offer, target_audience, campaign_goal } = body;
     if (!promotion_name || !promotion_description) return errorResponse('Name and description required.', 400, env);
 
     const limit = PLANS[v.plan]?.limit ?? 30;
     if (limit !== -1 && (v.used || 0) >= limit) return errorResponse('Limit reached.', 429, env);
 
-    const FALLBACK_PROMPT = `Create a campaign for {{promotion_name}}. Return JSON.`;
-    const { content: promptTpl, versionId } = await this.aiRepo.getPrompt('campaign', FALLBACK_PROMPT);
+    const SYSTEM_PROMPT = `You are a world-class Hospitality Marketing OS.
+Your goal is to transform a promotion into a complete multi-channel marketing campaign.
 
-    const prompt = promptTpl
-      .replace('{{promotion_name}}', promotion_name)
-      .replace('{{promotion_description}}', promotion_description);
+Return a strictly valid JSON object with these keys:
+1. campaign_brief: { theme, key_message, target_audience, marketing_angle, cta }
+2. social_media: { instagram, facebook, linkedin }
+3. email_campaign: { subject, preview_text, body, cta }
+4. calendar: [ { day: 1, platform, topic, content_type, cta }, ... ] (total 30 days)
+
+Tone: Professional, persuasive, and tailored to the hospitality industry.`;
+
+    const USER_PROMPT = `Generate a campaign for:
+Business Type: ${business_type || 'Hospitality'}
+Promotion Name: ${promotion_name}
+Description: ${promotion_description}
+Offer: ${offer || 'Special Price'}
+Target Audience: ${target_audience || 'General Guests'}
+Goal: ${campaign_goal || 'Increase Bookings'}`;
 
     const startTime = Date.now();
     try {
       const isPaid = PLANS[v.plan]?.isPaid ?? false;
-      const result = await this.aiService.generate(prompt, isPaid);
+      // In Clean Architecture, the AIService handles the specific provider logic
+      const result = await this.aiService.generate(`${SYSTEM_PROMPT}\n\n${USER_PROMPT}`, isPaid);
 
       await this.aiRepo.trackUsage({
         orgId: v.code,
         module: 'campaign',
-        prompt_version_id: versionId,
+        prompt_version_id: 'v8.0-multi-agent',
         model: result.source,
         input_tokens: result.usage.input,
         output_tokens: result.usage.output,

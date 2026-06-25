@@ -145,7 +145,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
 .result-title{font-weight:600;margin-bottom:.75rem;color:var(--ink);display:flex;justify-content:space-between;align-items:center;font-size:14px;}
 .stab{padding:8px 16px;font-size:12px;border:none;background:none;cursor:pointer;color:var(--muted);border-radius:99px;transition:.15s;font-weight:600;}
 .stab.active{background:var(--ink);color:#fff;}
-.admin-sub-panel{display:none;}.admin-sub-panel.active{display:block;}
+.admin-card{padding:1rem;background:var(--pale);border-radius:12px;margin-top:1rem;}
+.admin-card-title{font-weight:600;font-size:14px;margin-bottom:10px;}
 .code-table{width:100%;border-collapse:collapse;font-size:11px;}
 .code-table th{text-align:left;padding:10px 8px;font-weight:600;color:var(--muted);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em;}
 .code-table td{padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
@@ -188,7 +189,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
   <div class="mkude-avatar">👨‍🍳</div>
   <div class="mkude-greeting"><span>👋</span><span id="greeting-text">Hi there! I'm Mkude</span></div>
   <h1 class="hero-title" id="hero-title">Your restaurant's new<br><em>content team member.</em></h1>
-  <div class="mkude-intro"><p id="hero-intro-text">Hi! My name is <strong>Mkude</strong> and I'm here to join your restaurant team. I handle the words so you can focus on the food. 🍽️</p></div>
+  <div class="mkude-intro"><p id="hero-intro-text">Hi! My name is <strong>Mkude</strong> and I'm here to join your restaurant team. I handle the words so you can focus on the food. 🍽️<br><br>Think of me as your behind-the-scenes writer — I handle everything from <em>campaign strategies</em> to <em>review replies</em> — all in your voice, for any cuisine, in any language.</p></div>
   <div class="hero-btns">
     <button class="btn-primary" onclick="openModal('promo')" id="btn-hero-promo">👋 Meet Mkude — it's free</button>
     <button class="btn-ghost" onclick="openModal('signup')" id="btn-hero-sub">Subscribe from $6/month</button>
@@ -235,6 +236,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
         <p class="team-card-desc" id="tc3-desc">Menu copy that sells more dishes. Social posts that fill more seats. Review replies that protect your reputation.</p>
       </div>
     </div>
+    <p style="font-size:14px;color:rgba(255,255,255,.5);max-width:480px;margin:2rem auto 0;">
+      <span id="mkude-quote">"I'm not just a tool — I'm part of the team. Tell me what you need."</span><br>
+      <span style="color:var(--gold);font-weight:500;">— Mkude</span>
+    </p>
   </div>
 </section>
 
@@ -271,7 +276,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
 </section>
 
 <footer class="footer">
-  <div style="margin-bottom:.5rem;font-size:16px;color:#fff;font-family:'Fraunces',serif;">👨‍🍳 Mkude <span style="font-size:12px;color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;">· Hospitality OS v6.0</span></div>
+  <div style="margin-bottom:.5rem;font-size:16px;color:#fff;font-family:'Fraunces',serif;">👨‍🍳 Mkude <span style="font-size:12px;color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;">· Hospitality OS v8.0</span></div>
   <div id="footer-links">
     <a href="privacy.html">Privacy Policy</a> ·
     <a href="terms.html">Terms of Service</a>
@@ -371,10 +376,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
         <div class="stat-box"><div class="stat-num" id="stat-content">0</div><div class="stat-lbl" id="lbl-assets">Assets</div></div>
         <div class="stat-box"><div class="stat-num" id="stat-usage-pct">0%</div><div class="stat-lbl" id="lbl-usage">Usage</div></div>
       </div>
-      <div class="admin-card">
-        <p class="admin-card-title" id="lbl-activity">Recent Activity</p>
-        <div id="recent-activity" style="font-size:12px; color:var(--muted)">No activity yet.</div>
-      </div>
     </div>
   </div>
 
@@ -404,9 +405,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
   <div id="tk-panel-intelligence" class="tk-panel">
     <div style="display:flex; gap:8px; margin-bottom:1.5rem;">
         <button class="stab active" onclick="switchIntelTab('executive',this)" id="itab-exec">👑 Executive</button>
-        <button class="stab" onclick="switchIntelTab('marketing',this)" id="itab-mkt">🚀 Marketing</button>
-        <button class="stab" onclick="switchIntelTab('reputation',this)" id="itab-rep">⭐ Reputation</button>
-        <button class="stab" onclick="switchIntelTab('revenue',this)" id="itab-rev">💰 Revenue</button>
         <button class="stab" onclick="switchIntelTab('insights',this)" id="itab-ai">🧠 AI Insights</button>
     </div>
     <div id="intel-panel-executive" class="intel-panel active">
@@ -420,39 +418,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
             </div>
         </div>
     </div>
-    <div id="intel-panel-marketing" class="intel-panel" style="display:none">
-        <div class="tool-card">
-            <p class="tool-title" id="mkt-perf-title">Marketing Performance</p>
-            <div class="stats-grid">
-                <div class="stat-box"><div class="stat-num" id="mkt-total">0</div><div class="stat-lbl">Total</div></div>
-                <div class="stat-box"><div class="stat-num" id="mkt-assets">0</div><div class="stat-lbl">Assets</div></div>
-                <div class="stat-box"><div class="stat-num" id="mkt-score">0</div><div class="stat-lbl">Score</div></div>
-            </div>
-            <div id="mkt-types" style="display:flex; flex-wrap:wrap; gap:8px"></div>
-        </div>
-    </div>
-    <div id="intel-panel-reputation" class="intel-panel" style="display:none">
-        <div class="tool-card">
-            <p class="tool-title" id="rep-ana-title">Reputation Analytics</p>
-            <div class="stats-grid">
-                <div class="stat-box"><div class="stat-num" id="ana-rating">0.0</div><div class="stat-lbl">Rating</div></div>
-                <div class="stat-box"><div class="stat-num" id="ana-count">0</div><div class="stat-lbl">Reviews</div></div>
-                <div class="stat-box"><div class="stat-num" id="ana-pos" style="color:var(--green)">0</div><div class="stat-lbl">Pos</div></div>
-                <div class="stat-box"><div class="stat-num" id="ana-neg" style="color:var(--red)">0</div><div class="stat-lbl">Neg</div></div>
-            </div>
-            <div id="ana-topics" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:1rem"></div>
-        </div>
-    </div>
-    <div id="intel-panel-revenue" class="intel-panel" style="display:none">
-        <div class="tool-card">
-            <p class="tool-title" id="rev-title">Revenue Dashboard</p>
-            <div class="stats-grid">
-                <div class="stat-box"><div class="stat-num" id="rev-mrr">$0</div><div class="stat-lbl">MRR</div></div>
-                <div class="stat-box"><div class="stat-num" id="rev-arr">$0</div><div class="stat-lbl">ARR</div></div>
-                <div class="stat-box"><div class="stat-num" id="rev-subs">0</div><div class="stat-lbl">Subs</div></div>
-            </div>
-        </div>
-    </div>
     <div id="intel-panel-insights" class="intel-panel" style="display:none">
         <div class="tool-card">
             <div style="display:flex; justify-content:space-between; align-items:center">
@@ -460,9 +425,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
                 <button class="btn-nav" id="btn-gen-insights" onclick="generateInsights()">✨ Generate Report</button>
             </div>
             <div id="insights-list" style="margin-top:1rem"></div>
-            <div id="insights-report-display" class="output-wrap" style="display:none">
-                <div id="report-content"></div>
-            </div>
         </div>
     </div>
   </div>
@@ -474,7 +436,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
             <p class="tool-title" id="pt-reg-title">Become a Mkude Partner</p>
             <p style="font-size:13px; color:var(--muted); margin-bottom:1.5rem;" id="pt-reg-sub">Refer clients and earn 20% recurring commission.</p>
             <div class="field"><label id="pt-org-lbl">Organization Name</label><input type="text" id="pt-org" /></div>
-            <div class="field"><label id="pt-type-lbl">Partner Type</label><select id="pt-type"><option>Consultant</option><option>Agency</option><option>Association</option></select></div>
             <div class="field"><label id="pt-contact-lbl">Contact Name</label><input type="text" id="pt-contact" /></div>
             <div class="field"><label id="pt-email-lbl">Email</label><input type="email" id="pt-email" /></div>
             <button class="btn-generate" onclick="registerPartner()" id="pt-reg-btn">Join Partner Program</button>
@@ -488,17 +449,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
             </div>
             <div class="stats-grid">
                 <div class="stat-box"><div class="stat-num" id="pt-stat-referrals">0</div><div class="stat-lbl">Referrals</div></div>
-                <div class="stat-box"><div class="stat-num" id="pt-stat-customers">0</div><div class="stat-lbl">Customers</div></div>
-                <div class="stat-box"><div class="stat-num" id="pt-stat-pending">0</div><div class="stat-lbl">Pending</div></div>
                 <div class="stat-box"><div class="stat-num" id="pt-stat-paid">0</div><div class="stat-lbl">Paid</div></div>
             </div>
-        </div>
-        <div class="tool-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
-                <p class="tool-title" id="pt-leads-title">Your Referrals</p>
-                <button class="btn-nav" onclick="showNewReferralForm()" id="btn-new-ref">+ Add Referral</button>
-            </div>
-            <div id="partner-referral-list"></div>
         </div>
     </div>
   </div>
@@ -513,10 +465,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
     <div id="tpl-panel-menu" class="tpl-panel active">
         <div class="tool-card">
             <p class="tool-title" id="tpl-m-title">Menu Generator</p>
-            <div class="row2">
-                <div class="field"><label id="tpl-m-dish-lbl">Dish name</label><input type="text" id="m-dish" /></div>
-                <div class="field"><label id="tpl-m-cuis-lbl">Cuisine</label><select id="m-cuisine"><option>Swahili</option><option>Italian</option></select></div>
-            </div>
+            <div class="field"><label id="tpl-m-dish-lbl">Dish name</label><input type="text" id="m-dish" /></div>
             <div class="field"><label id="tpl-m-ing-lbl">Ingredients</label><input type="text" id="m-ing" /></div>
             <button class="btn-generate" onclick="generate('menu')" id="tpl-m-btn">Write Description</button>
             <div id="out-menu" class="output-wrap" style="display:none"><div id="out-menu-text" class="output-text"></div></div>
@@ -542,38 +491,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
 
   <!-- ENTERPRISE -->
   <div id="tk-panel-enterprise" class="tk-panel">
-    <div style="display:flex; gap:8px; margin-bottom:1.5rem;">
-        <button class="stab active" onclick="switchEnterpriseTab('dashboard',this)">📊 Group Dashboard</button>
-        <button class="stab" onclick="switchEnterpriseTab('properties',this)">🏢 Properties</button>
-        <button class="stab" onclick="switchEnterpriseTab('branding',this)">🎨 Branding</button>
-    </div>
     <div id="ent-panel-dashboard" class="ent-panel active">
         <div class="tool-card">
-            <p class="tool-title" id="ent-dash-title">Enterprise Performance</p>
+            <p class="tool-title" id="ent-dash-title">Enterprise Console</p>
             <div class="stats-grid">
                 <div class="stat-box"><div class="stat-num" id="ent-stat-props">0</div><div class="stat-lbl">Properties</div></div>
                 <div class="stat-box"><div class="stat-num" id="ent-stat-users">0</div><div class="stat-lbl">Users</div></div>
-                <div class="stat-box"><div class="stat-num" id="ent-stat-rating">0.0</div><div class="stat-lbl">Avg Rating</div></div>
-                <div class="stat-box"><div class="stat-num" id="ent-stat-gen">0</div><div class="stat-lbl">Generations</div></div>
             </div>
-        </div>
-    </div>
-    <div id="ent-panel-properties" class="ent-panel" style="display:none">
-        <div class="tool-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
-                <p class="tool-title">Property Portfolio</p>
-                <button class="btn-nav" onclick="showNewPropertyForm()">+ Add Property</button>
-            </div>
-            <div id="enterprise-property-list"></div>
-        </div>
-    </div>
-    <div id="ent-panel-branding" class="ent-panel" style="display:none">
-        <div class="tool-card">
-            <p class="tool-title">White Label Settings</p>
-            <div class="field"><label>Custom Domain</label><input type="text" id="ent-domain" placeholder="marketing.yourgroup.com" /></div>
-            <div class="field"><label>Logo URL</label><input type="text" id="ent-logo" /></div>
-            <div class="field"><label>Primary Color</label><input type="color" id="ent-color" value="#c9a84c" /></div>
-            <button class="btn-generate" onclick="saveEnterpriseBranding()">Save Brand Identity</button>
         </div>
     </div>
   </div>
@@ -583,44 +507,21 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
     <div style="display:flex; gap:8px; margin-bottom:1.5rem;">
         <button class="stab active" onclick="switchAdminTab('codes',this)">🔑 Codes</button>
         <button class="stab" onclick="switchAdminTab('ai',this)">🧠 AI Center</button>
-        <button class="stab" onclick="switchAdminTab('config',this)">⚙️ Config</button>
     </div>
     <div id="admin-panel-codes" class="admin-panel active">
-        <div class="stats-grid" id="admin-stats"></div>
         <div class="tool-card">
             <table class="code-table">
-                <thead><tr><th>Code</th><th>Plan</th><th>Expiry</th><th>Status</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Code</th><th>Plan</th><th>Expiry</th><th>Actions</th></tr></thead>
                 <tbody id="code-tbody"></tbody>
             </table>
         </div>
     </div>
     <div id="admin-panel-ai" class="admin-panel" style="display:none">
-        <div id="ai-admin-auth" class="tool-card">
-            <p class="tool-title">Security Required</p>
-            <input type="password" id="admin-token-input" placeholder="Admin Token" style="width:100%; padding:10px; margin-bottom:10px" />
-            <button class="btn-nav" onclick="saveAdminToken()">Authenticate</button>
-        </div>
-        <div id="ai-center-content" style="display:none">
-            <div class="stats-grid">
-                <div class="stat-box"><div class="stat-num" id="ai-total-reqs">0</div><div class="stat-lbl">Requests</div></div>
-                <div class="stat-box"><div class="stat-num" id="ai-avg-latency">0ms</div><div class="stat-lbl">Latency</div></div>
-                <div class="stat-box"><div class="stat-num" id="ai-total-cost">$0</div><div class="stat-lbl">Cost</div></div>
-                <div class="stat-box"><div class="stat-num" id="ai-avg-quality">0%</div><div class="stat-lbl">Quality</div></div>
-            </div>
-            <div class="tool-card">
-                <p class="tool-title">Prompt Registry</p>
-                <table class="code-table">
-                    <thead><tr><th>Module</th><th>Version</th><th>Snippet</th></tr></thead>
-                    <tbody id="ai-prompts-tbody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <div id="admin-panel-config" class="admin-panel" style="display:none">
         <div class="tool-card">
-            <label>Worker API URL</label>
-            <input type="text" id="worker-url-input" style="width:100%; padding:10px; margin-top:5px" />
-            <button class="btn-nav" style="margin-top:10px" onclick="saveWorkerURL()">Save</button>
+            <p class="tool-title">AI Telemetry</p>
+            <div class="stats-grid">
+                <div class="stat-box"><div class="stat-num" id="ai-total-reqs">0</div><div class="stat-lbl">Total Reqs</div></div>
+            </div>
         </div>
     </div>
   </div>
@@ -641,7 +542,6 @@ let ADMIN_TOKEN = localStorage.getItem('RCS_ADMIN_TOKEN') || '';
 let currentUser = null;
 let LOCAL_CAMPAIGNS = JSON.parse(localStorage.getItem('RCS_CAMPAIGNS') || '{}');
 let LOCAL_REVIEWS = JSON.parse(localStorage.getItem('RCS_REVIEWS') || '{}');
-let currentPartner = JSON.parse(localStorage.getItem('MKD_PARTNER') || 'null');
 let lang = 'en';
 
 // --- TRANSLATIONS ---
@@ -650,77 +550,25 @@ const TRANS = {
     greeting: "Hi there! I'm Mkude",
     heroTitle: "Your restaurant's new<br><em>content team member.</em>",
     heroIntro: "Hi! My name is <strong>Mkude</strong> and I'm here to join your restaurant team. I handle the words so you can focus on the food. 🍽️",
-    tryFree: "Try for free",
-    signIn: "Sign in",
-    subFrom: "Subscribe from $6/month",
-    navWhat: "What I do",
-    navTeam: "The team",
-    navPricing: "Pricing",
-    f1Title: "Campaign Generator",
-    f1Desc: "Transform one promotion into a complete multi-channel campaign in seconds. Strategy, social posts, and email ready to go.",
-    f2Title: "Hospitality Intelligence",
-    f2Desc: "Strategic executive reports and reputation analytics. Know exactly how your property is performing across all channels.",
-    f3Title: "Advanced Reviews",
-    f3Desc: "Automated sentiment analysis, risk detection, and professional drafting for guest reviews on Google and TripAdvisor.",
-    mlTitle: "Welcome back!",
-    mlSub: "Enter your access code to unlock the OS.",
-    mlBtn: "👨‍🍳 Let's get to work",
-    tabDash: "📊 Dashboard",
-    tabCamp: "🚀 Campaigns",
-    tabRev: "⭐ Reviews",
-    tabIntel: "🧠 Intelligence",
-    tabTpl: "📝 Templates",
-    lblCamp: "Campaigns",
-    lblRev: "Reviews",
-    lblAssets: "Assets",
-    lblUsage: "Usage",
-    lblActivity: "Recent Activity",
-    newStrategy: "+ New Strategy",
-    analyzeFeedback: "+ Changanua Maoni",
-    itabExec: "👑 Executive",
-    itabMkt: "🚀 Marketing",
-    itabRep: "⭐ Reputation",
-    itabRev: "💰 Revenue",
-    itabAi: "🧠 AI Insights",
-    tabPartners: "🤝 Partners"
+    tryFree: "Try for free", signIn: "Sign in", subFrom: "Subscribe from $6/month",
+    navWhat: "What I do", navTeam: "The team", navPricing: "Pricing", navPartners: "Partners",
+    f1Title: "Campaign Generator", f2Title: "Hospitality Intelligence", f3Title: "Advanced Reviews",
+    tc1Role: "You & your team", tc1Name: "Create the experience", tc1Desc: "Exceptional food, outstanding service, memorable moments that keep guests coming back.",
+    tc3Role: "👨‍🍳 Mkude", tc3Name: "Amplify the experience", tc3Desc: "Menu copy that sells more dishes. Social posts that fill more seats. Review replies that protect your reputation.",
+    mkudeQuote: '"I\'m not just a tool — I\'m part of the team. Tell me what you need."',
+    tabDash: "📊 Dashboard", tabCamp: "🚀 Campaigns", tabRev: "⭐ Reviews", tabIntel: "🧠 Intelligence", tabPartners: "🤝 Partners", tabTpl: "📝 Templates"
   },
   sw: {
     greeting: "Habari! Mimi ni Mkude",
     heroTitle: "Mwanachama mpya wa timu<br><em>ya mkahawa wako.</em>",
     heroIntro: "Habari! Jina langu ni <strong>Mkude</strong> na niko hapa kujiunga na timu yako. Ninashughulikia maneno ili uweze kuzingatia chakula. 🍽️",
-    tryFree: "Jaribu bure",
-    signIn: "Ingia",
-    subFrom: "Jiandikishe kutoka $6/mwezi",
-    navWhat: "Ninachofanya",
-    navTeam: "Timu",
-    navPricing: "Bei",
-    f1Title: "Muunda Kampeni",
-    f1Desc: "Badilisha tangazo moja kuwa kampeni kamili ya njia nyingi ndani ya sekunde chache. Mkakati na barua pepe viko tayari.",
-    f2Title: "Ujasusi wa Ukarimu",
-    f2Desc: "Ripoti za kimkakati na uchanganuzi wa sifa. Jua jinsi mkahawa wako unavyofanya kazi katika njia zote.",
-    f3Title: "Tathmini za Kisasa",
-    f3Desc: "Uchanganuzi wa hisia na uandishi wa kitaalamu wa majibu kwa tathmini za wateja kwenye Google na TripAdvisor.",
-    mlTitle: "Karibu tena!",
-    mlSub: "Weka msimbo wako wa ufikiaji ili kufungua OS.",
-    mlBtn: "👨‍🍳 Tuanze kazi",
-    tabDash: "📊 Dashibodi",
-    tabCamp: "🚀 Kampeni",
-    tabRev: "⭐ Tathmini",
-    tabIntel: "🧠 Ujasusi",
-    tabTpl: "📝 Violezo",
-    lblCamp: "Kampeni",
-    lblRev: "Tathmini",
-    lblAssets: "Maudhui",
-    lblUsage: "Matumizi",
-    lblActivity: "Shughuli za Karibuni",
-    newStrategy: "+ Mkakati Mpya",
-    analyzeFeedback: "+ Changanua Maoni",
-    itabExec: "👑 Mtendaji",
-    itabMkt: "🚀 Masoko",
-    itabRep: "⭐ Sifa",
-    itabRev: "💰 Mapato",
-    itabAi: "🧠 AI Maono",
-    tabPartners: "🤝 Washirika"
+    tryFree: "Jaribu bure", signIn: "Ingia", subFrom: "Jiandikishe kutoka $6/mwezi",
+    navWhat: "Ninachofanya", navTeam: "Timu", navPricing: "Bei", navPartners: "Washirika",
+    f1Title: "Muunda Kampeni", f2Title: "Ujasusi wa Ukarimu", f3Title: "Tathmini za Kisasa",
+    tc1Role: "Wewe na timu yako", tc1Name: "Unda uzoefu", tc1Desc: "Chakula bora, huduma bora, matukio ya kukumbukwa yanayowafanya wageni warudi.",
+    tc3Role: "👨‍🍳 Mkude", tc3Name: "Kuza uzoefu", tc3Desc: "Maelezo ya menyu yanayouza zaidi. Machapisho ya kijamii yanayojaza viti. Majibu yanayolinda sifa yako.",
+    mkudeQuote: '"Mimi si zana tu — mimi ni sehemu ya timu. Niambie unahitaji nini."',
+    tabDash: "📊 Dashibodi", tabCamp: "🚀 Kampeni", tabRev: "⭐ Tathmini", tabIntel: "🧠 Ujasusi", tabPartners: "🤝 Washirika", tabTpl: "📝 Violezo"
   }
 };
 
@@ -736,41 +584,26 @@ function toggleLang() {
     document.getElementById('nav-what').textContent = L.navWhat;
     document.getElementById('nav-team').textContent = L.navTeam;
     document.getElementById('nav-pricing').textContent = L.navPricing;
-    document.getElementById('btn-hero-promo').textContent = "👋 Meet Mkude — " + L.tryFree.toLowerCase();
-    document.getElementById('btn-hero-sub').textContent = L.subFrom;
+    document.getElementById('nav-partners').textContent = L.navPartners;
 
     document.getElementById('feat-f1-title').textContent = L.f1Title;
-    document.getElementById('feat-f1-desc').textContent = L.f1Desc;
     document.getElementById('feat-f2-title').textContent = L.f2Title;
-    document.getElementById('feat-f2-desc').textContent = L.f2Desc;
     document.getElementById('feat-f3-title').textContent = L.f3Title;
-    document.getElementById('feat-f3-desc').textContent = L.f3Desc;
 
-    document.getElementById('ml-title').textContent = L.mlTitle;
-    document.getElementById('ml-sub').textContent = L.mlSub;
-    document.getElementById('ml-btn').textContent = L.mlBtn;
+    document.getElementById('tc1-role').textContent = L.tc1Role;
+    document.getElementById('tc1-name').textContent = L.tc1Name;
+    document.getElementById('tc1-desc').textContent = L.tc1Desc;
+    document.getElementById('tc3-role').textContent = L.tc3Role;
+    document.getElementById('tc3-name').textContent = L.tc3Name;
+    document.getElementById('tc3-desc').textContent = L.tc3Desc;
+    document.getElementById('mkude-quote').textContent = L.mkudeQuote;
 
     document.getElementById('tab-dash').textContent = L.tabDash;
     document.getElementById('tab-camp').textContent = L.tabCamp;
     document.getElementById('tab-rev').textContent = L.tabRev;
     document.getElementById('tab-intel').textContent = L.tabIntel;
-    document.getElementById('tab-tpl').textContent = L.tabTpl;
     document.getElementById('tab-partners').textContent = L.tabPartners;
-
-    document.getElementById('lbl-camp').textContent = L.lblCamp;
-    document.getElementById('lbl-rev').textContent = L.lblRev;
-    document.getElementById('lbl-assets').textContent = L.lblAssets;
-    document.getElementById('lbl-usage').textContent = L.lblUsage;
-    document.getElementById('lbl-activity').textContent = L.lblActivity;
-
-    document.getElementById('btn-new-camp').textContent = L.newStrategy;
-    document.getElementById('btn-new-rev').textContent = L.analyzeFeedback;
-
-    document.getElementById('itab-exec').textContent = L.itabExec;
-    document.getElementById('itab-mkt').textContent = L.itabMkt;
-    document.getElementById('itab-rep').textContent = L.itabRep;
-    document.getElementById('itab-rev').textContent = L.itabRev;
-    document.getElementById('itab-ai').textContent = L.itabAi;
+    document.getElementById('tab-tpl').textContent = L.tabTpl;
 }
 
 // --- CORE ---
@@ -782,334 +615,98 @@ async function doLogin() {
     const code = document.getElementById('login-code').value.trim().toUpperCase();
     if(!code) return;
     try {
-        const res = await fetch(WORKER_URL + '/validate', {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({code})
-        });
+        const res = await fetch(WORKER_URL + '/validate', { method: 'POST', body: JSON.stringify({code}) });
         if(res.ok) {
-            const d = await res.json();
-            currentUser = { code, ...d };
-            sessionStorage.setItem('MKD_SESSION', JSON.stringify({code}));
-            closeModal('login'); launchToolkit();
-        } else { alert('Invalid code.'); }
-    } catch(e) { alert('Worker offline.'); }
+            const d = await res.json(); currentUser = { code, ...d };
+            launchToolkit(); closeModal('login');
+        } else { alert('Invalid Code.'); }
+    } catch(e) { alert('Connection Failed.'); }
 }
 function launchToolkit() {
     document.getElementById('landing-wrap').style.display = 'none';
     document.getElementById('main-nav').style.display = 'none';
     document.getElementById('toolkit').style.display = 'block';
     document.getElementById('tk-plan').textContent = currentUser.plan;
-    document.getElementById('tk-exp').textContent = currentUser.daysLeft + 'd left';
     if(currentUser.plan === 'Admin') document.getElementById('admin-tab').style.display = 'block';
     if(currentUser.enterpriseGroupId) document.getElementById('enterprise-tab').style.display = 'block';
-    updateUsageBar(); renderDashboard(); syncCampaigns(); syncReviews();
+    renderDashboard(); syncCampaigns(); syncReviews();
 }
 function doSignOut() {
-    currentUser = null; sessionStorage.removeItem('MKD_SESSION');
-    document.getElementById('toolkit').style.display = 'none';
+    currentUser = null; document.getElementById('toolkit').style.display = 'none';
     document.getElementById('landing-wrap').style.display = 'block';
     document.getElementById('main-nav').style.display = 'flex';
 }
-function updateUsageBar() {
-    const pct = currentUser.limit === -1 ? 0 : Math.round((currentUser.used / currentUser.limit) * 100);
-    document.getElementById('usage-fill').style.width = pct + '%';
-    document.getElementById('usage-count').textContent = currentUser.used + '/' + (currentUser.limit === -1 ? '∞' : currentUser.limit);
-}
 
-// TABS
 function switchTab(name, el) {
     document.querySelectorAll('.tk-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tk-panel').forEach(p => p.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('tk-panel-' + name).classList.add('active');
-    if(name === 'dashboard') renderDashboard();
-    if(name === 'admin') renderAdmin();
-    if(name === 'partners') renderPartners();
-    if(name === 'enterprise') renderEnterpriseConsole();
+    el.classList.add('active'); document.getElementById('tk-panel-' + name).classList.add('active');
 }
 
-// ENTERPRISE
-function renderEnterpriseConsole() {
-    if(!currentUser.enterpriseGroupId) return;
-    fetchEnterpriseReport();
-    fetchEnterpriseProperties();
-}
-async function fetchEnterpriseReport() {
-    const res = await fetch(WORKER_URL + '/api/enterprise/reports?groupId=' + currentUser.enterpriseGroupId);
-    if(res.ok) {
-        const d = await res.json();
-        document.getElementById('ent-stat-props').textContent = d.report.properties;
-        document.getElementById('ent-stat-users').textContent = d.report.users;
-        document.getElementById('ent-stat-rating').textContent = d.report.avgRating;
-        document.getElementById('ent-stat-gen').textContent = d.report.campaigns;
-    }
-}
-async function fetchEnterpriseProperties() {
-    const res = await fetch(WORKER_URL + '/api/properties?groupId=' + currentUser.enterpriseGroupId);
-    if(res.ok) {
-        const d = await res.json();
-        document.getElementById('enterprise-property-list').innerHTML = d.properties.map(p => `
-            <div class="campaign-list-item"><div><strong>${p.name}</strong><div class="campaign-meta">${p.property_type} · ${p.city || ''}</div></div><div>→</div></div>`).join('');
-    }
-}
-function switchEnterpriseTab(name, el) {
-    document.querySelectorAll('.ent-panel').forEach(p => p.style.display = 'none');
-    document.querySelectorAll('#tk-panel-enterprise .stab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('ent-panel-' + name).style.display = 'block';
-}
-function showNewPropertyForm() {
-    const content = document.getElementById('os-content');
-    content.innerHTML = `
-        <h2 class="tool-title">Add New Property</h2>
-        <div class="field"><label>Property Name</label><input type="text" id="ep-name" /></div>
-        <div class="field"><label>Type</label><select id="ep-type"><option>Hotel</option><option>Resort</option><option>Restaurant</option></select></div>
-        <div class="field"><label>City</label><input type="text" id="ep-city" /></div>
-        <button class="btn-generate" onclick="submitNewProperty()">Add to Portfolio</button>
-    `;
-    document.getElementById('overlay-os').classList.add('open');
-}
-async function submitNewProperty() {
-    const body = {
-        groupId: currentUser.enterpriseGroupId,
-        name: document.getElementById('ep-name').value,
-        type: document.getElementById('ep-type').value,
-        city: document.getElementById('ep-city').value
-    };
-    const res = await fetch(WORKER_URL + '/api/properties', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(body)
-    });
-    if(res.ok) {
-        closeOSOverlay();
-        fetchEnterpriseProperties();
-    }
-}
-async function saveEnterpriseBranding() {
-    const body = {
-        organizationId: currentUser.enterpriseGroupId,
-        customDomain: document.getElementById('ent-domain').value,
-        logoUrl: document.getElementById('ent-logo').value,
-        primaryColor: document.getElementById('ent-color').value
-    };
-    const res = await fetch(WORKER_URL + '/api/white-label', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(body)
-    });
-    if(res.ok) alert('Branding saved successfully.');
-}
-
-// PARTNERS
-function renderPartners() {
-    if(currentPartner) {
-        document.getElementById('partner-registration-view').style.display = 'none';
-        document.getElementById('partner-dashboard-view').style.display = 'block';
-        document.getElementById('pt-ref-code').textContent = 'CODE: ' + currentPartner.referralCode;
-        fetchPartnerDashboard();
-        fetchReferrals();
-    } else {
-        document.getElementById('partner-registration-view').style.display = 'block';
-        document.getElementById('partner-dashboard-view').style.display = 'none';
-    }
-}
-async function registerPartner() {
-    const body = {
-        organizationName: document.getElementById('pt-org').value,
-        partnerType: document.getElementById('pt-type').value,
-        contactName: document.getElementById('pt-contact').value,
-        email: document.getElementById('pt-email').value
-    };
-    const res = await fetch(WORKER_URL + '/api/partners/register', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(body)
-    });
-    if(res.ok) {
-        const d = await res.json();
-        currentPartner = { id: d.partnerId, referralCode: d.referralCode, ...body };
-        localStorage.setItem('MKD_PARTNER', JSON.stringify(currentPartner));
-        renderPartners();
-    }
-}
-async function fetchPartnerDashboard() {
-    const res = await fetch(WORKER_URL + '/api/partners/dashboard', { headers: {'X-Partner-Id': currentPartner.id} });
-    if(res.ok) {
-        const d = await res.json();
-        document.getElementById('pt-stat-referrals').textContent = d.analytics.totalReferrals;
-        document.getElementById('pt-stat-customers').textContent = d.analytics.activeCustomers;
-        document.getElementById('pt-stat-pending').textContent = d.analytics.pendingCommissions;
-        document.getElementById('pt-stat-paid').textContent = d.analytics.paidCommissions;
-    }
-}
-async function fetchReferrals() {
-    const res = await fetch(WORKER_URL + '/api/referrals', { headers: {'X-Partner-Id': currentPartner.id} });
-    if(res.ok) {
-        const d = await res.json();
-        document.getElementById('partner-referral-list').innerHTML = d.referrals.map(r => `
-            <div class="campaign-list-item"><div><strong>${r.lead_name}</strong><div class="campaign-meta">${r.organization_name || ''} · ${r.referral_status}</div></div></div>`).join('');
-    }
-}
-function showNewReferralForm() {
-    const content = document.getElementById('os-content');
-    content.innerHTML = `
-        <h2 class="tool-title">Add New Referral</h2>
-        <div class="field"><label>Lead Name</label><input type="text" id="rf-name" /></div>
-        <div class="field"><label>Lead Email</label><input type="email" id="rf-email" /></div>
-        <div class="field"><label>Organization</label><input type="text" id="rf-org" /></div>
-        <button class="btn-generate" onclick="submitReferral()">Submit Lead</button>
-    `;
-    document.getElementById('overlay-os').classList.add('open');
-}
-async function submitReferral() {
-    const body = {
-        partnerId: currentPartner.id,
-        leadName: document.getElementById('rf-name').value,
-        leadEmail: document.getElementById('rf-email').value,
-        organizationName: document.getElementById('rf-org').value
-    };
-    const res = await fetch(WORKER_URL + '/api/referrals/create', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(body)
-    });
-    if(res.ok) {
-        closeOSOverlay();
-        fetchReferrals();
-    }
-}
 function switchIntelTab(name, el) {
     document.querySelectorAll('#tk-panel-intelligence .stab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.intel-panel').forEach(p => p.style.display = 'none');
-    el.classList.add('active');
-    document.getElementById('intel-panel-' + name).style.display = 'block';
-    if(name==='executive') renderExecutiveDashboard();
-    if(name==='insights') renderInsightsCenter();
+    el.classList.add('active'); document.getElementById('intel-panel-' + name).style.display = 'block';
 }
+
+function switchAdminTab(name, el) {
+    document.querySelectorAll('#tk-panel-admin .stab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.admin-panel').forEach(p => p.style.display = 'none');
+    el.classList.add('active'); document.getElementById('admin-panel-' + name).style.display = 'block';
+}
+
 function switchTemplateTab(name, el) {
     document.querySelectorAll('.tpl-panel').forEach(p => p.style.display = 'none');
     document.querySelectorAll('#tk-panel-templates .stab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('tpl-panel-' + name).style.display = 'block';
+    el.classList.add('active'); document.getElementById('tpl-panel-' + name).style.display = 'block';
 }
 
 // CAMPAIGNS
 async function syncCampaigns() {
     const res = await fetch(WORKER_URL + '/api/campaigns', { headers: { 'X-Access-Code': currentUser.code } });
-    if(res.ok) {
-        const d = await res.json();
-        d.campaigns.forEach(c => LOCAL_CAMPAIGNS[c.id] = c);
-        renderCampaigns();
-    }
+    if(res.ok) { const d = await res.json(); d.campaigns.forEach(c => LOCAL_CAMPAIGNS[c.id] = c); renderCampaigns(); }
 }
 function renderCampaigns() {
-    const list = document.getElementById('campaign-list');
-    const items = Object.values(LOCAL_CAMPAIGNS).filter(c => c.code === currentUser.code);
-    list.innerHTML = items.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).map(c => `
-        <div class="campaign-list-item" onclick="viewCampaign('${c.id}')"><div><strong>${c.name}</strong><div class="campaign-meta">${c.created_at}</div></div><div>→</div></div>`).join('');
+    document.getElementById('campaign-list').innerHTML = Object.values(LOCAL_CAMPAIGNS).map(c => `
+        <div class="campaign-list-item" onclick="viewCampaign('${c.id}')"><div><strong>${c.name}</strong></div><div>→</div></div>`).join('');
 }
 function showNewCampaignForm() {
-    const content = document.getElementById('os-content');
-    content.innerHTML = `
-        <h2 class="tool-title">New Marketing Campaign</h2>
-        <div class="field"><label>Business Type</label><select id="c-type"><option>Hotel</option><option>Resort</option><option>Lodge</option><option>Restaurant</option></select></div>
+    document.getElementById('os-content').innerHTML = `
+        <h2 class="tool-title">New Campaign Strategy</h2>
+        <div class="field"><label>Business Type</label><select id="c-type"><option>Hotel</option><option>Restaurant</option></select></div>
         <div class="field"><label>Promo Name</label><input type="text" id="c-name" /></div>
-        <div class="field"><label>Description</label><textarea id="c-desc" placeholder="What is the promotion about?"></textarea></div>
-        <div class="field"><label>Offer</label><input type="text" id="c-offer" placeholder="e.g. 20% off, Buy 1 Get 1" /></div>
-        <div class="field"><label>Target Audience</label><input type="text" id="c-audience" placeholder="e.g. Couples, Business Travelers" /></div>
-        <div class="field"><label>Campaign Goal</label><input type="text" id="c-goal" placeholder="e.g. Increase direct bookings" /></div>
-        <button class="btn-generate" onclick="generateCampaign()">✨ Create Complete Strategy</button>
+        <div class="field"><label>Description</label><textarea id="c-desc" placeholder="Offer details, goal, etc."></textarea></div>
+        <button class="btn-generate" onclick="generateCampaign()">✨ Create Strategy</button>
     `;
     document.getElementById('overlay-os').classList.add('open');
 }
 async function generateCampaign() {
-    const btn = document.querySelector('#os-content .btn-generate');
-    btn.disabled = true; btn.textContent = 'Generating...';
-    const body = {
-        business_type: document.getElementById('c-type').value,
-        promotion_name: document.getElementById('c-name').value,
-        promotion_description: document.getElementById('c-desc').value,
-        offer: document.getElementById('c-offer').value,
-        target_audience: document.getElementById('c-audience').value,
-        campaign_goal: document.getElementById('c-goal').value
-    };
-    const res = await fetch(WORKER_URL + '/api/generate/campaign', {
-        method:'POST',
-        headers:{'Content-Type':'application/json', 'X-Access-Code': currentUser.code},
-        body: JSON.stringify(body)
-    });
-    if(res.ok) {
-        const d = await res.json(); LOCAL_CAMPAIGNS[d.campaign.id] = d.campaign;
-        closeOSOverlay(); renderCampaigns(); viewCampaign(d.campaign.id);
-    }
+    const body = { promotion_name: document.getElementById('c-name').value, promotion_description: document.getElementById('c-desc').value, business_type: document.getElementById('c-type').value };
+    const res = await fetch(WORKER_URL + '/api/generate/campaign', { method:'POST', headers:{'X-Access-Code': currentUser.code}, body: JSON.stringify(body) });
+    if(res.ok) { const d = await res.json(); LOCAL_CAMPAIGNS[d.campaign.id] = d.campaign; renderCampaigns(); closeOSOverlay(); viewCampaign(d.campaign.id); }
 }
-async function viewCampaign(id) {
-    let c = LOCAL_CAMPAIGNS[id];
-    if(!c.output) {
-        const res = await fetch(WORKER_URL + '/api/campaigns/' + id, { headers: {'X-Access-Code': currentUser.code} });
-        c = (await res.json()).campaign; LOCAL_CAMPAIGNS[id] = c;
-    }
-    const content = document.getElementById('os-content');
-    content.innerHTML = `
+function viewCampaign(id) {
+    const c = LOCAL_CAMPAIGNS[id];
+    document.getElementById('os-content').innerHTML = `
         <h2 class="tool-title">${c.name}</h2>
-        <div style="display:flex; gap:8px; margin-bottom:1rem; overflow-x:auto; padding-bottom:8px">
-            <button class="stab active" onclick="switchCampaignResultTab('brief',this)">Brief</button>
-            <button class="stab" onclick="switchCampaignResultTab('social',this)">Social</button>
-            <button class="stab" onclick="switchCampaignResultTab('email',this)">Email</button>
-            <button class="stab" onclick="switchCampaignResultTab('calendar',this)">30-Day Calendar</button>
-        </div>
-        <div id="cr-brief" class="camp-res-panel active">
-            <div class="result-section"><div class="result-title">Theme</div><p style="font-size:13px">${c.output.campaign_brief.theme}</p></div>
-            <div class="result-section"><div class="result-title">Key Message</div><p style="font-size:13px">${c.output.campaign_brief.key_message}</p></div>
-            <div class="result-section"><div class="result-title">Target</div><p style="font-size:13px">${c.output.campaign_brief.target_audience}</p></div>
-        </div>
-        <div id="cr-social" class="camp-res-panel" style="display:none">
-            <div class="result-section"><div class="result-title">Instagram</div><p style="font-size:13px">${c.output.social_media.instagram}</p></div>
-            <div class="result-section"><div class="result-title">Facebook</div><p style="font-size:13px">${c.output.social_media.facebook}</p></div>
-            <div class="result-section"><div class="result-title">LinkedIn</div><p style="font-size:13px">${c.output.social_media.linkedin}</p></div>
-        </div>
-        <div id="cr-email" class="camp-res-panel" style="display:none">
-            <div class="result-section"><div class="result-title">Subject</div><p style="font-size:13px">${c.output.email_campaign.subject}</p></div>
-            <div class="result-section"><div class="result-title">Body</div><p style="font-size:13px; white-space:pre-wrap">${c.output.email_campaign.body}</p></div>
-        </div>
-        <div id="cr-calendar" class="camp-res-panel" style="display:none">
-            <div class="result-section">
-                <table class="code-table">
-                    <thead><tr><th>Day</th><th>Platform</th><th>Topic</th></tr></thead>
-                    <tbody>${c.output.calendar.map(day => `<tr><td>${day.day}</td><td>${day.platform}</td><td>${day.topic}</td></tr>`).join('')}</tbody>
-                </table>
-            </div>
-        </div>
+        <div class="result-section"><h3>Strategy Theme</h3><p>${c.output.campaign_brief?.theme || 'Generating...'}</p></div>
+        <div class="result-section"><h3>Instagram Post</h3><p>${c.output.social_media?.instagram || '...'}</p></div>
+        <div class="result-section"><h3>Email Subject</h3><p>${c.output.email_campaign?.subject || '...'}</p></div>
     `;
     document.getElementById('overlay-os').classList.add('open');
-}
-function switchCampaignResultTab(name, el) {
-    document.querySelectorAll('.camp-res-panel').forEach(p => p.style.display = 'none');
-    document.querySelectorAll('#os-content .stab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('cr-' + name).style.display = 'block';
 }
 
 // REVIEWS
 async function syncReviews() {
     const res = await fetch(WORKER_URL + '/api/reviews', { headers: { 'X-Access-Code': currentUser.code } });
-    if(res.ok) {
-        const d = await res.json();
-        d.reviews.forEach(r => LOCAL_REVIEWS[r.id] = r);
-        renderReviews();
-    }
+    if(res.ok) { const d = await res.json(); d.reviews.forEach(r => LOCAL_REVIEWS[r.id] = r); renderReviews(); }
 }
 function renderReviews() {
-    const list = document.getElementById('review-list');
-    const items = Object.values(LOCAL_REVIEWS).filter(r => r.code === currentUser.code);
-    list.innerHTML = items.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).map(r => `
-        <div class="campaign-list-item" onclick="viewReview('${r.id}')"><div><strong>${r.source}</strong><div class="campaign-meta">${r.text.substring(0,40)}...</div></div><div>→</div></div>`).join('');
+    document.getElementById('review-list').innerHTML = Object.values(LOCAL_REVIEWS).map(r => `
+        <div class="campaign-list-item" onclick="viewReview('${r.id}')"><div><strong>${r.text.substring(0,30)}...</strong></div></div>`).join('');
 }
 function showNewReviewForm() {
-    const content = document.getElementById('os-content');
-    content.innerHTML = `
+    document.getElementById('os-content').innerHTML = `
         <h2 class="tool-title">Analyze Review</h2>
         <div class="field"><label>Review Text</label><textarea id="r-text"></textarea></div>
         <button class="btn-generate" onclick="createReview()">✨ Analyze Feedback</button>
@@ -1117,178 +714,51 @@ function showNewReviewForm() {
     document.getElementById('overlay-os').classList.add('open');
 }
 async function createReview() {
-    const res = await fetch(WORKER_URL + '/api/reviews', {
-        method:'POST',
-        headers:{'Content-Type':'application/json', 'X-Access-Code':currentUser.code},
-        body: JSON.stringify({review_text: document.getElementById('r-text').value})
-    });
-    if(res.ok) {
-        const d = await res.json(); LOCAL_REVIEWS[d.review.id] = d.review;
-        closeOSOverlay(); renderReviews(); viewReview(d.review.id);
-    }
+    const res = await fetch(WORKER_URL + '/api/reviews', { method:'POST', headers:{'X-Access-Code':currentUser.code}, body: JSON.stringify({review_text: document.getElementById('r-text').value}) });
+    if(res.ok) { const d = await res.json(); LOCAL_REVIEWS[d.review.id] = d.review; renderReviews(); closeOSOverlay(); viewReview(d.review.id); }
 }
 function viewReview(id) {
     const r = LOCAL_REVIEWS[id];
-    const content = document.getElementById('os-content');
-    content.innerHTML = `
+    document.getElementById('os-content').innerHTML = `
         <h2 class="tool-title">Review Analysis</h2>
-        <div class="result-section">
-            <div class="result-title">Guest Feedback</div>
-            <p style="font-size:13px; font-style:italic">"${r.text}"</p>
-            <div class="campaign-meta">Source: ${r.source} · Rating: ${r.rating}/5</div>
-        </div>
-        <div class="stats-grid">
-            <div class="stat-box"><div class="stat-num">${r.analysis.sentiment_score}</div><div class="stat-lbl">${r.analysis.sentiment_label}</div></div>
-            <div class="stat-box"><div class="stat-num">${r.analysis.risk_score}/10</div><div class="stat-lbl">Risk</div></div>
-        </div>
-        <div class="result-section">
-            <div class="result-title">Suggested Reply</div>
-            <p style="font-size:13px; white-space:pre-wrap">${r.response.draft}</p>
-            <button class="act-btn" style="margin-top:10px" onclick="navigator.clipboard.writeText(\`${r.response.draft.replace(/`/g, '\\`')}\`)">📋 Copy Reply</button>
-        </div>
-        ${r.analysis.escalation.escalate ? `<div style="background:#fee2e2; border:1px solid #ef4444; color:#991b1b; padding:12px; border-radius:10px; font-size:12px"><strong>⚠️ Management Escalation Required:</strong> ${r.analysis.escalation.reason}</div>` : ''}
+        <div class="result-section"><h3>Draft Reply</h3><p>${r.response.draft}</p></div>
+        <div class="result-section"><h3>Sentiment</h3><p>${r.analysis.sentiment_label} (${r.analysis.sentiment_score}%)</p></div>
     `;
     document.getElementById('overlay-os').classList.add('open');
 }
 
-// INTELLIGENCE
-async function renderExecutiveDashboard() {
-    const res = await fetch(WORKER_URL + '/api/dashboard', { headers: {'X-Access-Code':currentUser.code} });
-    if(res.ok) {
-        const d = await res.json();
-        document.getElementById('exec-campaigns').textContent = d.metrics.campaignsCreated;
-        document.getElementById('exec-reviews').textContent = d.metrics.reviewsProcessed;
-        document.getElementById('exec-usage').textContent = Math.round((d.metrics.usage/d.metrics.limit)*100) + '%';
-        document.getElementById('exec-days').textContent = d.metrics.daysLeft;
-    }
-}
-async function generateInsights() {
-    const res = await fetch(WORKER_URL + '/api/insights/generate', { method:'POST', headers:{'X-Access-Code':currentUser.code} });
-    if(res.ok) {
-        const d = await res.json(); renderInsightsCenter();
-    }
-}
-async function renderInsightsCenter() {
-    const res = await fetch(WORKER_URL + '/api/insights', { headers: {'X-Access-Code':currentUser.code} });
-    if(res.ok) {
-        const d = await res.json();
-        document.getElementById('insights-list').innerHTML = d.reports.map(r => `<div class="campaign-list-item">Report: ${r.created_at}</div>`).join('');
-    }
-}
-
-// DASHBOARD
-function renderDashboard() {
-    const c = Object.values(LOCAL_CAMPAIGNS).filter(i => i.code === currentUser.code).length;
-    const r = Object.values(LOCAL_REVIEWS).filter(i => i.code === currentUser.code).length;
-    document.getElementById('stat-campaigns').textContent = c;
-    document.getElementById('stat-reviews').textContent = r;
-    document.getElementById('stat-content').textContent = c*5 + r*2;
-}
-
-// ADMIN
-function switchAdminTab(name, el) {
-    document.querySelectorAll('.admin-panel').forEach(p => p.style.display = 'none');
-    document.querySelectorAll('#tk-panel-admin .stab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    document.getElementById('admin-panel-' + name).style.display = 'block';
-    if(name === 'ai') renderAICenter();
-}
-async function renderAICenter() {
-    if(!ADMIN_TOKEN) return;
-    document.getElementById('ai-admin-auth').style.display = 'none';
-    document.getElementById('ai-center-content').style.display = 'block';
-    const res = await fetch(WORKER_URL + '/api/ai/analytics', { headers: {'X-Admin-Token': ADMIN_TOKEN} });
-    if(res.ok) {
-        const d = await res.json();
-        document.getElementById('ai-total-reqs').textContent = d.analytics.requests;
-        document.getElementById('ai-avg-latency').textContent = Math.round(d.analytics.latency) + 'ms';
-        document.getElementById('ai-total-cost').textContent = '$' + d.analytics.cost.toFixed(4);
-        document.getElementById('ai-avg-quality').textContent = Math.round(d.analytics.quality*100) + '%';
-    }
-}
-function saveAdminToken() {
-    ADMIN_TOKEN = document.getElementById('admin-token-input').value;
-    localStorage.setItem('RCS_ADMIN_TOKEN', ADMIN_TOKEN);
-    renderAICenter();
-}
-function saveWorkerURL() {
-    WORKER_URL = document.getElementById('worker-url-input').value;
-    localStorage.setItem('MKD_WORKER_URL', WORKER_URL);
-}
-
-// PROMO & PAY
-async function claimPromo() {
-    const body = { email: document.getElementById('promo-email').value, name: document.getElementById('promo-name').value, deviceId: 'web' };
-    const res = await fetch(WORKER_URL + '/claim-promo', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(body)
-    });
-    if(res.ok) {
-        const d = await res.json();
-        document.getElementById('promo-code-val').textContent = d.code;
-        document.getElementById('promo-step-form').style.display = 'none';
-        document.getElementById('promo-step-success').style.display = 'block';
-    }
-}
-function usePromoCode() {
-    document.getElementById('login-code').value = document.getElementById('promo-code-val').textContent;
-    closeModal('promo'); openModal('login');
-}
-async function doPayment(method) {
-    const plan = document.getElementById('signup-plan').value;
-    const email = document.getElementById('signup-email').value;
-    const res = await fetch(WORKER_URL + '/' + method + '-create', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({plan, email, name:email})
-    });
-    if(res.ok) {
-        const d = await res.json();
-        window.open(d.checkoutUrl || d.data?.checkoutUrl, '_blank');
-        closeModal('signup'); openModal('login');
-    }
+// PARTNERS
+async function registerPartner() {
+    const body = { organizationName: document.getElementById('pt-org').value, contactName: document.getElementById('pt-contact').value, email: document.getElementById('pt-email').value };
+    const res = await fetch(WORKER_URL + '/api/partners/register', { method:'POST', body: JSON.stringify(body) });
+    if(res.ok) { alert('Registered!'); }
 }
 
 // TEMPLATES
 async function generate(type) {
-    let p = "";
-    if(type==='menu') p = "Menu description for " + document.getElementById('m-dish').value;
-    if(type==='social') p = "Social post: " + document.getElementById('s-context').value;
-    if(type==='review') p = "Reply to: " + document.getElementById('r-review-simple').value;
-    const res = await fetch(WORKER_URL + '/generate', {
-        method:'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({code:currentUser.code, prompt: p})
-    });
-    const d = await res.json();
-    document.getElementById('out-'+type+'-text').textContent = d.text;
-    document.getElementById('out-'+type).style.display = 'block';
+    let prompt = "";
+    if(type==='menu') prompt = "Write an appetizing menu description for " + document.getElementById('m-dish').value + " using these ingredients: " + document.getElementById('m-ing').value;
+    if(type==='social') prompt = "Write a social media post about this: " + document.getElementById('s-context').value;
+    if(type==='review') prompt = "Write a professional reply to this review: " + document.getElementById('r-review-simple').value;
+
+    const res = await fetch(WORKER_URL + '/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({code:currentUser.code, prompt}) });
+    if(res.ok) {
+        const d = await res.json();
+        document.getElementById('out-'+type+'-text').textContent = d.text;
+        document.getElementById('out-'+type).style.display = 'block';
+    }
 }
 
-// BOOTSTRAP
-window.onload = () => {
-    document.getElementById('worker-url-input').value = WORKER_URL;
-    const session = sessionStorage.getItem('MKD_SESSION');
-    if(session) {
-        const {code} = JSON.parse(session);
-        fetch(WORKER_URL + '/validate', {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({code})
-        })
-            .then(res => res.json())
-            .then(d => { currentUser = {code, ...d}; launchToolkit(); });
-    }
-};
+function renderDashboard() {
+    document.getElementById('stat-campaigns').textContent = Object.values(LOCAL_CAMPAIGNS).length;
+    document.getElementById('stat-reviews').textContent = Object.values(LOCAL_REVIEWS).length;
+}
 
 // CUISINES MARQUEE
-const ALL_CUISINES=[{flag:'🇹🇿',name:'Swahili'},{flag:'🇮🇹',name:'Italian'},{flag:'🇯🇵',name:'Japanese'},{flag:'🇮🇳',name:'Indian'},{flag:'🇫🇷',name:'French'},{flag:'🇲🇽',name:'Mexican'}];
-function buildMarquee(){
-    const el=document.getElementById('cuisine-scroll');
-    el.innerHTML=[...ALL_CUISINES,...ALL_CUISINES].map(c=>`<div class="cuisine-chip"><span>${c.flag}</span>${c.name}</div>`).join('');
-}
-buildMarquee();
+const ALL_CUISINES=[{flag:'🇹🇿',name:'Swahili'},{flag:'🇮🇹',name:'Italian'},{flag:'🇯🇵',name:'Japanese'},{flag:'🇫🇷',name:'French'},{flag:'🇲🇽',name:'Mexican'}];
+document.getElementById('cuisine-scroll').innerHTML = [...ALL_CUISINES,...ALL_CUISINES].map(c=>`<div class="cuisine-chip"><span>${c.flag}</span>${c.name}</div>`).join('');
+
+window.onload = () => { if(sessionStorage.getItem('MKD_SESSION')) launchToolkit(); };
 </script>
 </body>
 </html>
