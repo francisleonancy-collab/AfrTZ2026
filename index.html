@@ -69,6 +69,40 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
 .feat-title{font-size:15px;font-weight:600;margin-bottom:.5rem;}
 .feat-desc{font-size:13px;color:var(--muted);line-height:1.7;}
 
+/* TEAM SECTION */
+.team-section{background:var(--ink);padding:5rem 2rem;}
+.team-inner{max-width:900px;margin:0 auto;text-align:center;}
+.team-title{font-family:'Fraunces',serif;color:#fff;font-size:clamp(1.8rem,3.5vw,2.8rem);margin-bottom:1rem;}
+.team-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:2.5rem;}
+.team-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--r2);padding:1.5rem;text-align:left;}
+.team-card-role{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--gold);margin-bottom:.5rem;font-weight:600;}
+.team-card-name{font-family:'Fraunces',serif;font-size:1.1rem;color:#fff;margin-bottom:.5rem;}
+.team-card-desc{font-size:12px;color:rgba(255,255,255,.5);line-height:1.7;}
+.team-card.mkude{border-color:var(--gold);background:rgba(201,168,76,.08);}
+
+/* PRICING SECTION */
+.pricing-bg{background:var(--pale);padding:5rem 2rem;border-top:1px solid var(--border);}
+.pricing-inner{max-width:920px;margin:0 auto;text-align:center;}
+.pricing-title{font-family:'Fraunces',serif;color:var(--ink);font-size:clamp(1.8rem,3.5vw,2.8rem);margin-bottom:.5rem;}
+.pricing-sub{color:var(--muted);font-size:14px;margin-bottom:3rem;}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:1.5rem;}
+.plan-card{background:#fff;border:1.5px solid var(--border);border-radius:var(--r2);padding:1.75rem;text-align:left;box-shadow:var(--sh2);}
+.plan-card.featured{border-color:var(--gold);}
+.plan-featured-badge{font-size:10px;background:var(--gold);color:var(--ink);padding:3px 10px;border-radius:99px;font-weight:600;display:inline-block;margin-bottom:1rem;}
+.plan-name{font-size:13px;color:var(--muted);margin-bottom:.5rem;}
+.plan-price{font-family:'Fraunces',serif;font-size:2rem;color:var(--ink);line-height:1;}
+.plan-price sup{font-size:.875rem;vertical-align:super;font-family:'DM Sans',sans-serif;}
+.plan-period{font-size:12px;color:var(--muted);margin-bottom:1.25rem;}
+.plan-features{list-style:none;font-size:13px;color:var(--muted);line-height:2.2;}
+.plan-features li::before{content:'✓  ';color:var(--gold);}
+.btn-plan{width:100%;margin-top:1.25rem;padding:12px;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:.2s;}
+.btn-plan-outline{background:#fff;color:var(--ink);border:1.5px solid var(--border);}
+.btn-plan-gold{background:var(--gold);color:var(--ink);}
+
+/* FOOTER */
+.footer{background:var(--ink);color:rgba(255,255,255,.4);padding:3rem 2rem;text-align:center;font-size:12px;line-height:2;}
+.footer a{color:rgba(255,255,255,.4);text-decoration:none;}
+
 /* TOOLKIT */
 #toolkit{display:none;min-height:100vh;background:var(--pale);}
 .tk-topbar{background:var(--ink);padding:.875rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
@@ -126,7 +160,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
 .btn-full{width:100%;padding:13px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;border:none;transition:.2s;}
 .btn-green{background:var(--green);color:#fff;}
 
-@media(max-width:600px){.nav-links{display:none;}.stats-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){.nav-links{display:none;}.stats-grid{grid-template-columns:1fr 1fr;}.plans-grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -136,6 +170,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
   <a class="nav-logo" href="#"><div class="nav-logo-icon">👨‍🍳</div><span class="nav-brand">Mkude</span></a>
   <div class="nav-links">
     <a class="nav-link" href="#what-mkude-does" data-en="What I do" data-sw="Ninachofanya" id="nav-what">What I do</a>
+    <a class="nav-link" href="#team" data-en="The team" data-sw="Timu" id="nav-team">The team</a>
     <a class="nav-link" href="#pricing" data-en="Pricing" data-sw="Bei" id="nav-pricing">Pricing</a>
   </div>
   <div class="nav-right">
@@ -178,6 +213,58 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
       <div class="feat-icon-wrap" style="background:#fefce8;">⭐</div>
       <p class="feat-title" id="feat-f3-title">Advanced Reviews</p>
       <p class="feat-desc" id="feat-f3-desc">Automated sentiment analysis, risk detection, and professional drafting for guest reviews on Google and TripAdvisor.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="team-section" id="team">
+  <div class="team-inner">
+    <p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;font-weight:600;" id="team-kicker">Your restaurant's competitive edge</p>
+    <h2 class="team-title" id="team-title">The restaurants winning online<br>all have one thing in common.</h2>
+    <div class="team-cards">
+      <div class="team-card">
+        <p class="team-card-role" id="tc1-role">You & your team</p>
+        <p class="team-card-name" id="tc1-name">Create the experience</p>
+        <p class="team-card-desc" id="tc1-desc">Exceptional food, outstanding service, memorable moments that keep guests coming back.</p>
+      </div>
+      <div class="team-card mkude">
+        <p class="team-card-role" id="tc3-role">👨‍🍳 Mkude</p>
+        <p class="team-card-name" id="tc3-name">Amplify the experience</p>
+        <p class="team-card-desc" id="tc3-desc">Menu copy that sells more dishes. Social posts that fill more seats. Review replies that protect your reputation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-bg" id="pricing">
+  <div class="pricing-inner">
+    <p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;font-weight:600;" id="pricing-kicker">Bring Mkude on board</p>
+    <h2 class="pricing-title" id="pricing-title">Simple, honest pricing.</h2>
+    <div class="plans-grid">
+      <div class="plan-card">
+        <p class="plan-name" id="pn-starter">Starter</p>
+        <p class="plan-price" id="price-starter"><sup>$</sup>6</p>
+        <p class="plan-period">/month · 30 days</p>
+        <ul class="plan-features"><li id="pf1-starter">30 writing tasks/month</li><li id="pf2-starter">Campaign Strategy</li><li id="pf3-starter">Review Analysis</li></ul>
+        <button class="btn-plan btn-plan-outline" onclick="openModal('signup')">Bring Mkude on board</button>
+      </div>
+      <div class="plan-card featured">
+        <div class="plan-featured-badge" id="popular-badge">Most popular</div>
+        <p class="plan-name" id="pn-growth">Growth</p>
+        <p class="plan-price" id="price-growth"><sup>$</sup>12</p>
+        <p class="plan-period">/month · 30 days</p>
+        <ul class="plan-features"><li id="pf1-growth">100 writing tasks/month</li><li id="pf2-growth">Intelligence Hub</li><li id="pf3-growth">Advanced Analytics</li></ul>
+        <button class="btn-plan btn-plan-gold" onclick="openModal('signup')">Bring Mkude on board</button>
+      </div>
+      <div class="plan-card">
+        <p class="plan-name" id="pn-premium">Premium</p>
+        <p class="plan-price" id="price-premium"><sup>$</sup>18</p>
+        <p class="plan-period">/month · 30 days</p>
+        <ul class="plan-features"><li id="pf1-premium">Unlimited writing tasks</li><li id="pf2-premium">Multi-tenant Admin</li><li id="pf3-premium">Priority Support</li></ul>
+        <button class="btn-plan btn-green" onclick="openModal('signup')">Bring Mkude on board</button>
+      </div>
     </div>
   </div>
 </section>
@@ -485,6 +572,7 @@ const TRANS = {
     signIn: "Sign in",
     subFrom: "Subscribe from $6/month",
     navWhat: "What I do",
+    navTeam: "The team",
     navPricing: "Pricing",
     f1Title: "Campaign Generator",
     f1Desc: "Transform one promotion into a complete multi-channel campaign in seconds. Strategy, social posts, and email ready to go.",
@@ -506,7 +594,7 @@ const TRANS = {
     lblUsage: "Usage",
     lblActivity: "Recent Activity",
     newStrategy: "+ New Strategy",
-    analyzeFeedback: "+ Analyze Feedback",
+    analyzeFeedback: "+ Changanua Maoni",
     itabExec: "👑 Executive",
     itabMkt: "🚀 Marketing",
     itabRep: "⭐ Reputation",
@@ -521,6 +609,7 @@ const TRANS = {
     signIn: "Ingia",
     subFrom: "Jiandikishe kutoka $6/mwezi",
     navWhat: "Ninachofanya",
+    navTeam: "Timu",
     navPricing: "Bei",
     f1Title: "Muunda Kampeni",
     f1Desc: "Badilisha tangazo moja kuwa kampeni kamili ya njia nyingi ndani ya sekunde chache. Mkakati na barua pepe viko tayari.",
@@ -561,6 +650,7 @@ function toggleLang() {
     document.getElementById('nav-promo').textContent = L.tryFree;
     document.getElementById('nav-signin').textContent = L.signIn;
     document.getElementById('nav-what').textContent = L.navWhat;
+    document.getElementById('nav-team').textContent = L.navTeam;
     document.getElementById('nav-pricing').textContent = L.navPricing;
     document.getElementById('btn-hero-promo').textContent = "👋 Meet Mkude — " + L.tryFree.toLowerCase();
     document.getElementById('btn-hero-sub').textContent = L.subFrom;
