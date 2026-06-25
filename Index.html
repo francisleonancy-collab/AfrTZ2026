@@ -282,7 +282,7 @@
     <button class="app-tab active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
     <button class="app-tab" onclick="switchTab('campaigns',this)">🚀 Campaigns</button>
     <button class="app-tab" onclick="switchTab('reviews',this)">⭐ Reviews</button>
-    <button class="app-tab" onclick="switchTab('analytics',this)">📈 Analytics</button>
+    <button class="app-tab" onclick="switchTab('analytics',this)">🧠 Intelligence</button>
     <button class="app-tab" onclick="switchTab('templates',this)">📝 Templates</button>
     <button class="app-tab" onclick="switchTab('settings',this)">⚙️ Settings</button>
     <button class="app-tab" id="admin-tab" onclick="switchTab('admin',this)" style="display:none">👑 Admin</button>
@@ -390,31 +390,95 @@
     </div>
   </div>
 
-  <!-- ANALYTICS -->
+  <!-- INTELLIGENCE / ANALYTICS -->
   <div id="app-panel-analytics" class="app-panel">
-    <div class="tool-card">
-      <p class="tool-title">Reputation Insights</p>
-      <p class="tool-sub">Aggregation of sentiment and feedback across all reviews.</p>
+    <div class="app-tabs" style="padding:0; margin-bottom:1.5rem; background:var(--cream); border-radius:var(--r);">
+      <button class="app-tab active" onclick="switchIntelTab('executive',this)">👑 Executive</button>
+      <button class="app-tab" onclick="switchIntelTab('marketing',this)">🚀 Marketing</button>
+      <button class="app-tab" onclick="switchIntelTab('reputation',this)">⭐ Reputation</button>
+      <button class="app-tab" onclick="switchIntelTab('revenue',this)">💰 Revenue</button>
+      <button class="app-tab" onclick="switchIntelTab('insights',this)">🧠 Insights</button>
+    </div>
 
-      <div class="stats-row">
-        <div class="stat-box"><div class="stat-num" id="ana-rating">0.0</div><div class="stat-label">Avg Rating</div></div>
-        <div class="stat-box"><div class="stat-num" id="ana-count">0</div><div class="stat-label">Total Reviews</div></div>
-        <div class="stat-box"><div class="stat-num" id="ana-pos" style="color:var(--ok)">0</div><div class="stat-label">Positive</div></div>
-        <div class="stat-box"><div class="stat-num" id="ana-neg" style="color:var(--err)">0</div><div class="stat-label">Negative</div></div>
-      </div>
-
-      <div class="admin-card">
-        <p class="admin-card-title">Top Mentioned Topics</p>
-        <div id="ana-topics" style="display:flex;flex-wrap:wrap;gap:8px"></div>
-      </div>
-
-      <div class="admin-card">
-        <p class="admin-card-title">Escalation Rate</p>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div class="usage-track" style="max-width:none"><div class="usage-fill usage-full" id="ana-esc-fill" style="width:0%"></div></div>
-          <span id="ana-esc-text" style="font-size:12px;font-weight:bold">0%</span>
+    <!-- EXECUTIVE SUB-PANEL -->
+    <div id="intel-panel-executive" class="intel-panel active">
+      <div class="tool-card">
+        <p class="tool-title">Executive Health Score</p>
+        <div class="stats-row" style="margin-top:1rem;">
+          <div class="stat-box"><div class="stat-num" id="exec-campaigns">0</div><div class="stat-label">Campaigns</div></div>
+          <div class="stat-box"><div class="stat-num" id="exec-reviews">0</div><div class="stat-label">Reviews</div></div>
+          <div class="stat-box"><div class="stat-num" id="exec-usage">0%</div><div class="stat-label">Limit Used</div></div>
+          <div class="stat-box"><div class="stat-num" id="exec-days">0</div><div class="stat-label">Days Left</div></div>
         </div>
-        <p style="font-size:10px;color:var(--tl);margin-top:5px">Percentage of reviews requiring immediate management attention.</p>
+      </div>
+    </div>
+
+    <!-- MARKETING SUB-PANEL -->
+    <div id="intel-panel-marketing" class="intel-panel" style="display:none">
+      <div class="tool-card">
+        <p class="tool-title">Marketing Performance</p>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-num" id="mkt-total">0</div><div class="stat-label">Total Campaigns</div></div>
+          <div class="stat-box"><div class="stat-num" id="mkt-assets">0</div><div class="stat-label">Assets Created</div></div>
+          <div class="stat-box"><div class="stat-num" id="mkt-score" style="color:var(--gl)">0</div><div class="stat-label">Marketing Score</div></div>
+        </div>
+        <div class="admin-card">
+          <p class="admin-card-title">Campaign Type Distribution</p>
+          <div id="mkt-types" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPUTATION SUB-PANEL -->
+    <div id="intel-panel-reputation" class="intel-panel" style="display:none">
+      <div class="tool-card">
+        <p class="tool-title">Reputation Analytics</p>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-num" id="ana-rating">0.0</div><div class="stat-label">Avg Rating</div></div>
+          <div class="stat-box"><div class="stat-num" id="ana-count">0</div><div class="stat-label">Total Reviews</div></div>
+          <div class="stat-box"><div class="stat-num" id="ana-pos" style="color:var(--ok)">0</div><div class="stat-label">Positive</div></div>
+          <div class="stat-box"><div class="stat-num" id="ana-neg" style="color:var(--err)">0</div><div class="stat-label">Negative</div></div>
+        </div>
+        <div class="admin-card">
+          <p class="admin-card-title">Top Mentioned Topics</p>
+          <div id="ana-topics" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+        </div>
+        <div class="admin-card">
+          <p class="admin-card-title">Escalation Rate</p>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="usage-track" style="max-width:none"><div class="usage-fill usage-full" id="ana-esc-fill" style="width:0%"></div></div>
+            <span id="ana-esc-text" style="font-size:12px;font-weight:bold">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVENUE SUB-PANEL -->
+    <div id="intel-panel-revenue" class="intel-panel" style="display:none">
+      <div class="tool-card">
+        <p class="tool-title" id="rev-title">Revenue Analytics</p>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-num" id="rev-mrr">$0</div><div class="stat-label" id="rev-mrr-label">MRR</div></div>
+          <div class="stat-box"><div class="stat-num" id="rev-arr">$0</div><div class="stat-label" id="rev-arr-label">ARR</div></div>
+          <div class="stat-box"><div class="stat-num" id="rev-subs">0</div><div class="stat-label" id="rev-subs-label">Active Subs</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INSIGHTS SUB-PANEL -->
+    <div id="intel-panel-insights" class="intel-panel" style="display:none">
+      <div class="tool-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <p class="tool-title">AI Insights Center</p>
+          <button class="btn-gold" id="btn-gen-insights" onclick="generateInsights()" style="padding:6px 14px;font-size:12px;">✨ Generate New Report</button>
+        </div>
+        <div id="insights-list" style="margin-bottom:1.5rem;">
+          <!-- List of historical reports -->
+        </div>
+        <div id="insights-report-display" style="display:none;" class="result-section">
+          <h3 id="report-date" style="font-size:14px; color:var(--gd); margin-bottom:1rem; border-bottom:1px solid #eee; padding-bottom:0.5rem;"></h3>
+          <div id="report-content" style="font-size:13px; line-height:1.6;"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1074,12 +1138,55 @@ async function viewReview(id) {
   document.getElementById('rev-draft').textContent = r.response?.draft || '';
 }
 
-async function renderAnalytics() {
+function switchIntelTab(name, el) {
+  const analytics = document.getElementById('app-panel-analytics');
+  analytics.querySelectorAll('.app-tab').forEach(t=>t.classList.remove('active'));
+  analytics.querySelectorAll('.intel-panel').forEach(p=>p.style.display='none');
+  el.classList.add('active');
+  document.getElementById('intel-panel-'+name).style.display='block';
+  if(name==='executive') renderExecutiveDashboard();
+  if(name==='marketing') renderMarketingAnalytics();
+  if(name==='reputation') renderReputationAnalytics();
+  if(name==='revenue') renderRevenueAnalytics();
+  if(name==='insights') renderInsightsCenter();
+}
+
+async function renderExecutiveDashboard() {
   if(!currentUser) return;
   try {
-    const baseUrl = WORKER_URL || '';
-    const url = baseUrl.replace(/\/$/, '') + '/api/reputation';
-    const res = await fetch(url, { headers: { 'X-Access-Code': currentUser.code } });
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/dashboard', { headers: { 'X-Access-Code': currentUser.code } });
+    if(res.ok) {
+      const data = await res.json();
+      const m = data.metrics;
+      document.getElementById('exec-campaigns').textContent = m.campaignsCreated;
+      document.getElementById('exec-reviews').textContent = m.reviewsProcessed;
+      const usagePct = m.limit === -1 ? 0 : Math.round((m.usage / m.limit) * 100);
+      document.getElementById('exec-usage').textContent = usagePct + '%';
+      document.getElementById('exec-days').textContent = daysLeft(m.expiry);
+    }
+  } catch(e) {}
+}
+
+async function renderMarketingAnalytics() {
+  if(!currentUser) return;
+  try {
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/analytics/marketing', { headers: { 'X-Access-Code': currentUser.code } });
+    if(res.ok) {
+      const data = await res.json();
+      const a = data.analytics;
+      document.getElementById('mkt-total').textContent = a.totalCampaigns;
+      document.getElementById('mkt-assets').textContent = a.totalAssetsGenerated;
+      document.getElementById('mkt-score').textContent = a.marketingScore;
+      const types = document.getElementById('mkt-types');
+      types.innerHTML = Object.entries(a.campaignDistribution).map(([t,c]) => `<span class="topic-tag">${t}: ${c}</span>`).join('');
+    }
+  } catch(e) {}
+}
+
+async function renderReputationAnalytics() {
+  if(!currentUser) return;
+  try {
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/reputation', { headers: { 'X-Access-Code': currentUser.code } });
     if(res.ok) {
       const data = await res.json();
       const m = data.metrics;
@@ -1087,15 +1194,132 @@ async function renderAnalytics() {
       document.getElementById('ana-count').textContent = m.totalReviews;
       document.getElementById('ana-pos').textContent = m.positive;
       document.getElementById('ana-neg').textContent = m.negative;
-
-      const topics = document.getElementById('ana-topics');
-      topics.innerHTML = m.topTopics.map(t => `<span class="topic-tag">${t}</span>`).join('');
-
+      document.getElementById('ana-topics').innerHTML = m.topTopics.map(t => `<span class="topic-tag">${t}</span>`).join('');
       const escRate = m.totalReviews > 0 ? Math.round((m.escalated / m.totalReviews) * 100) : 0;
       document.getElementById('ana-esc-text').textContent = escRate + '%';
       document.getElementById('ana-esc-fill').style.width = escRate + '%';
     }
-  } catch(e) { console.error('Analytics failed:', e); }
+  } catch(e) {}
+}
+
+async function renderRevenueAnalytics() {
+  if(!currentUser) return;
+  try {
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/analytics/revenue', { headers: { 'X-Access-Code': currentUser.code } });
+    if(res.ok) {
+      const data = await res.json();
+      const m = data.metrics;
+      if (currentUser.plan === 'Admin') {
+        document.getElementById('rev-title').textContent = 'Global Revenue Dashboard';
+        document.getElementById('rev-mrr').textContent = '$' + m.mrr;
+        document.getElementById('rev-arr').textContent = '$' + m.arr;
+        document.getElementById('rev-subs').textContent = m.activeSubscriptions;
+        document.getElementById('rev-mrr-label').textContent = 'Monthly Recurring';
+        document.getElementById('rev-arr-label').textContent = 'Annual Recurring';
+        document.getElementById('rev-subs-label').textContent = 'Active SaaS Subs';
+      } else {
+        document.getElementById('rev-title').textContent = 'Subscription Value';
+        document.getElementById('rev-mrr').textContent = '$' + m.monthlySubscription;
+        document.getElementById('rev-arr').textContent = '$' + m.estimatedValue;
+        document.getElementById('rev-subs').textContent = 'Active';
+        document.getElementById('rev-mrr-label').textContent = 'Plan Price';
+        document.getElementById('rev-arr-label').textContent = 'Value Generated';
+        document.getElementById('rev-subs-label').textContent = 'Status';
+      }
+    }
+  } catch(e) {}
+}
+
+async function renderInsightsCenter() {
+  if(!currentUser) return;
+  try {
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/insights', { headers: { 'X-Access-Code': currentUser.code } });
+    if(res.ok) {
+      const data = await res.json();
+      const list = document.getElementById('insights-list');
+      if(data.reports.length === 0) {
+        list.innerHTML = '<div style="text-align:center;padding:1rem;color:var(--tl);font-size:12px;">No intelligence reports generated yet.</div>';
+      } else {
+        list.innerHTML = data.reports.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).map(r => `
+          <div class="campaign-list-item" onclick="viewInsightReport('${r.id}')" style="padding:10px;">
+            <div style="font-size:12px;">Intelligence Report: ${new Date(r.created_at).toLocaleString()}</div>
+            <div style="font-size:14px">→</div>
+          </div>
+        `).join('');
+      }
+    }
+  } catch(e) {}
+}
+
+async function generateInsights() {
+  const btn = document.getElementById('btn-gen-insights');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Generating Insights...';
+
+  try {
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/insights/generate', {
+      method: 'POST',
+      headers: { 'X-Access-Code': currentUser.code }
+    });
+    if(res.ok) {
+      const data = await res.json();
+      displayInsightReport(data.report);
+      renderInsightsCenter();
+    } else {
+      alert('Insight generation failed.');
+    }
+  } catch(e) {
+    alert('Failed to connect to Intelligence Engine.');
+  }
+  btn.disabled = false;
+  btn.innerHTML = orig;
+}
+
+async function viewInsightReport(id) {
+  try {
+    const res = await fetch((WORKER_URL||'').replace(/\/$/, '') + '/api/insights/' + id, { headers: { 'X-Access-Code': currentUser.code } });
+    if(res.ok) {
+      const data = await res.json();
+      displayInsightReport(data.report);
+    }
+  } catch(e) {}
+}
+
+function displayInsightReport(report) {
+  const display = document.getElementById('insights-report-display');
+  const content = document.getElementById('report-content');
+  document.getElementById('report-date').textContent = 'Intelligence Report: ' + new Date(report.created_at).toLocaleString();
+
+  const d = report.data;
+  content.innerHTML = `
+    <div style="margin-bottom:1.5rem;">
+      <p style="font-weight:bold; color:var(--gd);">Executive Summary</p>
+      <p>${d.executive_summary}</p>
+    </div>
+    <div class="row2">
+      <div>
+        <p style="font-weight:bold; color:var(--gd);">Key Wins</p>
+        <ul style="padding-left:1.2rem; margin-top:0.5rem;">${d.key_wins.map(w=>`<li>${w}</li>`).join('')}</ul>
+      </div>
+      <div>
+        <p style="font-weight:bold; color:var(--err);">Critical Risks</p>
+        <ul style="padding-left:1.2rem; margin-top:0.5rem;">${d.critical_risks.map(r=>`<li>${r}</li>`).join('')}</ul>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem; background:var(--cream); padding:1rem; border-radius:var(--r);">
+      <p style="font-weight:bold; color:var(--gd);">Strategic Next Actions</p>
+      <ol style="padding-left:1.2rem; margin-top:0.5rem;">${d.next_actions.map(a=>`<li>${a}</li>`).join('')}</ol>
+    </div>
+  `;
+  display.style.display = 'block';
+  display.scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderAnalytics() {
+  // Trigger sub-tab rendering
+  const activeTab = document.querySelector('#app-panel-analytics .app-tab.active');
+  if (activeTab) activeTab.click();
 }
 
 function renderCampaigns() {

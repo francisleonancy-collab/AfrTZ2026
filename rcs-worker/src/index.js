@@ -49,6 +49,13 @@ export default {
       if (path==='/api/reviews'          && req.method==='GET')  return handleGetReviews(req,env);
       if (path.startsWith('/api/reviews/') && req.method==='GET') return handleGetReviewById(req,env);
       if (path==='/api/reputation'       && req.method==='GET')  return handleGetReputation(req,env);
+      // Intelligence (Sprint 5)
+      if (path==='/api/dashboard'        && req.method==='GET')  return handleGetDashboard(req,env);
+      if (path==='/api/analytics/marketing' && req.method==='GET') return handleGetMarketingAnalytics(req,env);
+      if (path==='/api/analytics/revenue'   && req.method==='GET') return handleGetRevenueAnalytics(req,env);
+      if (path==='/api/insights/generate'   && req.method==='POST') return handleGenerateInsights(req,env);
+      if (path==='/api/insights'         && req.method==='GET')  return handleGetInsights(req,env);
+      if (path.startsWith('/api/insights/') && req.method==='GET') return handleGetInsightById(req,env);
       // Payments
       if (path==='/clickpesa-create'     && req.method==='POST') return handleClickPesaCreate(req,env);
       if (path==='/clickpesa-callback'   && req.method==='POST') return handleClickPesaCallback(req,env);
@@ -537,6 +544,196 @@ async function handleGetReputation(req, env) {
     }
   }, 200, env);
 }
+
+// == INTELLIGENCE (Sprint 5) ===============================
+async function handleGetDashboard(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const [campaigns, reviews] = await Promise.all([
+    env.CODES_KV.list({ prefix: `campaign:${v.code}:` }),
+    env.CODES_KV.list({ prefix: `review:${v.code}:` })
+  ]);
+
+  return jsonR({
+    success: true,
+    metrics: {
+      campaignsCreated: campaigns.keys.length,
+      reviewsProcessed: reviews.keys.length,
+      plan: v.data.plan,
+      usage: v.data.used || 0,
+      limit: PLANS[v.data.plan]?.limit || 0,
+      expiry: v.data.expiry
+    }
+  }, 200, env);
+}
+
+async function handleGetMarketingAnalytics(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const list = await env.CODES_KV.list({ prefix: `campaign:${v.code}:` });
+  const typeMap = {};
+  let totalContent = 0;
+
+  for (const key of list.keys) {
+    const c = await env.CODES_KV.get(key.name, 'json');
+    if (c) {
+      const type = c.input?.business_type || 'other';
+      typeMap[type] = (typeMap[type] || 0) + 1;
+      totalContent += 5; // Brief, 3 social, 1 email
+    }
+  }
+
+  return jsonR({
+    success: true,
+    analytics: {
+      totalCampaigns: list.keys.length,
+      totalAssetsGenerated: totalContent,
+      campaignDistribution: typeMap,
+      marketingScore: Math.min(100, (list.keys.length * 10) + 20)
+    }
+  }, 200, env);
+}
+
+async function handleGetRevenueAnalytics(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  if (v.data.plan === 'Admin') {
+    const list = await env.CODES_KV.list();
+    let mrr = 0, activeCount = 0, trials = 0;
+    const planPrices = { Starter:3, Growth:6, Premium:9 };
+    for (const key of list.keys) {
+      if (key.name.length > 12) continue;
+      const d = await env.CODES_KV.get(key.name, 'json');
+      if (d && d.active && !isExp(d.expiry)) {
+        if (d.plan === 'Promo') trials++;
+        else {
+          mrr += (planPrices[d.plan] || 0);
+          activeCount++;
+        }
+      }
+    }
+    return jsonR({ success:true, metrics: { mrr, arr: mrr*12, activeSubscriptions: activeCount, activeTrials: trials } }, 200, env);
+  } else {
+    const pricing = await env.CODES_KV.get('config:pricing', 'json') || { Starter:{usd:3}, Growth:{usd:6}, Premium:{usd:9} };
+    const planPrice = pricing[v.data.plan]?.usd || 0;
+    return jsonR({ success:true, metrics: { monthlySubscription: planPrice, estimatedValue: (v.data.used||0) * 2 } }, 200, env);
+  }
+}
+
+async function handleGenerateInsights(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  // 1. Build Dataset
+  const [campaigns, reviews] = await Promise.all([
+    getAllKV(env.CODES_KV, `campaign:${v.code}:`),
+    getAllKV(env.CODES_KV, `review:${v.code}:`)
+  ]);
+
+  const dataset = {
+    organization: { plan: v.data.plan, client: v.data.client },
+    marketing: campaigns.map(c => ({ name: c.name, type: c.input?.business_type, date: c.created_at })),
+    reputation: reviews.map(r => ({ rating: r.rating, sentiment: r.analysis?.sentiment_label, topics: r.analysis?.topics, date: r.created_at })),
+    usage: { used: v.data.used, limit: PLANS[v.data.plan]?.limit }
+  };
+
+  // 2. Call AI
+  const prompt = `${EXECUTIVE_ADVISOR_PROMPT}\n\nOrganization Data:\n${JSON.stringify(dataset)}`;
+  let text = '', source = '';
+
+  if (env.ANTHROPIC_KEY) {
+    try { text = await callClaude(prompt, env.ANTHROPIC_KEY); source = 'claude'; }
+    catch(e) { console.warn('Claude failed:', e); }
+  }
+  if (!text && env.GEMINI_KEY) {
+    try { text = await callGemini(prompt, env.GEMINI_KEY); source = 'gemini'; }
+    catch(e) { console.warn('Gemini failed:', e); }
+  }
+
+  if (!text) return errR('Insight generation failed.', 503, env);
+
+  try {
+    const cleanJson = text.includes('```json') ? text.split('```json')[1].split('```')[0].trim() : text.trim();
+    const reportData = JSON.parse(cleanJson);
+
+    const reportId = Date.now().toString();
+    const report = {
+      id: reportId,
+      code: v.code,
+      data: reportData,
+      created_at: nowD().toISOString()
+    };
+
+    await env.CODES_KV.put(`insight:${v.code}:${reportId}`, JSON.stringify(report));
+    return jsonR({ success:true, report, source }, 200, env);
+  } catch(e) {
+    return errR('AI returned invalid report format.', 500, env);
+  }
+}
+
+async function handleGetInsights(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const list = await env.CODES_KV.list({ prefix: `insight:${v.code}:` });
+  const reports = [];
+  for (const key of list.keys) {
+    const r = await env.CODES_KV.get(key.name, 'json');
+    if (r) reports.push({ id: r.id, created_at: r.created_at });
+  }
+  return jsonR({ success:true, reports }, 200, env);
+}
+
+async function handleGetInsightById(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const id = new URL(req.url).pathname.split('/').pop();
+  const report = await env.CODES_KV.get(`insight:${v.code}:${id}`, 'json');
+  if (!report) return errR('Report not found', 404, env);
+  return jsonR({ success:true, report }, 200, env);
+}
+
+// Helpers for Intelligence
+async function getAllKV(kv, prefix) {
+  const list = await kv.list({ prefix });
+  const results = [];
+  for (const key of list.keys) {
+    const val = await kv.get(key.name, 'json');
+    if (val) results.push(val);
+  }
+  return results;
+}
+
+const EXECUTIVE_ADVISOR_PROMPT = `You are the Mkude Hospitality Intelligence Executive Advisor.
+Analyze the provided organization data (Marketing, Reputation, and Usage) to generate a comprehensive Executive Report.
+
+Your report must include:
+1. Executive Summary: High-level property health.
+2. Marketing Insights: Top campaign types, performance summary, and growth recommendations.
+3. Reputation Insights: Top compliments/complaints, service risks, and improvement opportunities.
+4. Operational Recommendations: Next actions for the General Manager.
+
+Output: Return ONLY a valid JSON object with the structure:
+{
+  "executive_summary": "",
+  "marketing": { "insights": [], "recommendations": [] },
+  "reputation": { "insights": [], "risks": [], "opportunities": [] },
+  "key_wins": [],
+  "critical_risks": [],
+  "next_actions": []
+}
+
+Ensure the insights are data-driven based on the input.`;
 
 // == CLICKPESA =============================================
 // ClickPesa Checkout: generate a checkout link covering mobile money
