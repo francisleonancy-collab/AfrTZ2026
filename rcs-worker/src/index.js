@@ -40,6 +40,10 @@ export default {
       if (path==='/generate'             && req.method==='POST') return handleGenerate(req,env);
       if (path==='/claim-promo'          && req.method==='POST') return handleClaimPromo(req,env);
       if (path==='/config/pricing'       && req.method==='GET')  return handleGetPricing(req,env);
+      // Campaigns (Sprint 2)
+      if (path==='/api/campaigns'        && req.method==='GET')  return handleGetCampaigns(req,env);
+      if (path.startsWith('/api/campaigns/') && req.method==='GET') return handleGetCampaignById(req,env);
+      if (path==='/api/generate/campaign' && req.method==='POST') return handleGenerateCampaign(req,env);
       // Payments
       if (path==='/clickpesa-create'     && req.method==='POST') return handleClickPesaCreate(req,env);
       if (path==='/clickpesa-callback'   && req.method==='POST') return handleClickPesaCallback(req,env);
@@ -242,6 +246,126 @@ async function handleGetPricing(req, env) {
     Promo:  {usd:0,  tzs:0,    kes:0,   limit:3,   days:7 },
   };
   return jsonR({ success:true, pricing }, 200, env);
+}
+
+// == CAMPAIGNS (Sprint 2) ==================================
+async function handleGetCampaigns(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const prefix = `campaign:${v.code}:`;
+  const list = await env.CODES_KV.list({ prefix });
+  const campaigns = [];
+  for (const key of list.keys) {
+    const data = await env.CODES_KV.get(key.name, 'json');
+    if (data) {
+      // For list view, we might not want the full output to save bandwidth
+      const { output, ...summary } = data;
+      campaigns.push(summary);
+    }
+  }
+  // Sort by created_at desc
+  campaigns.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  return jsonR({ success:true, campaigns }, 200, env);
+}
+
+async function handleGetCampaignById(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const id = new URL(req.url).pathname.split('/').pop();
+  if (!id) return errR('Missing campaign ID', 400, env);
+
+  const data = await env.CODES_KV.get(`campaign:${v.code}:${id}`, 'json');
+  if (!data) return errR('Campaign not found', 404, env);
+
+  return jsonR({ success:true, campaign: data }, 200, env);
+}
+
+async function handleGenerateCampaign(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const body = await req.json().catch(()=>({}));
+  const v = await validateCode(code || body.code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const { business_type, promotion_name, promotion_description, offer, target_audience, campaign_goal } = body;
+  if (!promotion_name || !promotion_description) return errR('Promotion name and description are required.', 400, env);
+
+  // Check usage limit
+  const { data:cd } = v;
+  const limit  = PLANS[cd.plan]?.limit ?? 30;
+  if (limit!==-1 && (cd.used||0)>=limit)
+    return errR('Monthly limit reached. Please upgrade your plan.', 429, env);
+
+  const prompt = `You are a Hospitality Campaign Strategist, Social Media Expert, Email Marketing Specialist, and Calendar Builder.
+Create a complete multi-channel marketing campaign for a ${business_type || 'hospitality business'}.
+
+Input Details:
+- Promotion Name: ${promotion_name}
+- Promotion Description: ${promotion_description}
+- Offer: ${offer || 'N/A'}
+- Target Audience: ${target_audience || 'General hospitality guests'}
+- Campaign Goal: ${campaign_goal || 'Increase bookings/visits'}
+
+Requirements:
+1. Campaign Brief: Theme, Key Message, Target Audience, Marketing Angle, CTA.
+2. Social Media Posts: Instagram Caption, Facebook Post, LinkedIn Post (Hospitality tone, include CTA).
+3. Email Campaign: Subject Line, Preview Text, Email Body, CTA.
+4. 30-Day Content Calendar: A list of 30 entries with Date (Day 1 to Day 30), Platform, Topic, Content Type, CTA.
+
+Output: Return ONLY a valid JSON object with the following structure:
+{
+  "campaign_brief": { "theme": "", "key_message": "", "target_audience": "", "marketing_angle": "", "cta": "" },
+  "social_media": { "instagram": "", "facebook": "", "linkedin": "" },
+  "email_campaign": { "subject": "", "preview": "", "body": "", "cta": "" },
+  "calendar": [ { "day": 1, "platform": "", "topic": "", "content_type": "", "cta": "" }, ... ]
+}
+
+Ensure the tone is professional, evocative, and aligned with hospitality standards. Write in English.`;
+
+  let text = '', source = '';
+  const isPaid = PLANS[cd.plan]?.isPaid ?? false;
+
+  if (isPaid && env.ANTHROPIC_KEY) {
+    try { text = await callClaude(prompt, env.ANTHROPIC_KEY); source = 'claude'; }
+    catch (e) { console.warn('Claude failed:', e.message); }
+  }
+  if (!text && env.GEMINI_KEY) {
+    try { text = await callGemini(prompt, env.GEMINI_KEY); source = 'gemini'; }
+    catch (e) { console.warn('Gemini failed:', e.message); }
+  }
+
+  if (!text) return errR('Generation service unavailable.', 503, env);
+
+  try {
+    // Basic JSON cleanup if needed
+    const cleanJson = text.includes('```json') ? text.split('```json')[1].split('```')[0].trim() : text.trim();
+    const campaignData = JSON.parse(cleanJson);
+
+    // Save campaign (Persistence logic will be refined in the next step)
+    const campaignId = Date.now().toString();
+    const campaign = {
+      id: campaignId,
+      code: v.code,
+      name: promotion_name,
+      input: body,
+      output: campaignData,
+      created_at: nowD().toISOString()
+    };
+
+    await env.CODES_KV.put(`campaign:${v.code}:${campaignId}`, JSON.stringify(campaign));
+
+    // Increment usage
+    cd.used = (cd.used || 0) + 1;
+    await env.CODES_KV.put(v.code, JSON.stringify(cd));
+
+    return jsonR({ success: true, campaign, source }, 200, env);
+  } catch (e) {
+    console.error('JSON Parse Error:', e, text);
+    return errR('AI returned invalid JSON. Please try again.', 500, env);
+  }
 }
 
 // == CLICKPESA =============================================

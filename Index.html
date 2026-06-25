@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Restaurant Content Services — Lefking Enterprise</title>
+<title>Mkude — Hospitality Marketing OS</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{--gd:#0a4a35;--gm:#0f6e56;--gl:#1d9e75;--gp:#9fe1cb;--gold:#f0b94a;--cream:#faf7f0;--td:#1a1a1a;--tm:#4a5568;--tl:#718096;--err:#e53e3e;--ok:#38a169;--bdr:#e2e8f0;--r:12px;--sh:0 4px 24px rgba(10,74,53,.10);}
@@ -104,6 +104,14 @@
   .app-tabs{display:flex;background:#fff;border-bottom:1px solid var(--bdr);padding:0 1.5rem;overflow-x:auto;}
   .app-tab{padding:13px 18px;font-size:13px;border:none;background:none;cursor:pointer;color:var(--tl);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;font-family:'DM Sans',sans-serif;transition:.15s;}
   .app-tab.active{color:var(--gd);border-bottom-color:var(--gd);font-weight:500;}
+  .campaign-list-item{padding:12px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:.2s;}
+  .campaign-list-item:hover{background:var(--cream);}
+  .campaign-meta{font-size:11px;color:var(--tl);margin-top:3px;}
+  .calendar-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:1rem;}
+  .calendar-table th{text-align:left;background:var(--gd);color:#fff;padding:8px;}
+  .calendar-table td{padding:8px;border-bottom:1px solid var(--bdr);}
+  .result-section{margin-bottom:1.5rem;padding:1.25rem;background:#fff;border:1px solid var(--bdr);border-radius:var(--r);}
+  .result-title{font-weight:600;margin-bottom:.75rem;color:var(--gd);display:flex;justify-content:space-between;align-items:center;}
   .app-panel{display:none;padding:1.5rem;max-width:680px;margin:0 auto;}
   .app-panel.active{display:block;}
   .tool-card{background:#fff;border-radius:var(--r);padding:1.5rem;border:1px solid var(--bdr);box-shadow:var(--sh);}
@@ -115,7 +123,7 @@
   .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gl);}
   .field textarea{min-height:80px;resize:vertical;}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .btn-gen{width:100%;background:var(--gd);color:#fff;border:none;padding:12px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:4px;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .btn-gen{width:100%;background:var(--gd);color:#fff;border:none;padding:12px;border-radius:99px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:4px;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
   .btn-gen:hover{background:var(--gm);}
   .btn-gen:disabled{opacity:.5;cursor:not-allowed;}
   .output-card{margin-top:1.25rem;background:#f0faf5;border:1px solid #9fe1cb;border-radius:var(--r);padding:1.25rem;animation:fadeIn .3s ease;}
@@ -250,7 +258,7 @@
 <!-- ══ TOOLKIT ══ -->
 <div id="toolkit">
   <div class="app-nav">
-    <div class="app-nav-logo">Lefking <span>Restaurant Toolkit</span></div>
+    <div class="app-nav-logo">Mkude <span>Hospitality Marketing OS</span></div>
     <div class="app-nav-r">
       <span class="u-badge" id="u-badge">—</span>
       <span class="exp-badge exp-ok" id="exp-badge">—</span>
@@ -267,79 +275,235 @@
     <a href="https://wa.me/255768777057?text=Hi%2C%20I%20want%20to%20upgrade%20my%20plan" target="_blank">Upgrade via WhatsApp →</a>
   </div>
   <div class="app-tabs">
-    <button class="app-tab active" onclick="switchTab('menu',this)">🍽 Menu</button>
-    <button class="app-tab" onclick="switchTab('social',this)">📱 Social</button>
-    <button class="app-tab" onclick="switchTab('review',this)">⭐ Reviews</button>
-    <button class="app-tab" id="admin-tab" onclick="switchTab('admin',this)" style="display:none">⚙️ Admin</button>
+    <button class="app-tab active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+    <button class="app-tab" onclick="switchTab('campaigns',this)">🚀 Campaigns</button>
+    <button class="app-tab" onclick="switchTab('templates',this)">📝 Templates</button>
+    <button class="app-tab" onclick="switchTab('settings',this)">⚙️ Settings</button>
+    <button class="app-tab" id="admin-tab" onclick="switchTab('admin',this)" style="display:none">👑 Admin</button>
   </div>
 
-  <!-- MENU -->
-  <div id="app-panel-menu" class="app-panel active">
+  <!-- NEW CAMPAIGN -->
+  <div id="app-panel-new-campaign" class="app-panel">
     <div class="tool-card">
-      <p class="tool-title">Menu Description Generator</p>
-      <p class="tool-sub">Fill in the details and click Generate — your description appears instantly below.</p>
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:1rem;">
+        <button class="btn-copy" onclick="switchTab('campaigns', document.querySelector('[onclick*=\'campaigns\']'))">← Back</button>
+        <p class="tool-title">Create New Campaign</p>
+      </div>
       <div class="row2">
-        <div class="field"><label>Dish name *</label><input type="text" id="m-dish" placeholder="e.g. Nyama Choma Platter"/></div>
-        <div class="field"><label>Cuisine</label>
-          <select id="m-cuisine"><option>East African</option><option>Italian</option><option>Indian</option><option>Chinese</option><option>American BBQ</option><option>Mediterranean</option><option>French</option><option>Swahili</option></select>
+        <div class="field">
+          <label for="c-type">Business Type</label>
+          <select id="c-type">
+            <option value="hotel">Hotel</option>
+            <option value="resort">Resort</option>
+            <option value="lodge">Lodge</option>
+            <option value="restaurant">Restaurant</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="c-name">Promotion Name *</label>
+          <input type="text" id="c-name" placeholder="e.g. Summer Staycation 2026"/>
         </div>
       </div>
-      <div class="field"><label>Key ingredients</label><input type="text" id="m-ing" placeholder="e.g. slow-grilled goat, kachumbari, ugali"/></div>
-      <div class="row2">
-        <div class="field"><label>Tone</label>
-          <select id="m-tone"><option>Warm & friendly</option><option>Upscale & poetic</option><option>Bold & punchy</option><option>Simple & clear</option></select>
-        </div>
-        <div class="field"><label>Price (optional)</label><input type="text" id="m-price" placeholder="e.g. TSh 18,000"/></div>
+      <div class="field">
+        <label for="c-desc">Promotion Description *</label>
+        <textarea id="c-desc" placeholder="Describe what you are promoting..."></textarea>
       </div>
-      <button class="btn-gen" id="btn-menu" onclick="generate('menu')">✨ Generate Description</button>
-      <div id="out-menu" style="display:none" class="output-card">
-        <div class="output-label">📋 Menu Description <button class="btn-copy" onclick="copyOut('out-menu-text',this)">Copy</button></div>
-        <div class="output-text" id="out-menu-text"></div>
+      <div class="field">
+        <label for="c-offer">Offer</label>
+        <input type="text" id="c-offer" placeholder="e.g. 20% off all suites, include free breakfast"/>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="c-audience">Target Audience</label>
+          <input type="text" id="c-audience" placeholder="e.g. Families, Business Travelers"/>
+        </div>
+        <div class="field">
+          <label for="c-goal">Campaign Goal</label>
+          <input type="text" id="c-goal" placeholder="e.g. Maximize weekend occupancy"/>
+        </div>
+      </div>
+      <button class="btn-gen" id="btn-campaign" onclick="generateCampaign()">✨ Generate Complete Campaign</button>
+    </div>
+  </div>
+
+  <!-- CAMPAIGN RESULTS -->
+  <div id="app-panel-campaign-results" class="app-panel">
+    <div class="tool-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <button class="btn-copy" onclick="switchTab('campaigns', document.querySelector('[onclick*=\'campaigns\']'))">← Back to Campaigns</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-copy" onclick="exportCampaign('json')">Download JSON</button>
+          <button class="btn-copy" onclick="exportCampaign('csv')">Download Calendar CSV</button>
+        </div>
+      </div>
+      <h2 class="tool-title" id="res-name">Campaign Results</h2>
+      <p class="tool-sub" id="res-date"></p>
+
+      <div class="result-section">
+        <div class="result-title">📋 Campaign Brief <button class="btn-copy" onclick="copySection('res-brief')">Copy</button></div>
+        <div id="res-brief" class="output-text"></div>
+      </div>
+
+      <div class="result-section">
+        <div class="result-title">📱 Social Media Posts</div>
+        <div style="margin-bottom:1rem; border-bottom:1px solid #eee; padding-bottom:1rem;">
+          <div class="output-label">Instagram <button class="btn-copy" onclick="copySection('res-insta')">Copy</button></div>
+          <div id="res-insta" class="output-text"></div>
+        </div>
+        <div style="margin-bottom:1rem; border-bottom:1px solid #eee; padding-bottom:1rem;">
+          <div class="output-label">Facebook <button class="btn-copy" onclick="copySection('res-fb')">Copy</button></div>
+          <div id="res-fb" class="output-text"></div>
+        </div>
+        <div>
+          <div class="output-label">LinkedIn <button class="btn-copy" onclick="copySection('res-li')">Copy</button></div>
+          <div id="res-li" class="output-text"></div>
+        </div>
+      </div>
+
+      <div class="result-section">
+        <div class="result-title">✉️ Email Campaign <button class="btn-copy" onclick="copySection('res-email')">Copy</button></div>
+        <div id="res-email" class="output-text"></div>
+      </div>
+
+      <div class="result-section">
+        <div class="result-title">📅 30-Day Content Calendar</div>
+        <div style="overflow-x:auto">
+          <table class="calendar-table">
+            <thead>
+              <tr><th>Day</th><th>Platform</th><th>Topic</th><th>CTA</th></tr>
+            </thead>
+            <tbody id="res-calendar"></tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- SOCIAL -->
-  <div id="app-panel-social" class="app-panel">
+  <!-- CAMPAIGNS -->
+  <div id="app-panel-campaigns" class="app-panel">
     <div class="tool-card">
-      <p class="tool-title">Social Media Caption Generator</p>
-      <p class="tool-sub">Generate ready-to-post captions for any platform instantly.</p>
-      <div class="row2">
-        <div class="field"><label>Post type</label>
-          <select id="s-type"><option>Daily special</option><option>New menu item</option><option>Weekend promotion</option><option>Behind the scenes</option><option>Customer shoutout</option><option>Holiday/event</option></select>
-        </div>
-        <div class="field"><label>Platform</label>
-          <select id="s-platform"><option>Instagram</option><option>Facebook</option><option>WhatsApp status</option><option>TikTok</option><option>Twitter/X</option></select>
-        </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <p class="tool-title">Campaigns</p>
+        <button class="btn-gold" onclick="showNewCampaignForm()" style="padding:6px 14px;font-size:12px;">+ New Campaign</button>
       </div>
-      <div class="field"><label>What's the post about? *</label><textarea id="s-context" placeholder="e.g. Friday fish fry — whole tilapia, chips and salad for TSh 12,000. Only this weekend."></textarea></div>
-      <div class="field"><label>Restaurant name (optional)</label><input type="text" id="s-rname" placeholder="e.g. Mama Jiko's Kitchen"/></div>
-      <button class="btn-gen" id="btn-social" onclick="generate('social')">✨ Generate Caption</button>
-      <div id="out-social" style="display:none" class="output-card">
-        <div class="output-label">📱 Social Caption <button class="btn-copy" onclick="copyOut('out-social-text',this)">Copy</button></div>
-        <div class="output-text" id="out-social-text"></div>
+      <div id="campaign-list">
+        <!-- Campaign list items here -->
       </div>
     </div>
   </div>
 
-  <!-- REVIEW -->
-  <div id="app-panel-review" class="app-panel">
+  <!-- DASHBOARD -->
+  <div id="app-panel-dashboard" class="app-panel active">
     <div class="tool-card">
-      <p class="tool-title">Review Reply Generator</p>
-      <p class="tool-sub">Respond to customer reviews professionally — reply appears on screen ready to copy.</p>
-      <div class="field"><label>Customer review *</label><textarea id="r-review" placeholder="Paste the customer review text here..." style="min-height:100px"></textarea></div>
-      <div class="row2">
-        <div class="field"><label>Star rating</label>
-          <select id="r-stars"><option value="5">⭐⭐⭐⭐⭐ 5 stars</option><option value="4">⭐⭐⭐⭐ 4 stars</option><option value="3">⭐⭐⭐ 3 stars</option><option value="2">⭐⭐ 2 stars</option><option value="1">⭐ 1 star</option></select>
+      <p class="tool-title">Performance Dashboard</p>
+      <div class="stats-row" id="dashboard-stats">
+        <div class="stat-box"><div class="stat-num" id="stat-campaigns">0</div><div class="stat-label">Campaigns</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-content">0</div><div class="stat-label">Assets</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-usage">0%</div><div class="stat-label">Monthly Limit</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-tasks">0</div><div class="stat-label">Tasks Done</div></div>
+      </div>
+      <div class="admin-card">
+        <p class="admin-card-title">Recent Activity</p>
+        <div id="recent-activity" style="font-size:12px;color:var(--tl)">No recent activity to show.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEMPLATES -->
+  <div id="app-panel-templates" class="app-panel">
+    <div class="app-tabs" style="padding:0; margin-bottom:1.5rem;">
+      <button class="app-tab active" onclick="switchSubTab('menu',this)">🍽 Menu</button>
+      <button class="app-tab" onclick="switchSubTab('social',this)">📱 Social</button>
+      <button class="app-tab" onclick="switchSubTab('review',this)">⭐ Reviews</button>
+    </div>
+
+    <!-- MENU TEMPLATE -->
+    <div id="sub-panel-menu" class="sub-panel active">
+      <div class="tool-card">
+        <p class="tool-title">Menu Description Generator</p>
+        <p class="tool-sub">Fill in the details and click Generate — your description appears instantly below.</p>
+        <div class="row2">
+          <div class="field"><label>Dish name *</label><input type="text" id="m-dish" placeholder="e.g. Nyama Choma Platter"/></div>
+          <div class="field"><label>Cuisine</label>
+            <select id="m-cuisine"><option>East African</option><option>Italian</option><option>Indian</option><option>Chinese</option><option>American BBQ</option><option>Mediterranean</option><option>French</option><option>Swahili</option></select>
+          </div>
         </div>
-        <div class="field"><label>Reply tone</label>
-          <select id="r-tone"><option>Warm & grateful</option><option>Professional & concise</option><option>Apologetic & caring</option><option>Upbeat & friendly</option></select>
+        <div class="field"><label>Key ingredients</label><input type="text" id="m-ing" placeholder="e.g. slow-grilled goat, kachumbari, ugali"/></div>
+        <div class="row2">
+          <div class="field"><label>Tone</label>
+            <select id="m-tone"><option>Warm & friendly</option><option>Upscale & poetic</option><option>Bold & punchy</option><option>Simple & clear</option></select>
+          </div>
+          <div class="field"><label>Price (optional)</label><input type="text" id="m-price" placeholder="e.g. TSh 18,000"/></div>
+        </div>
+        <button class="btn-gen" id="btn-menu" onclick="generate('menu')">✨ Generate Description</button>
+        <div id="out-menu" style="display:none" class="output-card">
+          <div class="output-label">📋 Menu Description <button class="btn-copy" onclick="copyOut('out-menu-text',this)">Copy</button></div>
+          <div class="output-text" id="out-menu-text"></div>
         </div>
       </div>
-      <button class="btn-gen" id="btn-review" onclick="generate('review')">✨ Generate Reply</button>
-      <div id="out-review" style="display:none" class="output-card">
-        <div class="output-label">⭐ Review Reply <button class="btn-copy" onclick="copyOut('out-review-text',this)">Copy</button></div>
-        <div class="output-text" id="out-review-text"></div>
+    </div>
+
+    <!-- SOCIAL TEMPLATE -->
+    <div id="sub-panel-social" class="sub-panel" style="display:none">
+      <div class="tool-card">
+        <p class="tool-title">Social Media Caption Generator</p>
+        <p class="tool-sub">Generate ready-to-post captions for any platform instantly.</p>
+        <div class="row2">
+          <div class="field"><label>Post type</label>
+            <select id="s-type"><option>Daily special</option><option>New menu item</option><option>Weekend promotion</option><option>Behind the scenes</option><option>Customer shoutout</option><option>Holiday/event</option></select>
+          </div>
+          <div class="field"><label>Platform</label>
+            <select id="s-platform"><option>Instagram</option><option>Facebook</option><option>WhatsApp status</option><option>TikTok</option><option>Twitter/X</option></select>
+          </div>
+        </div>
+        <div class="field"><label>What's the post about? *</label><textarea id="s-context" placeholder="e.g. Friday fish fry — whole tilapia, chips and salad for TSh 12,000. Only this weekend."></textarea></div>
+        <div class="field"><label>Restaurant name (optional)</label><input type="text" id="s-rname" placeholder="e.g. Mama Jiko's Kitchen"/></div>
+        <button class="btn-gen" id="btn-social" onclick="generate('social')">✨ Generate Caption</button>
+        <div id="out-social" style="display:none" class="output-card">
+          <div class="output-label">📱 Social Caption <button class="btn-copy" onclick="copyOut('out-social-text',this)">Copy</button></div>
+          <div class="output-text" id="out-social-text"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVIEW TEMPLATE -->
+    <div id="sub-panel-review" class="sub-panel" style="display:none">
+      <div class="tool-card">
+        <p class="tool-title">Review Reply Generator</p>
+        <p class="tool-sub">Respond to customer reviews professionally — reply appears on screen ready to copy.</p>
+        <div class="field"><label>Customer review *</label><textarea id="r-review" placeholder="Paste the customer review text here..." style="min-height:100px"></textarea></div>
+        <div class="row2">
+          <div class="field"><label>Star rating</label>
+            <select id="r-stars"><option value="5">⭐⭐⭐⭐⭐ 5 stars</option><option value="4">⭐⭐⭐⭐ 4 stars</option><option value="3">⭐⭐⭐ 3 stars</option><option value="2">⭐⭐ 2 stars</option><option value="1">⭐ 1 star</option></select>
+          </div>
+          <div class="field"><label>Reply tone</label>
+            <select id="r-tone"><option>Warm & grateful</option><option>Professional & concise</option><option>Apologetic & caring</option><option>Upbeat & friendly</option></select>
+          </div>
+        </div>
+        <button class="btn-gen" id="btn-review" onclick="generate('review')">✨ Generate Reply</button>
+        <div id="out-review" style="display:none" class="output-card">
+          <div class="output-label">⭐ Review Reply <button class="btn-copy" onclick="copyOut('out-review-text',this)">Copy</button></div>
+          <div class="output-text" id="out-review-text"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="app-panel-settings" class="app-panel">
+    <div class="tool-card">
+      <p class="tool-title">Settings</p>
+      <div class="field">
+        <label>Account Plan</label>
+        <input type="text" id="set-plan" readonly />
+      </div>
+      <div class="field">
+        <label>Client Name</label>
+        <input type="text" id="set-client" readonly />
+      </div>
+      <div class="field">
+        <label>Expiry Date</label>
+        <input type="text" id="set-expiry" readonly />
       </div>
     </div>
   </div>
@@ -380,6 +544,9 @@
 </div>
 
 <script>
+// ══ CONFIG ══
+let WORKER_URL = ''; // Set this to your Cloudflare Worker URL, e.g., 'https://rcs-worker.your-subdomain.workers.dev'
+
 // ══ PLAN LIMITS ══
 const LIMITS = { Starter:30, Growth:100, Premium:Infinity, Promo:10, Admin:Infinity };
 
@@ -391,6 +558,7 @@ const daysLeft=e=>Math.ceil((new Date(e)-today())/(1000*60*60*24));
 const isExpired=e=>daysLeft(e)<=0;
 
 // ══ CODES DATABASE ══
+let LOCAL_CAMPAIGNS = JSON.parse(localStorage.getItem('RCS_CAMPAIGNS') || '{}');
 let CODES={
   'ADMIN000':{plan:'Admin',   client:'Lefking Admin',  expiry:fmtDate(addDays(today(),3650)),active:true,used:0},
   'RCST1234':{plan:'Starter', client:'Demo Starter',   expiry:fmtDate(addDays(today(),30)), active:true,used:0},
@@ -431,16 +599,36 @@ function launchToolkit(){
   if(currentUser.plan==='Admin') document.getElementById('admin-tab').style.display='inline-block';
   updateUsageBar();
   window.scrollTo(0,0);
+  syncCampaigns();
+  switchTab('dashboard', document.querySelector('[onclick*=\'dashboard\']'));
+}
+
+async function syncCampaigns() {
+  if(!currentUser) return;
+  try {
+    const baseUrl = WORKER_URL || '';
+    const url = baseUrl.replace(/\/$/, '') + '/api/campaigns';
+    const res = await fetch(url, {
+      headers: { 'X-Access-Code': currentUser.code }
+    });
+    if(res.ok) {
+      const data = await res.json();
+      data.campaigns.forEach(c => {
+        LOCAL_CAMPAIGNS[c.id] = c;
+      });
+      localStorage.setItem('RCS_CAMPAIGNS', JSON.stringify(LOCAL_CAMPAIGNS));
+      renderDashboard();
+      renderCampaigns();
+    }
+  } catch(e) {
+    console.warn('Sync failed:', e);
+  }
 }
 
 function logout(){
   currentUser=null;
   document.getElementById('landing').style.display='block';
   document.getElementById('toolkit').style.display='none';
-  document.querySelectorAll('.app-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.app-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelector('.app-tab').classList.add('active');
-  document.getElementById('app-panel-menu').classList.add('active');
 }
 
 // ══ USAGE BAR ══
@@ -491,6 +679,232 @@ function switchTab(name,el){
   el.classList.add('active');
   document.getElementById('app-panel-'+name).classList.add('active');
   if(name==='admin') renderAdmin();
+  if(name==='dashboard') renderDashboard();
+  if(name==='campaigns') renderCampaigns();
+  if(name==='settings') renderSettings();
+}
+
+function switchSubTab(name, el) {
+  const templates = document.getElementById('app-panel-templates');
+  templates.querySelectorAll('.app-tab').forEach(t=>t.classList.remove('active'));
+  templates.querySelectorAll('.sub-panel').forEach(p=>p.style.display='none');
+  el.classList.add('active');
+  document.getElementById('sub-panel-'+name).style.display='block';
+}
+
+function renderSettings() {
+  if(!currentUser) return;
+  document.getElementById('set-plan').value = currentUser.plan;
+  document.getElementById('set-client').value = currentUser.client;
+  document.getElementById('set-expiry').value = currentUser.expiry;
+}
+
+async function generateCampaign() {
+  if(!checkLimit()){
+    alert('You have used all your generations this month. Please upgrade via WhatsApp: 0768 777 057');
+    return;
+  }
+
+  const name = document.getElementById('c-name').value.trim();
+  const desc = document.getElementById('c-desc').value.trim();
+  if(!name || !desc) { alert('Please enter at least a name and description.'); return; }
+
+  const btn = document.getElementById('btn-campaign');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Generating Strategy...';
+
+  const body = {
+    business_type: document.getElementById('c-type').value,
+    promotion_name: name,
+    promotion_description: desc,
+    offer: document.getElementById('c-offer').value,
+    target_audience: document.getElementById('c-audience').value,
+    campaign_goal: document.getElementById('c-goal').value,
+    code: currentUser.code
+  };
+
+  try {
+    const baseUrl = WORKER_URL || '';
+    const url = baseUrl.replace(/\/$/, '') + '/api/generate/campaign';
+    // Attempt worker call
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Access-Code': currentUser.code },
+      body: JSON.stringify(body)
+    });
+
+    if(res.ok) {
+      const data = await res.json();
+      LOCAL_CAMPAIGNS[data.campaign.id] = data.campaign;
+      localStorage.setItem('RCS_CAMPAIGNS', JSON.stringify(LOCAL_CAMPAIGNS));
+      incrementUsage();
+      viewCampaign(data.campaign.id);
+    } else {
+      throw new Error('API Error');
+    }
+  } catch(e) {
+    alert('Direct worker connection failed. Campaigns require a connected worker.');
+    console.error(e);
+  }
+  btn.disabled = false;
+  btn.innerHTML = orig;
+}
+
+function renderDashboard() {
+  if(!currentUser) return;
+  const campaigns = Object.values(LOCAL_CAMPAIGNS).filter(c => c.code === currentUser.code);
+  const totalAssets = campaigns.reduce((acc, c) => acc + (c.output ? 5 : 0), 0); // Brief, 3 social, 1 email
+  const limit = LIMITS[currentUser.plan] || 30;
+  const used = (CODES[currentUser.code].used || 0);
+  const usagePct = limit === Infinity ? 0 : Math.round((used/limit) * 100);
+
+  document.getElementById('stat-campaigns').textContent = campaigns.length;
+  document.getElementById('stat-content').textContent = totalAssets;
+  document.getElementById('stat-usage').textContent = usagePct + '%';
+  document.getElementById('stat-tasks').textContent = used;
+
+  const activity = document.getElementById('recent-activity');
+  if(campaigns.length === 0) {
+    activity.textContent = 'No recent activity to show.';
+  } else {
+    activity.innerHTML = campaigns.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5).map(c => `
+      <div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #eee">
+        <strong>${c.name}</strong><br>
+        <span style="font-size:10px;color:var(--tl)">${c.created_at}</span>
+      </div>
+    `).join('');
+  }
+}
+
+function renderCampaigns() {
+  if(!currentUser) return;
+  const campaigns = Object.values(LOCAL_CAMPAIGNS).filter(c => c.code === currentUser.code);
+  const list = document.getElementById('campaign-list');
+  if(campaigns.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--tl)">No campaigns created yet. Click "+ New Campaign" to start.</div>';
+  } else {
+    list.innerHTML = campaigns.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(c => `
+      <div class="campaign-list-item" onclick="viewCampaign('${c.id}')">
+        <div>
+          <strong>${c.name}</strong>
+          <div class="campaign-meta">${c.created_at}</div>
+        </div>
+        <div style="font-size:18px">→</div>
+      </div>
+    `).join('');
+  }
+}
+
+function showNewCampaignForm() {
+  document.querySelectorAll('.app-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('app-panel-new-campaign').classList.add('active');
+  // Clear form
+  document.getElementById('c-name').value = '';
+  document.getElementById('c-desc').value = '';
+  document.getElementById('c-offer').value = '';
+  document.getElementById('c-audience').value = '';
+  document.getElementById('c-goal').value = '';
+}
+
+let activeCampaign = null;
+
+async function viewCampaign(id) {
+  let c = LOCAL_CAMPAIGNS[id];
+  if(!c) return;
+
+  // If summary only, fetch full
+  if(!c.output) {
+    try {
+      const baseUrl = WORKER_URL || '';
+      const url = baseUrl.replace(/\/$/, '') + '/api/campaigns/' + id;
+      const res = await fetch(url, {
+        headers: { 'X-Access-Code': currentUser.code }
+      });
+      if(res.ok) {
+        const data = await res.json();
+        c = data.campaign;
+        LOCAL_CAMPAIGNS[id] = c;
+        localStorage.setItem('RCS_CAMPAIGNS', JSON.stringify(LOCAL_CAMPAIGNS));
+      }
+    } catch(e) {
+      console.error('Fetch detail failed:', e);
+    }
+  }
+
+  activeCampaign = c;
+  if(!c.output) { alert('Campaign data not loaded.'); return; }
+  document.querySelectorAll('.app-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('app-panel-campaign-results').classList.add('active');
+
+  document.getElementById('res-name').textContent = c.name;
+  document.getElementById('res-date').textContent = 'Created: ' + c.created_at;
+
+  const o = c.output;
+  // Brief
+  document.getElementById('res-brief').innerHTML = `
+    <strong>Theme:</strong> ${o.campaign_brief.theme}<br>
+    <strong>Key Message:</strong> ${o.campaign_brief.key_message}<br>
+    <strong>Target Audience:</strong> ${o.campaign_brief.target_audience}<br>
+    <strong>Marketing Angle:</strong> ${o.campaign_brief.marketing_angle}<br>
+    <strong>CTA:</strong> ${o.campaign_brief.cta}
+  `;
+
+  // Social
+  document.getElementById('res-insta').textContent = o.social_media.instagram;
+  document.getElementById('res-fb').textContent = o.social_media.facebook;
+  document.getElementById('res-li').textContent = o.social_media.linkedin;
+
+  // Email
+  document.getElementById('res-email').innerHTML = `
+    <strong>Subject:</strong> ${o.email_campaign.subject}<br>
+    <strong>Preview:</strong> ${o.email_campaign.preview}<br><br>
+    ${o.email_campaign.body.replace(/\n/g, '<br>')}<br><br>
+    <strong>CTA:</strong> ${o.email_campaign.cta}
+  `;
+
+  // Calendar
+  document.getElementById('res-calendar').innerHTML = o.calendar.map(d => `
+    <tr>
+      <td>Day ${d.day}</td>
+      <td>${d.platform}</td>
+      <td>${d.topic} (${d.content_type})</td>
+      <td>${d.cta}</td>
+    </tr>
+  `).join('');
+}
+
+function copySection(id) {
+  const el = document.getElementById(id);
+  const text = el.innerText || el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Copied to clipboard!');
+  });
+}
+
+function exportCampaign(type) {
+  if(!activeCampaign) return;
+  const name = activeCampaign.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  if(type === 'json') {
+    const data = JSON.stringify(activeCampaign, null, 2);
+    const blob = new Blob([data], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `campaign_${name}.json`;
+    a.click();
+  } else {
+    let csv = 'Day,Platform,Topic,Content Type,CTA\n';
+    activeCampaign.output.calendar.forEach(d => {
+      csv += `${d.day},"${d.platform}","${d.topic}","${d.content_type}","${d.cta}"\n`;
+    });
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `calendar_${name}.csv`;
+    a.click();
+  }
 }
 
 // ══ AI GENERATION ══
@@ -534,14 +948,20 @@ async function generate(type){
   outCard.style.display='none';
 
   try {
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
+    const baseUrl = WORKER_URL || '';
+    const url = baseUrl ? baseUrl.replace(/\/$/, '') + '/generate' : '/generate';
+    const res=await fetch(url, {
       method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})
+      headers:{'Content-Type':'application/json', 'X-Access-Code': currentUser.code},
+      body:JSON.stringify({prompt, code: currentUser.code})
     });
-    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||'API error '+res.status);}
+    if(!res.ok){
+      // Try direct if worker not set/fails? No, original fallback was just a message.
+      const e=await res.json().catch(()=>({}));
+      throw new Error(e.error?.message||'API error '+res.status);
+    }
     const data=await res.json();
-    const text=data.content.map(b=>b.text||'').join('').trim();
+    const text=data.text;
     outText.textContent=text;
     outCard.style.background='#f0faf5';
     outCard.style.border='1px solid #9fe1cb';
@@ -553,7 +973,6 @@ async function generate(type){
     outCard.style.background='#fffbf0';
     outCard.style.border='1px solid #fde9a8';
     outCard.style.display='block';
-    // Still count usage on fallback? No — don't penalise for browser restriction
   }
   btn.disabled=false;
   btn.innerHTML=orig;
