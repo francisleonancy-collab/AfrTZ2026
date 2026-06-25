@@ -2,6 +2,7 @@ import { jsonResponse, errorResponse } from './middleware/utils.js';
 import { CodeRepository } from './repositories/CodeRepository.js';
 import { AIRepository } from './repositories/AIRepository.js';
 import { PartnerRepository } from './repositories/PartnerRepository.js';
+import { EnterpriseRepository } from './repositories/EnterpriseRepository.js';
 import { AIService } from './services/AIService.js';
 import { CoreController } from './controllers/CoreController.js';
 import { CampaignController } from './controllers/CampaignController.js';
@@ -10,13 +11,14 @@ import { PartnerController } from './controllers/PartnerController.js';
 import { AdminController } from './controllers/AdminController.js';
 import { IntelligenceController } from './controllers/IntelligenceController.js';
 import { PaymentController } from './controllers/PaymentController.js';
+import { EnterpriseController } from './controllers/EnterpriseController.js';
 
 export default {
   async fetch(req, env) {
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: {
       'Access-Control-Allow-Origin': env.ALLOWED_ORIGIN || '*',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, X-Access-Code, X-Admin-Token, X-Partner-Id',
+      'Access-Control-Allow-Headers': 'Content-Type, X-Access-Code, X-Admin-Token, X-Partner-Id, X-Enterprise-Group',
     }});
 
     const url = new URL(req.url);
@@ -26,6 +28,7 @@ export default {
     const codeRepo = new CodeRepository(env.CODES_KV);
     const aiRepo = new AIRepository(env.DB);
     const partnerRepo = new PartnerRepository(env.DB);
+    const enterpriseRepo = new EnterpriseRepository(env.DB);
     const aiService = new AIService(env);
 
     // Controllers
@@ -36,10 +39,10 @@ export default {
     const admin = new AdminController(codeRepo, aiRepo, aiService);
     const intelligence = new IntelligenceController(codeRepo, aiService, aiRepo);
     const payment = new PaymentController(codeRepo);
+    const enterprise = new EnterpriseController(enterpriseRepo, codeRepo);
 
     try {
-      // Dynamic Routing / Static Registry
-      const staticRoutes = {
+      const routes = {
         'GET:/health': () => core.health(req, env),
         'POST:/validate': () => core.validate(req, env),
         'GET:/usage': () => core.usage(req, env),
@@ -73,10 +76,18 @@ export default {
         'POST:/admin/renew': () => admin.renewCode(req, env),
         'POST:/admin/pricing': () => admin.updatePricing(req, env),
         'GET:/api/ai/analytics': () => admin.getAIAnalytics(req, env),
+
+        // Enterprise Routes (Sprint 8)
+        'POST:/api/groups': () => enterprise.createGroup(req, env),
+        'GET:/api/groups': () => enterprise.listGroups(req, env),
+        'POST:/api/properties': () => enterprise.createProperty(req, env),
+        'GET:/api/properties': () => enterprise.listProperties(req, env),
+        'POST:/api/white-label': () => enterprise.configureWhiteLabel(req, env),
+        'GET:/api/enterprise/reports': () => enterprise.getEnterpriseReport(req, env),
       };
 
       const routeKey = `${req.method}:${path}`;
-      if (staticRoutes[routeKey]) return await staticRoutes[routeKey]();
+      if (routes[routeKey]) return await routes[routeKey]();
 
       // Dynamic Path segments
       if (path.startsWith('/api/campaigns/') && req.method === 'GET') {

@@ -357,6 +357,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
     <button class="tk-tab" onclick="switchTab('intelligence',this)" id="tab-intel">🧠 Intelligence</button>
     <button class="tk-tab" onclick="switchTab('templates',this)" id="tab-tpl">📝 Templates</button>
     <button class="tk-tab" onclick="switchTab('partners',this)" id="tab-partners">🤝 Partners</button>
+    <button class="tk-tab" id="enterprise-tab" onclick="switchTab('enterprise',this)" style="display:none">🏢 Enterprise</button>
     <button class="tk-tab" id="admin-tab" onclick="switchTab('admin',this)" style="display:none">⚙️ Admin</button>
   </div>
 
@@ -535,6 +536,44 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
             <div class="field"><label id="tpl-r-rev-lbl">Review</label><textarea id="r-review-simple"></textarea></div>
             <button class="btn-generate" onclick="generate('review')" id="tpl-r-btn">Write Reply</button>
             <div id="out-reply" class="output-wrap" style="display:none"><div id="out-reply-text" class="output-text"></div></div>
+        </div>
+    </div>
+  </div>
+
+  <!-- ENTERPRISE -->
+  <div id="tk-panel-enterprise" class="tk-panel">
+    <div style="display:flex; gap:8px; margin-bottom:1.5rem;">
+        <button class="stab active" onclick="switchEnterpriseTab('dashboard',this)">📊 Group Dashboard</button>
+        <button class="stab" onclick="switchEnterpriseTab('properties',this)">🏢 Properties</button>
+        <button class="stab" onclick="switchEnterpriseTab('branding',this)">🎨 Branding</button>
+    </div>
+    <div id="ent-panel-dashboard" class="ent-panel active">
+        <div class="tool-card">
+            <p class="tool-title" id="ent-dash-title">Enterprise Performance</p>
+            <div class="stats-grid">
+                <div class="stat-box"><div class="stat-num" id="ent-stat-props">0</div><div class="stat-lbl">Properties</div></div>
+                <div class="stat-box"><div class="stat-num" id="ent-stat-users">0</div><div class="stat-lbl">Users</div></div>
+                <div class="stat-box"><div class="stat-num" id="ent-stat-rating">0.0</div><div class="stat-lbl">Avg Rating</div></div>
+                <div class="stat-box"><div class="stat-num" id="ent-stat-gen">0</div><div class="stat-lbl">Generations</div></div>
+            </div>
+        </div>
+    </div>
+    <div id="ent-panel-properties" class="ent-panel" style="display:none">
+        <div class="tool-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
+                <p class="tool-title">Property Portfolio</p>
+                <button class="btn-nav" onclick="showNewPropertyForm()">+ Add Property</button>
+            </div>
+            <div id="enterprise-property-list"></div>
+        </div>
+    </div>
+    <div id="ent-panel-branding" class="ent-panel" style="display:none">
+        <div class="tool-card">
+            <p class="tool-title">White Label Settings</p>
+            <div class="field"><label>Custom Domain</label><input type="text" id="ent-domain" placeholder="marketing.yourgroup.com" /></div>
+            <div class="field"><label>Logo URL</label><input type="text" id="ent-logo" /></div>
+            <div class="field"><label>Primary Color</label><input type="color" id="ent-color" value="#c9a84c" /></div>
+            <button class="btn-generate" onclick="saveEnterpriseBranding()">Save Brand Identity</button>
         </div>
     </div>
   </div>
@@ -763,6 +802,7 @@ function launchToolkit() {
     document.getElementById('tk-plan').textContent = currentUser.plan;
     document.getElementById('tk-exp').textContent = currentUser.daysLeft + 'd left';
     if(currentUser.plan === 'Admin') document.getElementById('admin-tab').style.display = 'block';
+    if(currentUser.enterpriseGroupId) document.getElementById('enterprise-tab').style.display = 'block';
     updateUsageBar(); renderDashboard(); syncCampaigns(); syncReviews();
 }
 function doSignOut() {
@@ -786,6 +826,80 @@ function switchTab(name, el) {
     if(name === 'dashboard') renderDashboard();
     if(name === 'admin') renderAdmin();
     if(name === 'partners') renderPartners();
+    if(name === 'enterprise') renderEnterpriseConsole();
+}
+
+// ENTERPRISE
+function renderEnterpriseConsole() {
+    if(!currentUser.enterpriseGroupId) return;
+    fetchEnterpriseReport();
+    fetchEnterpriseProperties();
+}
+async function fetchEnterpriseReport() {
+    const res = await fetch(WORKER_URL + '/api/enterprise/reports?groupId=' + currentUser.enterpriseGroupId);
+    if(res.ok) {
+        const d = await res.json();
+        document.getElementById('ent-stat-props').textContent = d.report.properties;
+        document.getElementById('ent-stat-users').textContent = d.report.users;
+        document.getElementById('ent-stat-rating').textContent = d.report.avgRating;
+        document.getElementById('ent-stat-gen').textContent = d.report.campaigns;
+    }
+}
+async function fetchEnterpriseProperties() {
+    const res = await fetch(WORKER_URL + '/api/properties?groupId=' + currentUser.enterpriseGroupId);
+    if(res.ok) {
+        const d = await res.json();
+        document.getElementById('enterprise-property-list').innerHTML = d.properties.map(p => `
+            <div class="campaign-list-item"><div><strong>${p.name}</strong><div class="campaign-meta">${p.property_type} · ${p.city || ''}</div></div><div>→</div></div>`).join('');
+    }
+}
+function switchEnterpriseTab(name, el) {
+    document.querySelectorAll('.ent-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('#tk-panel-enterprise .stab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('ent-panel-' + name).style.display = 'block';
+}
+function showNewPropertyForm() {
+    const content = document.getElementById('os-content');
+    content.innerHTML = `
+        <h2 class="tool-title">Add New Property</h2>
+        <div class="field"><label>Property Name</label><input type="text" id="ep-name" /></div>
+        <div class="field"><label>Type</label><select id="ep-type"><option>Hotel</option><option>Resort</option><option>Restaurant</option></select></div>
+        <div class="field"><label>City</label><input type="text" id="ep-city" /></div>
+        <button class="btn-generate" onclick="submitNewProperty()">Add to Portfolio</button>
+    `;
+    document.getElementById('overlay-os').classList.add('open');
+}
+async function submitNewProperty() {
+    const body = {
+        groupId: currentUser.enterpriseGroupId,
+        name: document.getElementById('ep-name').value,
+        type: document.getElementById('ep-type').value,
+        city: document.getElementById('ep-city').value
+    };
+    const res = await fetch(WORKER_URL + '/api/properties', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(body)
+    });
+    if(res.ok) {
+        closeOSOverlay();
+        fetchEnterpriseProperties();
+    }
+}
+async function saveEnterpriseBranding() {
+    const body = {
+        organizationId: currentUser.enterpriseGroupId,
+        customDomain: document.getElementById('ent-domain').value,
+        logoUrl: document.getElementById('ent-logo').value,
+        primaryColor: document.getElementById('ent-color').value
+    };
+    const res = await fetch(WORKER_URL + '/api/white-label', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(body)
+    });
+    if(res.ok) alert('Branding saved successfully.');
 }
 
 // PARTNERS

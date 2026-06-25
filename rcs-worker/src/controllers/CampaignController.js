@@ -18,7 +18,6 @@ export class CampaignController {
     const list = await this.codeRepo.list(prefix);
     const keys = list.keys;
 
-    // Performance: parallel fetching
     const campaignsData = await Promise.all(keys.map(k => this.codeRepo.get(k.name)));
 
     const campaigns = campaignsData
@@ -30,6 +29,17 @@ export class CampaignController {
 
     campaigns.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
     return jsonResponse({ success: true, campaigns }, 200, env);
+  }
+
+  async getById(req, env, id) {
+    const code = req.headers.get('X-Access-Code');
+    const v = await this.codeRepo.findByCode(code);
+    if (!v) return errorResponse('Unauthorised', 401, env);
+
+    const campaign = await this.codeRepo.get(`campaign:${v.code}:${id}`);
+    if (!campaign) return errorResponse('Campaign not found', 404, env);
+
+    return jsonResponse({ success: true, campaign }, 200, env);
   }
 
   async generate(req, env) {
