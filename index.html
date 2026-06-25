@@ -172,6 +172,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
     <a class="nav-link" href="#what-mkude-does" data-en="What I do" data-sw="Ninachofanya" id="nav-what">What I do</a>
     <a class="nav-link" href="#team" data-en="The team" data-sw="Timu" id="nav-team">The team</a>
     <a class="nav-link" href="#pricing" data-en="Pricing" data-sw="Bei" id="nav-pricing">Pricing</a>
+    <a class="nav-link" href="#partners" data-en="Partners" data-sw="Washirika" id="nav-partners">Partners</a>
   </div>
   <div class="nav-right">
     <button class="lang-btn" id="lang-toggle" onclick="toggleLang()">🇹🇿 Swahili</button>
@@ -355,6 +356,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
     <button class="tk-tab" onclick="switchTab('reviews',this)" id="tab-rev">⭐ Reviews</button>
     <button class="tk-tab" onclick="switchTab('intelligence',this)" id="tab-intel">🧠 Intelligence</button>
     <button class="tk-tab" onclick="switchTab('templates',this)" id="tab-tpl">📝 Templates</button>
+    <button class="tk-tab" onclick="switchTab('partners',this)" id="tab-partners">🤝 Partners</button>
     <button class="tk-tab" id="admin-tab" onclick="switchTab('admin',this)" style="display:none">⚙️ Admin</button>
   </div>
 
@@ -464,6 +466,42 @@ body{font-family:'DM Sans',sans-serif;background:var(--pale);color:var(--ink);mi
     </div>
   </div>
 
+  <!-- PARTNERS -->
+  <div id="tk-panel-partners" class="tk-panel">
+    <div id="partner-registration-view">
+        <div class="tool-card">
+            <p class="tool-title" id="pt-reg-title">Become a Mkude Partner</p>
+            <p style="font-size:13px; color:var(--muted); margin-bottom:1.5rem;" id="pt-reg-sub">Refer clients and earn 20% recurring commission.</p>
+            <div class="field"><label id="pt-org-lbl">Organization Name</label><input type="text" id="pt-org" /></div>
+            <div class="field"><label id="pt-type-lbl">Partner Type</label><select id="pt-type"><option>Consultant</option><option>Agency</option><option>Association</option></select></div>
+            <div class="field"><label id="pt-contact-lbl">Contact Name</label><input type="text" id="pt-contact" /></div>
+            <div class="field"><label id="pt-email-lbl">Email</label><input type="email" id="pt-email" /></div>
+            <button class="btn-generate" onclick="registerPartner()" id="pt-reg-btn">Join Partner Program</button>
+        </div>
+    </div>
+    <div id="partner-dashboard-view" style="display:none">
+        <div class="tool-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
+                <p class="tool-title" id="pt-dash-title">Partner Dashboard</p>
+                <div class="tk-badge" id="pt-ref-code">CODE: —</div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-box"><div class="stat-num" id="pt-stat-referrals">0</div><div class="stat-lbl">Referrals</div></div>
+                <div class="stat-box"><div class="stat-num" id="pt-stat-customers">0</div><div class="stat-lbl">Customers</div></div>
+                <div class="stat-box"><div class="stat-num" id="pt-stat-pending">0</div><div class="stat-lbl">Pending</div></div>
+                <div class="stat-box"><div class="stat-num" id="pt-stat-paid">0</div><div class="stat-lbl">Paid</div></div>
+            </div>
+        </div>
+        <div class="tool-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem">
+                <p class="tool-title" id="pt-leads-title">Your Referrals</p>
+                <button class="btn-nav" onclick="showNewReferralForm()" id="btn-new-ref">+ Add Referral</button>
+            </div>
+            <div id="partner-referral-list"></div>
+        </div>
+    </div>
+  </div>
+
   <!-- TEMPLATES -->
   <div id="tk-panel-templates" class="tk-panel">
     <div style="display:flex; gap:8px; margin-bottom:1.5rem;">
@@ -564,6 +602,7 @@ let ADMIN_TOKEN = localStorage.getItem('RCS_ADMIN_TOKEN') || '';
 let currentUser = null;
 let LOCAL_CAMPAIGNS = JSON.parse(localStorage.getItem('RCS_CAMPAIGNS') || '{}');
 let LOCAL_REVIEWS = JSON.parse(localStorage.getItem('RCS_REVIEWS') || '{}');
+let currentPartner = JSON.parse(localStorage.getItem('MKD_PARTNER') || 'null');
 let lang = 'en';
 
 // --- TRANSLATIONS ---
@@ -603,7 +642,8 @@ const TRANS = {
     itabMkt: "🚀 Marketing",
     itabRep: "⭐ Reputation",
     itabRev: "💰 Revenue",
-    itabAi: "🧠 AI Insights"
+    itabAi: "🧠 AI Insights",
+    tabPartners: "🤝 Partners"
   },
   sw: {
     greeting: "Habari! Mimi ni Mkude",
@@ -640,7 +680,8 @@ const TRANS = {
     itabMkt: "🚀 Masoko",
     itabRep: "⭐ Sifa",
     itabRev: "💰 Mapato",
-    itabAi: "🧠 AI Maono"
+    itabAi: "🧠 AI Maono",
+    tabPartners: "🤝 Washirika"
   }
 };
 
@@ -675,6 +716,7 @@ function toggleLang() {
     document.getElementById('tab-rev').textContent = L.tabRev;
     document.getElementById('tab-intel').textContent = L.tabIntel;
     document.getElementById('tab-tpl').textContent = L.tabTpl;
+    document.getElementById('tab-partners').textContent = L.tabPartners;
 
     document.getElementById('lbl-camp').textContent = L.lblCamp;
     document.getElementById('lbl-rev').textContent = L.lblRev;
@@ -743,6 +785,86 @@ function switchTab(name, el) {
     document.getElementById('tk-panel-' + name).classList.add('active');
     if(name === 'dashboard') renderDashboard();
     if(name === 'admin') renderAdmin();
+    if(name === 'partners') renderPartners();
+}
+
+// PARTNERS
+function renderPartners() {
+    if(currentPartner) {
+        document.getElementById('partner-registration-view').style.display = 'none';
+        document.getElementById('partner-dashboard-view').style.display = 'block';
+        document.getElementById('pt-ref-code').textContent = 'CODE: ' + currentPartner.referralCode;
+        fetchPartnerDashboard();
+        fetchReferrals();
+    } else {
+        document.getElementById('partner-registration-view').style.display = 'block';
+        document.getElementById('partner-dashboard-view').style.display = 'none';
+    }
+}
+async function registerPartner() {
+    const body = {
+        organizationName: document.getElementById('pt-org').value,
+        partnerType: document.getElementById('pt-type').value,
+        contactName: document.getElementById('pt-contact').value,
+        email: document.getElementById('pt-email').value
+    };
+    const res = await fetch(WORKER_URL + '/api/partners/register', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(body)
+    });
+    if(res.ok) {
+        const d = await res.json();
+        currentPartner = { id: d.partnerId, referralCode: d.referralCode, ...body };
+        localStorage.setItem('MKD_PARTNER', JSON.stringify(currentPartner));
+        renderPartners();
+    }
+}
+async function fetchPartnerDashboard() {
+    const res = await fetch(WORKER_URL + '/api/partners/dashboard', { headers: {'X-Partner-Id': currentPartner.id} });
+    if(res.ok) {
+        const d = await res.json();
+        document.getElementById('pt-stat-referrals').textContent = d.analytics.totalReferrals;
+        document.getElementById('pt-stat-customers').textContent = d.analytics.activeCustomers;
+        document.getElementById('pt-stat-pending').textContent = d.analytics.pendingCommissions;
+        document.getElementById('pt-stat-paid').textContent = d.analytics.paidCommissions;
+    }
+}
+async function fetchReferrals() {
+    const res = await fetch(WORKER_URL + '/api/referrals', { headers: {'X-Partner-Id': currentPartner.id} });
+    if(res.ok) {
+        const d = await res.json();
+        document.getElementById('partner-referral-list').innerHTML = d.referrals.map(r => `
+            <div class="campaign-list-item"><div><strong>${r.lead_name}</strong><div class="campaign-meta">${r.organization_name || ''} · ${r.referral_status}</div></div></div>`).join('');
+    }
+}
+function showNewReferralForm() {
+    const content = document.getElementById('os-content');
+    content.innerHTML = `
+        <h2 class="tool-title">Add New Referral</h2>
+        <div class="field"><label>Lead Name</label><input type="text" id="rf-name" /></div>
+        <div class="field"><label>Lead Email</label><input type="email" id="rf-email" /></div>
+        <div class="field"><label>Organization</label><input type="text" id="rf-org" /></div>
+        <button class="btn-generate" onclick="submitReferral()">Submit Lead</button>
+    `;
+    document.getElementById('overlay-os').classList.add('open');
+}
+async function submitReferral() {
+    const body = {
+        partnerId: currentPartner.id,
+        leadName: document.getElementById('rf-name').value,
+        leadEmail: document.getElementById('rf-email').value,
+        organizationName: document.getElementById('rf-org').value
+    };
+    const res = await fetch(WORKER_URL + '/api/referrals/create', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(body)
+    });
+    if(res.ok) {
+        closeOSOverlay();
+        fetchReferrals();
+    }
 }
 function switchIntelTab(name, el) {
     document.querySelectorAll('#tk-panel-intelligence .stab').forEach(t => t.classList.remove('active'));
@@ -778,17 +900,31 @@ function showNewCampaignForm() {
     const content = document.getElementById('os-content');
     content.innerHTML = `
         <h2 class="tool-title">New Marketing Campaign</h2>
+        <div class="field"><label>Business Type</label><select id="c-type"><option>Hotel</option><option>Resort</option><option>Lodge</option><option>Restaurant</option></select></div>
         <div class="field"><label>Promo Name</label><input type="text" id="c-name" /></div>
-        <div class="field"><label>Description</label><textarea id="c-desc"></textarea></div>
+        <div class="field"><label>Description</label><textarea id="c-desc" placeholder="What is the promotion about?"></textarea></div>
+        <div class="field"><label>Offer</label><input type="text" id="c-offer" placeholder="e.g. 20% off, Buy 1 Get 1" /></div>
+        <div class="field"><label>Target Audience</label><input type="text" id="c-audience" placeholder="e.g. Couples, Business Travelers" /></div>
+        <div class="field"><label>Campaign Goal</label><input type="text" id="c-goal" placeholder="e.g. Increase direct bookings" /></div>
         <button class="btn-generate" onclick="generateCampaign()">✨ Create Complete Strategy</button>
     `;
     document.getElementById('overlay-os').classList.add('open');
 }
 async function generateCampaign() {
+    const btn = document.querySelector('#os-content .btn-generate');
+    btn.disabled = true; btn.textContent = 'Generating...';
+    const body = {
+        business_type: document.getElementById('c-type').value,
+        promotion_name: document.getElementById('c-name').value,
+        promotion_description: document.getElementById('c-desc').value,
+        offer: document.getElementById('c-offer').value,
+        target_audience: document.getElementById('c-audience').value,
+        campaign_goal: document.getElementById('c-goal').value
+    };
     const res = await fetch(WORKER_URL + '/api/generate/campaign', {
         method:'POST',
         headers:{'Content-Type':'application/json', 'X-Access-Code': currentUser.code},
-        body: JSON.stringify({promotion_name: document.getElementById('c-name').value, promotion_description: document.getElementById('c-desc').value})
+        body: JSON.stringify(body)
     });
     if(res.ok) {
         const d = await res.json(); LOCAL_CAMPAIGNS[d.campaign.id] = d.campaign;
@@ -804,10 +940,42 @@ async function viewCampaign(id) {
     const content = document.getElementById('os-content');
     content.innerHTML = `
         <h2 class="tool-title">${c.name}</h2>
-        <div class="result-section"><div class="result-title">Brief</div><p style="font-size:13px">${c.output.campaign_brief.theme}</p></div>
-        <div class="result-section"><div class="result-title">Instagram</div><p style="font-size:13px">Insta: ${c.output.social_media.instagram}</p></div>
+        <div style="display:flex; gap:8px; margin-bottom:1rem; overflow-x:auto; padding-bottom:8px">
+            <button class="stab active" onclick="switchCampaignResultTab('brief',this)">Brief</button>
+            <button class="stab" onclick="switchCampaignResultTab('social',this)">Social</button>
+            <button class="stab" onclick="switchCampaignResultTab('email',this)">Email</button>
+            <button class="stab" onclick="switchCampaignResultTab('calendar',this)">30-Day Calendar</button>
+        </div>
+        <div id="cr-brief" class="camp-res-panel active">
+            <div class="result-section"><div class="result-title">Theme</div><p style="font-size:13px">${c.output.campaign_brief.theme}</p></div>
+            <div class="result-section"><div class="result-title">Key Message</div><p style="font-size:13px">${c.output.campaign_brief.key_message}</p></div>
+            <div class="result-section"><div class="result-title">Target</div><p style="font-size:13px">${c.output.campaign_brief.target_audience}</p></div>
+        </div>
+        <div id="cr-social" class="camp-res-panel" style="display:none">
+            <div class="result-section"><div class="result-title">Instagram</div><p style="font-size:13px">${c.output.social_media.instagram}</p></div>
+            <div class="result-section"><div class="result-title">Facebook</div><p style="font-size:13px">${c.output.social_media.facebook}</p></div>
+            <div class="result-section"><div class="result-title">LinkedIn</div><p style="font-size:13px">${c.output.social_media.linkedin}</p></div>
+        </div>
+        <div id="cr-email" class="camp-res-panel" style="display:none">
+            <div class="result-section"><div class="result-title">Subject</div><p style="font-size:13px">${c.output.email_campaign.subject}</p></div>
+            <div class="result-section"><div class="result-title">Body</div><p style="font-size:13px; white-space:pre-wrap">${c.output.email_campaign.body}</p></div>
+        </div>
+        <div id="cr-calendar" class="camp-res-panel" style="display:none">
+            <div class="result-section">
+                <table class="code-table">
+                    <thead><tr><th>Day</th><th>Platform</th><th>Topic</th></tr></thead>
+                    <tbody>${c.output.calendar.map(day => `<tr><td>${day.day}</td><td>${day.platform}</td><td>${day.topic}</td></tr>`).join('')}</tbody>
+                </table>
+            </div>
+        </div>
     `;
     document.getElementById('overlay-os').classList.add('open');
+}
+function switchCampaignResultTab(name, el) {
+    document.querySelectorAll('.camp-res-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('#os-content .stab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('cr-' + name).style.display = 'block';
 }
 
 // REVIEWS
@@ -848,7 +1016,24 @@ async function createReview() {
 function viewReview(id) {
     const r = LOCAL_REVIEWS[id];
     const content = document.getElementById('os-content');
-    content.innerHTML = `<h2 class="tool-title">Feedback Result</h2><div class="result-section">${r.response.draft}</div>`;
+    content.innerHTML = `
+        <h2 class="tool-title">Review Analysis</h2>
+        <div class="result-section">
+            <div class="result-title">Guest Feedback</div>
+            <p style="font-size:13px; font-style:italic">"${r.text}"</p>
+            <div class="campaign-meta">Source: ${r.source} · Rating: ${r.rating}/5</div>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-box"><div class="stat-num">${r.analysis.sentiment_score}</div><div class="stat-lbl">${r.analysis.sentiment_label}</div></div>
+            <div class="stat-box"><div class="stat-num">${r.analysis.risk_score}/10</div><div class="stat-lbl">Risk</div></div>
+        </div>
+        <div class="result-section">
+            <div class="result-title">Suggested Reply</div>
+            <p style="font-size:13px; white-space:pre-wrap">${r.response.draft}</p>
+            <button class="act-btn" style="margin-top:10px" onclick="navigator.clipboard.writeText(\`${r.response.draft.replace(/`/g, '\\`')}\`)">📋 Copy Reply</button>
+        </div>
+        ${r.analysis.escalation.escalate ? `<div style="background:#fee2e2; border:1px solid #ef4444; color:#991b1b; padding:12px; border-radius:10px; font-size:12px"><strong>⚠️ Management Escalation Required:</strong> ${r.analysis.escalation.reason}</div>` : ''}
+    `;
     document.getElementById('overlay-os').classList.add('open');
 }
 

@@ -62,6 +62,13 @@ export default {
       if (path==='/api/ai/evaluate'      && req.method==='POST') return handleEvaluateAI(req,env);
       if (path==='/api/ai/analytics'     && req.method==='GET')  return handleGetAIAnalytics(req,env);
       if (path==='/api/ai/costs'         && req.method==='GET')  return handleGetAICosts(req,env);
+      // Partner Portal (Sprint 7)
+      if (path==='/api/partners/register'   && req.method==='POST') return handlePartnerRegister(req,env);
+      if (path==='/api/partners/dashboard'  && req.method==='GET')  return handlePartnerDashboard(req,env);
+      if (path==='/api/referrals/create'    && req.method==='POST') return handleCreateReferral(req,env);
+      if (path==='/api/referrals'           && req.method==='GET')  return handleGetReferrals(req,env);
+      if (path==='/api/commissions'         && req.method==='GET')  return handleGetCommissions(req,env);
+      if (path==='/api/payouts/process'     && req.method==='POST') return handleProcessPayout(req,env);
       // Payments
       if (path==='/clickpesa-create'     && req.method==='POST') return handleClickPesaCreate(req,env);
       if (path==='/clickpesa-callback'   && req.method==='POST') return handleClickPesaCallback(req,env);
@@ -845,6 +852,98 @@ Output: Return ONLY a valid JSON object with the structure:
 }
 
 Ensure the insights are data-driven based on the input.`;
+
+// == PARTNER PORTAL (Sprint 7) =============================
+async function handlePartnerRegister(req, env) {
+  const body = await req.json().catch(()=>({}));
+  const { organizationName, partnerType, contactName, email, phone } = body;
+  if (!organizationName || !email || !contactName) return errR('Missing required fields.', 400, env);
+
+  const partnerId = crypto.randomUUID();
+  const referralCode = crypto.randomUUID().substring(0, 8).toUpperCase();
+
+  try {
+    await env.DB.prepare(`
+      INSERT INTO partners (id, organization_name, partner_type, contact_name, email, phone, referral_code)
+      VALUES (?,?,?,?,?,?,?)
+    `).bind(partnerId, organizationName, partnerType || 'Consultant', contactName, email.toLowerCase(), phone || null, referralCode).run();
+
+    return jsonR({ success: true, partnerId, referralCode }, 200, env);
+  } catch (e) {
+    if (e.message.includes('UNIQUE')) return errR('Email already registered.', 409, env);
+    throw e;
+  }
+}
+
+async function handlePartnerDashboard(req, env) {
+  const partnerId = req.headers.get('X-Partner-Id');
+  if (!partnerId) return errR('Partner ID required.', 401, env);
+
+  const stats = await env.DB.prepare(`
+    SELECT
+      (SELECT COUNT(*) FROM referrals WHERE partner_id = ?) as totalReferrals,
+      (SELECT COUNT(*) FROM referrals WHERE partner_id = ? AND referral_status = 'customer') as activeCustomers,
+      (SELECT IFNULL(SUM(amount), 0) FROM commissions WHERE partner_id = ? AND status = 'pending') as pendingCommissions,
+      (SELECT IFNULL(SUM(amount), 0) FROM commissions WHERE partner_id = ? AND status = 'paid') as paidCommissions
+  `).bind(partnerId, partnerId, partnerId, partnerId).first();
+
+  return jsonR({ success: true, analytics: stats }, 200, env);
+}
+
+async function handleCreateReferral(req, env) {
+  const body = await req.json().catch(()=>({}));
+  const { partnerId, leadName, leadEmail, organizationName } = body;
+  if (!partnerId || !leadName || !leadEmail) return errR('Missing required fields.', 400, env);
+
+  const referralId = crypto.randomUUID();
+  await env.DB.prepare(`
+    INSERT INTO referrals (id, partner_id, lead_name, lead_email, organization_name)
+    VALUES (?,?,?,?,?)
+  `).bind(referralId, partnerId, leadName, leadEmail.toLowerCase(), organizationName || null).run();
+
+  return jsonR({ success: true, referralId }, 200, env);
+}
+
+async function handleGetReferrals(req, env) {
+  const partnerId = req.headers.get('X-Partner-Id');
+  if (!partnerId) return errR('Partner ID required.', 401, env);
+
+  const { results } = await env.DB.prepare(`
+    SELECT * FROM referrals WHERE partner_id = ? ORDER BY created_at DESC
+  `).bind(partnerId).all();
+
+  return jsonR({ success: true, referrals: results }, 200, env);
+}
+
+async function handleGetCommissions(req, env) {
+  const partnerId = req.headers.get('X-Partner-Id');
+  if (!partnerId) return errR('Partner ID required.', 401, env);
+
+  const { results } = await env.DB.prepare(`
+    SELECT c.*, r.lead_name, r.organization_name as lead_org
+    FROM commissions c
+    JOIN referrals r ON c.referral_id = r.id
+    WHERE c.partner_id = ?
+    ORDER BY c.created_at DESC
+  `).bind(partnerId).all();
+
+  return jsonR({ success: true, commissions: results }, 200, env);
+}
+
+async function handleProcessPayout(req, env) {
+  if (!adminOk(req, env)) return errR('Unauthorised', 401, env);
+  const { partnerId, amount } = await req.json();
+
+  const payoutId = crypto.randomUUID();
+  await env.DB.batch([
+    env.DB.prepare(`INSERT INTO payouts (id, partner_id, amount, payout_status, payout_date) VALUES (?,?,?,?,?)`)
+      .bind(payoutId, partnerId, amount, 'completed', new Date().toISOString()),
+    env.DB.prepare(`UPDATE commissions SET status = 'paid' WHERE partner_id = ? AND status = 'pending'`)
+      .bind(partnerId)
+  ]);
+
+  return jsonR({ success: true, payoutId }, 200, env);
+}
 
 // == AI OPTIMIZATION (Sprint 6) ============================
 async function handleGetPrompts(req, env) {
