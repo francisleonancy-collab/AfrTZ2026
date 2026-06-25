@@ -172,23 +172,26 @@ async function handleGenerate(req, env) {
   if (typeof prompt!=='string'||prompt.length>2000) return errR('Invalid prompt.', 400, env);
   const safe = prompt.trim().slice(0,2000);
   const startTime = Date.now();
-  let text='', source='';
+  let result=null, source='';
   // Paid: Claude primary -> Gemini fallback. Promo: Gemini only.
   if (isPaid && env.ANTHROPIC_KEY) {
-    try { text=await callClaude(safe,env.ANTHROPIC_KEY); source='claude'; }
+    try { result=await callClaude(safe,env.ANTHROPIC_KEY); source='claude'; }
     catch(e) { console.warn('Claude failed:',e.message); }
   }
-  if (!text && env.GEMINI_KEY) {
-    try { text=await callGemini(safe,env.GEMINI_KEY); source='gemini'; }
+  if (!result && env.GEMINI_KEY) {
+    try { result=await callGemini(safe,env.GEMINI_KEY); source='gemini'; }
     catch(e) { console.warn('Gemini failed:',e.message); }
   }
-  if (!text) return errR('Writing service temporarily unavailable. Please try again shortly.', 503, env);
+  if (!result) return errR('Writing service temporarily unavailable. Please try again shortly.', 503, env);
 
+  const { text, usage } = result;
   await trackAIUsage(env, {
     orgId: code,
     module: 'general',
     model: source,
-    tokens: Math.ceil(text.length / 4),
+    input_tokens: usage.input,
+    output_tokens: usage.output,
+    total_tokens: usage.total,
     latency: Date.now() - startTime
   });
 
@@ -202,19 +205,48 @@ async function callClaude(prompt, key) {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method:'POST',
     headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
-    body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    body:JSON.stringify({model:'claude-3-5-haiku-20241022',max_tokens:1000,messages:[{role:'user',content:prompt}]})
   });
   if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error?.message||'Claude '+res.status); }
   const d = await res.json();
-  return d.content.map(b=>b.text||'').join('').trim();
+  return {
+    text: d.content.map(b=>b.text||'').join('').trim(),
+    usage: {
+      input: d.usage.input_tokens,
+      output: d.usage.output_tokens,
+      total: d.usage.input_tokens + d.usage.output_tokens
+    }
+  };
 }
 async function callGemini(prompt, key) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-06-17:generateContent?key=${key}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`;
   const res = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:600,temperature:0.7}})});
+    body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:1000,temperature:0.7}})});
   if (!res.ok) { const e=await res.json().catch(()=>({})); throw new Error(e.error?.message||'Gemini '+res.status); }
   const d = await res.json();
-  return d.candidates[0].content.parts[0].text.trim();
+  return {
+    text: d.candidates[0].content.parts[0].text.trim(),
+    usage: {
+      input: d.usageMetadata.promptTokenCount,
+      output: d.usageMetadata.candidatesTokenCount,
+      total: d.usageMetadata.totalTokenCount
+    }
+  };
+}
+
+async function getPrompt(env, module, fallback) {
+  try {
+    const res = await env.DB.prepare(`
+      SELECT v.prompt_content, v.id as version_id
+      FROM prompt_templates t
+      JOIN prompt_versions v ON t.active_version = v.id
+      WHERE t.module_name = ?
+    `).bind(module).first();
+    return res ? { content: res.prompt_content, versionId: res.version_id } : { content: fallback, versionId: null };
+  } catch (e) {
+    console.error('Registry lookup failed:', e);
+    return { content: fallback, versionId: null };
+  }
 }
 
 // == PROMO CLAIM ===========================================
@@ -327,15 +359,15 @@ async function handleGenerateCampaign(req, env) {
   if (limit!==-1 && (cd.used||0)>=limit)
     return errR('Monthly limit reached. Please upgrade your plan.', 429, env);
 
-  const prompt = `You are a Hospitality Campaign Strategist, Social Media Expert, Email Marketing Specialist, and Calendar Builder.
-Create a complete multi-channel marketing campaign for a ${business_type || 'hospitality business'}.
+  const FALLBACK_CAMPAIGN_PROMPT = `You are a Hospitality Campaign Strategist, Social Media Expert, Email Marketing Specialist, and Calendar Builder.
+Create a complete multi-channel marketing campaign for a {{business_type}}.
 
 Input Details:
-- Promotion Name: ${promotion_name}
-- Promotion Description: ${promotion_description}
-- Offer: ${offer || 'N/A'}
-- Target Audience: ${target_audience || 'General hospitality guests'}
-- Campaign Goal: ${campaign_goal || 'Increase bookings/visits'}
+- Promotion Name: {{promotion_name}}
+- Promotion Description: {{promotion_description}}
+- Offer: {{offer}}
+- Target Audience: {{target_audience}}
+- Campaign Goal: {{campaign_goal}}
 
 Requirements:
 1. Campaign Brief: Theme, Key Message, Target Audience, Marketing Angle, CTA.
@@ -353,27 +385,41 @@ Output: Return ONLY a valid JSON object with the following structure:
 
 Ensure the tone is professional, evocative, and aligned with hospitality standards. Write in English.`;
 
+  const { content: promptTpl, versionId } = await getPrompt(env, 'campaign', FALLBACK_CAMPAIGN_PROMPT);
+  const prompt = promptTpl
+    .replace('{{business_type}}', business_type || 'hospitality business')
+    .replace('{{promotion_name}}', promotion_name)
+    .replace('{{promotion_description}}', promotion_description)
+    .replace('{{offer}}', offer || 'N/A')
+    .replace('{{target_audience}}', target_audience || 'General hospitality guests')
+    .replace('{{campaign_goal}}', campaign_goal || 'Increase bookings/visits');
+
   const startTime = Date.now();
-  let text = '', source = '';
+  let result = null, source = '';
   const isPaid = PLANS[cd.plan]?.isPaid ?? false;
 
   if (isPaid && env.ANTHROPIC_KEY) {
-    try { text = await callClaude(prompt, env.ANTHROPIC_KEY); source = 'claude'; }
+    try { result = await callClaude(prompt, env.ANTHROPIC_KEY); source = 'claude'; }
     catch (e) { console.warn('Claude failed:', e.message); }
   }
-  if (!text && env.GEMINI_KEY) {
-    try { text = await callGemini(prompt, env.GEMINI_KEY); source = 'gemini'; }
+  if (!result && env.GEMINI_KEY) {
+    try { result = await callGemini(prompt, env.GEMINI_KEY); source = 'gemini'; }
     catch (e) { console.warn('Gemini failed:', e.message); }
   }
 
-  if (!text) return errR('Generation service unavailable.', 503, env);
+  if (!result) return errR('Generation service unavailable.', 503, env);
+
+  const { text, usage } = result;
 
   // Sprint 6: Track Usage
   await trackAIUsage(env, {
     orgId: v.code,
     module: 'campaign',
+    prompt_version_id: versionId,
     model: source,
-    tokens: Math.ceil(text.length / 4),
+    input_tokens: usage.input,
+    output_tokens: usage.output,
+    total_tokens: usage.total,
     latency: Date.now() - startTime
   });
 
@@ -454,13 +500,13 @@ async function handleCreateReview(req, env) {
   if (limit!==-1 && (cd.used||0)>=limit)
     return errR('Monthly limit reached. Please upgrade your plan.', 429, env);
 
-  const prompt = `You are a Hospitality Reputation Analyst and Guest Relations Manager.
-Analyze this review for a ${property_type || 'hospitality property'} named "${property_name || 'Our Property'}".
+  const FALLBACK_REVIEW_PROMPT = `You are a Hospitality Reputation Analyst and Guest Relations Manager.
+Analyze this review for a {{property_type}} named "{{property_name}}".
 
 Review Details:
-- Source: ${review_source || 'Unknown'}
-- Rating: ${review_rating || 'N/A'}/5
-- Review Text: ${review_text}
+- Source: {{review_source}}
+- Rating: {{review_rating}}/5
+- Review Text: {{review_text}}
 
 Task:
 1. Sentiment Analysis: Score (1-100), Label (Positive, Neutral, Negative).
@@ -485,27 +531,40 @@ Output: Return ONLY a valid JSON object with this structure:
 
 Ensure the response matches the sentiment and addresses the guest's points accurately. Write in English.`;
 
+  const { content: promptTpl, versionId } = await getPrompt(env, 'review', FALLBACK_REVIEW_PROMPT);
+  const prompt = promptTpl
+    .replace('{{property_type}}', property_type || 'hospitality property')
+    .replace('{{property_name}}', property_name || 'Our Property')
+    .replace('{{review_source}}', review_source || 'Unknown')
+    .replace('{{review_rating}}', review_rating || 'N/A')
+    .replace('{{review_text}}', review_text);
+
   const startTime = Date.now();
-  let text = '', source = '';
+  let result = null, source = '';
   const isPaid = PLANS[cd.plan]?.isPaid ?? false;
 
   if (isPaid && env.ANTHROPIC_KEY) {
-    try { text = await callClaude(prompt, env.ANTHROPIC_KEY); source = 'claude'; }
+    try { result = await callClaude(prompt, env.ANTHROPIC_KEY); source = 'claude'; }
     catch (e) { console.warn('Claude failed:', e.message); }
   }
-  if (!text && env.GEMINI_KEY) {
-    try { text = await callGemini(prompt, env.GEMINI_KEY); source = 'gemini'; }
+  if (!result && env.GEMINI_KEY) {
+    try { result = await callGemini(prompt, env.GEMINI_KEY); source = 'gemini'; }
     catch (e) { console.warn('Gemini failed:', e.message); }
   }
 
-  if (!text) return errR('Generation service unavailable.', 503, env);
+  if (!result) return errR('Generation service unavailable.', 503, env);
+
+  const { text, usage } = result;
 
   // Sprint 6: Track Usage
   await trackAIUsage(env, {
     orgId: v.code,
     module: 'review',
+    prompt_version_id: versionId,
     model: source,
-    tokens: Math.ceil(text.length / 4),
+    input_tokens: usage.input,
+    output_tokens: usage.output,
+    total_tokens: usage.total,
     latency: Date.now() - startTime
   });
 
@@ -681,27 +740,33 @@ async function handleGenerateInsights(req, env) {
   };
 
   // 2. Call AI
-  const prompt = `${EXECUTIVE_ADVISOR_PROMPT}\n\nOrganization Data:\n${JSON.stringify(dataset)}`;
+  const { content: promptTpl, versionId } = await getPrompt(env, 'intelligence', EXECUTIVE_ADVISOR_PROMPT);
+  const prompt = `${promptTpl}\n\nOrganization Data:\n${JSON.stringify(dataset)}`;
   const startTime = Date.now();
-  let text = '', source = '';
+  let result = null, source = '';
 
   if (env.ANTHROPIC_KEY) {
-    try { text = await callClaude(prompt, env.ANTHROPIC_KEY); source = 'claude'; }
+    try { result = await callClaude(prompt, env.ANTHROPIC_KEY); source = 'claude'; }
     catch(e) { console.warn('Claude failed:', e); }
   }
-  if (!text && env.GEMINI_KEY) {
-    try { text = await callGemini(prompt, env.GEMINI_KEY); source = 'gemini'; }
+  if (!result && env.GEMINI_KEY) {
+    try { result = await callGemini(prompt, env.GEMINI_KEY); source = 'gemini'; }
     catch(e) { console.warn('Gemini failed:', e); }
   }
 
-  if (!text) return errR('Insight generation failed.', 503, env);
+  if (!result) return errR('Insight generation failed.', 503, env);
+
+  const { text, usage } = result;
 
   // Sprint 6: Track Usage
   await trackAIUsage(env, {
     orgId: v.code,
     module: 'intelligence',
+    prompt_version_id: versionId,
     model: source,
-    tokens: Math.ceil(text.length / 4),
+    input_tokens: usage.input,
+    output_tokens: usage.output,
+    total_tokens: usage.total,
     latency: Date.now() - startTime
   });
 
@@ -860,11 +925,22 @@ async function handleGetAICosts(req, env) {
 
 async function trackAIUsage(env, meta) {
   try {
-    const cost = (meta.tokens / 1000) * 0.002; // Simple estimate: $0.002 per 1k tokens
+    const cost = (meta.total_tokens / 1000) * 0.002; // Simple estimate: $0.002 per 1k tokens
     await env.DB.prepare(`
-      INSERT INTO ai_requests (id, organization_id, module_name, model_name, total_tokens, estimated_cost, response_time_ms)
-      VALUES (?,?,?,?,?,?,?)
-    `).bind(crypto.randomUUID(), meta.orgId, meta.module, meta.model, meta.tokens, cost, meta.latency).run();
+      INSERT INTO ai_requests (id, organization_id, module_name, prompt_version_id, model_name, input_tokens, output_tokens, total_tokens, estimated_cost, response_time_ms)
+      VALUES (?,?,?,?,?,?,?,?,?,?)
+    `).bind(
+      crypto.randomUUID(),
+      meta.orgId,
+      meta.module,
+      meta.prompt_version_id || null,
+      meta.model,
+      meta.input_tokens || 0,
+      meta.output_tokens || 0,
+      meta.total_tokens || 0,
+      cost,
+      meta.latency
+    ).run();
   } catch(e) { console.error('Usage tracking failed:', e); }
 }
 
