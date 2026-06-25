@@ -44,6 +44,11 @@ export default {
       if (path==='/api/campaigns'        && req.method==='GET')  return handleGetCampaigns(req,env);
       if (path.startsWith('/api/campaigns/') && req.method==='GET') return handleGetCampaignById(req,env);
       if (path==='/api/generate/campaign' && req.method==='POST') return handleGenerateCampaign(req,env);
+      // Reviews (Sprint 3)
+      if (path==='/api/reviews'          && req.method==='POST') return handleCreateReview(req,env);
+      if (path==='/api/reviews'          && req.method==='GET')  return handleGetReviews(req,env);
+      if (path.startsWith('/api/reviews/') && req.method==='GET') return handleGetReviewById(req,env);
+      if (path==='/api/reputation'       && req.method==='GET')  return handleGetReputation(req,env);
       // Payments
       if (path==='/clickpesa-create'     && req.method==='POST') return handleClickPesaCreate(req,env);
       if (path==='/clickpesa-callback'   && req.method==='POST') return handleClickPesaCallback(req,env);
@@ -366,6 +371,171 @@ Ensure the tone is professional, evocative, and aligned with hospitality standar
     console.error('JSON Parse Error:', e, text);
     return errR('AI returned invalid JSON. Please try again.', 500, env);
   }
+}
+
+// == REVIEWS (Sprint 3) ====================================
+async function handleGetReviews(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const prefix = `review:${v.code}:`;
+  const list = await env.CODES_KV.list({ prefix });
+  const reviews = [];
+  for (const key of list.keys) {
+    const data = await env.CODES_KV.get(key.name, 'json');
+    if (data) {
+      // Summary for list view
+      const { analysis, response, ...summary } = data;
+      reviews.push({ ...summary, sentiment: analysis?.sentiment_label, escalated: analysis?.escalation?.escalate });
+    }
+  }
+  reviews.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  return jsonR({ success:true, reviews }, 200, env);
+}
+
+async function handleGetReviewById(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const id = new URL(req.url).pathname.split('/').pop();
+  const data = await env.CODES_KV.get(`review:${v.code}:${id}`, 'json');
+  if (!data) return errR('Review not found', 404, env);
+
+  return jsonR({ success:true, review: data }, 200, env);
+}
+
+async function handleCreateReview(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const body = await req.json().catch(()=>({}));
+  const v = await validateCode(code || body.code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const { review_source, review_rating, review_text, property_type, property_name } = body;
+  if (!review_text) return errR('Review text is required.', 400, env);
+
+  // Check usage limit
+  const { data:cd } = v;
+  const limit  = PLANS[cd.plan]?.limit ?? 30;
+  if (limit!==-1 && (cd.used||0)>=limit)
+    return errR('Monthly limit reached. Please upgrade your plan.', 429, env);
+
+  const prompt = `You are a Hospitality Reputation Analyst and Guest Relations Manager.
+Analyze this review for a ${property_type || 'hospitality property'} named "${property_name || 'Our Property'}".
+
+Review Details:
+- Source: ${review_source || 'Unknown'}
+- Rating: ${review_rating || 'N/A'}/5
+- Review Text: ${review_text}
+
+Task:
+1. Sentiment Analysis: Score (1-100), Label (Positive, Neutral, Negative).
+2. Topic Detection: Identify key topics mentioned.
+3. Risk Assessment: Identify if management intervention is required (Risk Score 1-10, Escalation decision).
+   Escalate if: Rating <= 2, Safety issues, Staff misconduct, or Fraud allegations.
+4. Response Drafting: Write a professional, warm, and human-sounding response.
+   Rules: Thank the guest, address specific concerns, maintain hospitality tone, avoid legal liability admission, include invitation to return.
+
+Output: Return ONLY a valid JSON object with this structure:
+{
+  "analysis": {
+    "sentiment_score": 0,
+    "sentiment_label": "",
+    "topics": [],
+    "risk_score": 0,
+    "summary": "",
+    "escalation": { "escalate": false, "reason": "" }
+  },
+  "response": { "draft": "" }
+}
+
+Ensure the response matches the sentiment and addresses the guest's points accurately. Write in English.`;
+
+  let text = '', source = '';
+  const isPaid = PLANS[cd.plan]?.isPaid ?? false;
+
+  if (isPaid && env.ANTHROPIC_KEY) {
+    try { text = await callClaude(prompt, env.ANTHROPIC_KEY); source = 'claude'; }
+    catch (e) { console.warn('Claude failed:', e.message); }
+  }
+  if (!text && env.GEMINI_KEY) {
+    try { text = await callGemini(prompt, env.GEMINI_KEY); source = 'gemini'; }
+    catch (e) { console.warn('Gemini failed:', e.message); }
+  }
+
+  if (!text) return errR('Generation service unavailable.', 503, env);
+
+  try {
+    const cleanJson = text.includes('```json') ? text.split('```json')[1].split('```')[0].trim() : text.trim();
+    const result = JSON.parse(cleanJson);
+
+    const reviewId = Date.now().toString();
+    const reviewData = {
+      id: reviewId,
+      code: v.code,
+      source: review_source,
+      rating: review_rating,
+      text: review_text,
+      property: { type: property_type, name: property_name },
+      analysis: result.analysis,
+      response: result.response,
+      created_at: nowD().toISOString()
+    };
+
+    await env.CODES_KV.put(`review:${v.code}:${reviewId}`, JSON.stringify(reviewData));
+
+    // Increment usage
+    cd.used = (cd.used || 0) + 1;
+    await env.CODES_KV.put(v.code, JSON.stringify(cd));
+
+    return jsonR({ success: true, review: reviewData, source }, 200, env);
+  } catch (e) {
+    console.error('JSON Parse Error:', e, text);
+    return errR('AI returned invalid JSON. Please try again.', 500, env);
+  }
+}
+
+async function handleGetReputation(req, env) {
+  const code = req.headers.get('X-Access-Code');
+  const v = await validateCode(code, env);
+  if (!v.valid) return errR(v.error, 401, env);
+
+  const prefix = `review:${v.code}:`;
+  const list = await env.CODES_KV.list({ prefix });
+
+  let totalRating = 0, count = 0, positive = 0, negative = 0, escalated = 0;
+  const topicsMap = {};
+
+  for (const key of list.keys) {
+    const data = await env.CODES_KV.get(key.name, 'json');
+    if (data) {
+      count++;
+      totalRating += (parseInt(data.rating) || 0);
+      if (data.analysis?.sentiment_label === 'Positive') positive++;
+      if (data.analysis?.sentiment_label === 'Negative') negative++;
+      if (data.analysis?.escalation?.escalate) escalated++;
+
+      (data.analysis?.topics || []).forEach(t => {
+        topicsMap[t] = (topicsMap[t] || 0) + 1;
+      });
+    }
+  }
+
+  const avgRating = count > 0 ? (totalRating / count).toFixed(1) : 0;
+  const topTopics = Object.entries(topicsMap).sort((a,b) => b[1] - a[1]).slice(0, 5).map(e => e[0]);
+
+  return jsonR({
+    success: true,
+    metrics: {
+      avgRating,
+      totalReviews: count,
+      positive,
+      negative,
+      escalated,
+      topTopics
+    }
+  }, 200, env);
 }
 
 // == CLICKPESA =============================================

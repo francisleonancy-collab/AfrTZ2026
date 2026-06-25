@@ -144,6 +144,10 @@
   .stat-box{background:var(--cream);border-radius:9px;padding:.75rem;text-align:center;}
   .stat-num{font-size:20px;font-weight:500;font-family:'Playfair Display',serif;color:var(--gd);}
   .stat-label{font-size:10px;color:var(--tl);margin-top:2px;}
+  .esc-badge-ui{padding:4px 12px;border-radius:99px;font-size:11px;font-weight:bold;text-transform:uppercase;}
+  .esc-yes{background:#fff5f5;color:var(--err);border:1px solid #fed7d7;}
+  .esc-no{background:#f0fff4;color:var(--ok);border:1px solid #c6f6d5;}
+  .topic-tag{background:var(--gp);color:var(--gd);padding:4px 10px;border-radius:99px;font-size:11px;font-weight:500;}
   .gen-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;}
   .gen-form .field{margin:0;flex:1;min-width:110px;}
   .gen-form .field input,.gen-form .field select{height:38px;padding:0 10px;}
@@ -277,9 +281,142 @@
   <div class="app-tabs">
     <button class="app-tab active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
     <button class="app-tab" onclick="switchTab('campaigns',this)">🚀 Campaigns</button>
+    <button class="app-tab" onclick="switchTab('reviews',this)">⭐ Reviews</button>
+    <button class="app-tab" onclick="switchTab('analytics',this)">📈 Analytics</button>
     <button class="app-tab" onclick="switchTab('templates',this)">📝 Templates</button>
     <button class="app-tab" onclick="switchTab('settings',this)">⚙️ Settings</button>
     <button class="app-tab" id="admin-tab" onclick="switchTab('admin',this)" style="display:none">👑 Admin</button>
+  </div>
+
+  <!-- REVIEWS -->
+  <div id="app-panel-reviews" class="app-panel">
+    <div class="tool-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <p class="tool-title">Review Inbox</p>
+        <button class="btn-gold" onclick="showNewReviewForm()" style="padding:6px 14px;font-size:12px;">+ Analyze Review</button>
+      </div>
+      <div id="review-list">
+        <!-- Review list items here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW REVIEW FORM -->
+  <div id="app-panel-new-review" class="app-panel">
+    <div class="tool-card">
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:1rem;">
+        <button class="btn-copy" onclick="switchTab('reviews', document.querySelector('[onclick*=\'reviews\']'))">← Back</button>
+        <p class="tool-title">Analyze Guest Review</p>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="r-source">Review Source</label>
+          <select id="r-source">
+            <option value="Google">Google Maps</option>
+            <option value="TripAdvisor">TripAdvisor</option>
+            <option value="Booking">Booking.com</option>
+            <option value="Expedia">Expedia</option>
+            <option value="Direct">Direct Feedback</option>
+            <option value="Social">Social Media</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="r-rating">Rating (1-5)</label>
+          <select id="r-rating">
+            <option value="5">5 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="2">2 Stars</option>
+            <option value="1">1 Star</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="r-text">Review Text *</label>
+        <textarea id="r-text" placeholder="Paste the guest's review here..."></textarea>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label for="r-pname">Property Name</label>
+          <input type="text" id="r-pname" placeholder="e.g. Mkude Resort"/>
+        </div>
+        <div class="field">
+          <label for="r-ptype">Property Type</label>
+          <select id="r-ptype">
+            <option value="hotel">Hotel</option>
+            <option value="restaurant">Restaurant</option>
+            <option value="resort">Resort</option>
+            <option value="lodge">Lodge</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-gen" id="btn-create-review" onclick="createReview()">✨ Analyze & Draft Response</button>
+    </div>
+  </div>
+
+  <!-- REVIEW DETAIL -->
+  <div id="app-panel-review-detail" class="app-panel">
+    <div class="tool-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <button class="btn-copy" onclick="switchTab('reviews', document.querySelector('[onclick*=\'reviews\']'))">← Back to Inbox</button>
+        <div id="rev-escalation-badge"></div>
+      </div>
+
+      <div class="result-section" style="background:var(--cream)">
+        <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem">
+          <span id="rev-source" style="font-size:11px;font-weight:bold;color:var(--tl)"></span>
+          <span id="rev-rating" style="color:var(--gold)"></span>
+        </div>
+        <div id="rev-text" class="output-text" style="font-style:italic"></div>
+        <div id="rev-date" style="font-size:10px;color:var(--tl);margin-top:8px"></div>
+      </div>
+
+      <div class="row2">
+        <div class="result-section">
+          <div class="result-title">📊 Analysis</div>
+          <div style="font-size:13px; line-height:1.6">
+            <p><strong>Sentiment:</strong> <span id="rev-sentiment"></span> (<span id="rev-sentiment-score"></span>%)</p>
+            <p><strong>Risk Score:</strong> <span id="rev-risk"></span>/10</p>
+            <p><strong>Topics:</strong> <span id="rev-topics"></span></p>
+          </div>
+          <div id="rev-summary" style="font-size:12px; margin-top:10px; color:var(--tm); border-top:1px solid #eee; padding-top:10px"></div>
+        </div>
+
+        <div class="result-section">
+          <div class="result-title">✍️ Draft Response <button class="btn-copy" onclick="copySection('rev-draft')">Copy</button></div>
+          <div id="rev-draft" class="output-text" style="font-size:13px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div id="app-panel-analytics" class="app-panel">
+    <div class="tool-card">
+      <p class="tool-title">Reputation Insights</p>
+      <p class="tool-sub">Aggregation of sentiment and feedback across all reviews.</p>
+
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-num" id="ana-rating">0.0</div><div class="stat-label">Avg Rating</div></div>
+        <div class="stat-box"><div class="stat-num" id="ana-count">0</div><div class="stat-label">Total Reviews</div></div>
+        <div class="stat-box"><div class="stat-num" id="ana-pos" style="color:var(--ok)">0</div><div class="stat-label">Positive</div></div>
+        <div class="stat-box"><div class="stat-num" id="ana-neg" style="color:var(--err)">0</div><div class="stat-label">Negative</div></div>
+      </div>
+
+      <div class="admin-card">
+        <p class="admin-card-title">Top Mentioned Topics</p>
+        <div id="ana-topics" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      </div>
+
+      <div class="admin-card">
+        <p class="admin-card-title">Escalation Rate</p>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="usage-track" style="max-width:none"><div class="usage-fill usage-full" id="ana-esc-fill" style="width:0%"></div></div>
+          <span id="ana-esc-text" style="font-size:12px;font-weight:bold">0%</span>
+        </div>
+        <p style="font-size:10px;color:var(--tl);margin-top:5px">Percentage of reviews requiring immediate management attention.</p>
+      </div>
+    </div>
   </div>
 
   <!-- NEW CAMPAIGN -->
@@ -398,9 +535,9 @@
       <p class="tool-title">Performance Dashboard</p>
       <div class="stats-row" id="dashboard-stats">
         <div class="stat-box"><div class="stat-num" id="stat-campaigns">0</div><div class="stat-label">Campaigns</div></div>
+        <div class="stat-box"><div class="stat-num" id="stat-reviews">0</div><div class="stat-label">Reviews</div></div>
         <div class="stat-box"><div class="stat-num" id="stat-content">0</div><div class="stat-label">Assets</div></div>
         <div class="stat-box"><div class="stat-num" id="stat-usage">0%</div><div class="stat-label">Monthly Limit</div></div>
-        <div class="stat-box"><div class="stat-num" id="stat-tasks">0</div><div class="stat-label">Tasks Done</div></div>
       </div>
       <div class="admin-card">
         <p class="admin-card-title">Recent Activity</p>
@@ -545,7 +682,11 @@
 
 <script>
 // ══ CONFIG ══
-let WORKER_URL = ''; // Set this to your Cloudflare Worker URL, e.g., 'https://rcs-worker.your-subdomain.workers.dev'
+/**
+ * Set this to your Cloudflare Worker URL, e.g., 'https://rcs-worker.your-subdomain.workers.dev'
+ * Leave as empty string if the Worker and the frontend are on the same domain (relative paths).
+ */
+let WORKER_URL = '';
 
 // ══ PLAN LIMITS ══
 const LIMITS = { Starter:30, Growth:100, Premium:Infinity, Promo:10, Admin:Infinity };
@@ -559,6 +700,7 @@ const isExpired=e=>daysLeft(e)<=0;
 
 // ══ CODES DATABASE ══
 let LOCAL_CAMPAIGNS = JSON.parse(localStorage.getItem('RCS_CAMPAIGNS') || '{}');
+let LOCAL_REVIEWS = JSON.parse(localStorage.getItem('RCS_REVIEWS') || '{}');
 let CODES={
   'ADMIN000':{plan:'Admin',   client:'Lefking Admin',  expiry:fmtDate(addDays(today(),3650)),active:true,used:0},
   'RCST1234':{plan:'Starter', client:'Demo Starter',   expiry:fmtDate(addDays(today(),30)), active:true,used:0},
@@ -600,7 +742,28 @@ function launchToolkit(){
   updateUsageBar();
   window.scrollTo(0,0);
   syncCampaigns();
+  syncReviews();
   switchTab('dashboard', document.querySelector('[onclick*=\'dashboard\']'));
+}
+
+async function syncReviews() {
+  if(!currentUser) return;
+  try {
+    const baseUrl = WORKER_URL || '';
+    const url = baseUrl.replace(/\/$/, '') + '/api/reviews';
+    const res = await fetch(url, {
+      headers: { 'X-Access-Code': currentUser.code }
+    });
+    if(res.ok) {
+      const data = await res.json();
+      data.reviews.forEach(r => {
+        if(!LOCAL_REVIEWS[r.id]) LOCAL_REVIEWS[r.id] = r;
+        else Object.assign(LOCAL_REVIEWS[r.id], r);
+      });
+      localStorage.setItem('RCS_REVIEWS', JSON.stringify(LOCAL_REVIEWS));
+      renderDashboard();
+    }
+  } catch(e) { console.warn('Sync reviews failed:', e); }
 }
 
 async function syncCampaigns() {
@@ -681,6 +844,8 @@ function switchTab(name,el){
   if(name==='admin') renderAdmin();
   if(name==='dashboard') renderDashboard();
   if(name==='campaigns') renderCampaigns();
+  if(name==='reviews') renderReviews();
+  if(name==='analytics') renderAnalytics();
   if(name==='settings') renderSettings();
 }
 
@@ -754,27 +919,183 @@ async function generateCampaign() {
 function renderDashboard() {
   if(!currentUser) return;
   const campaigns = Object.values(LOCAL_CAMPAIGNS).filter(c => c.code === currentUser.code);
-  const totalAssets = campaigns.reduce((acc, c) => acc + (c.output ? 5 : 0), 0); // Brief, 3 social, 1 email
+  const reviews = Object.values(LOCAL_REVIEWS).filter(r => r.code === currentUser.code);
+
+  const campaignAssets = campaigns.reduce((acc, c) => acc + (c.output ? 5 : 0), 0);
+  const reviewAssets = reviews.reduce((acc, r) => acc + (r.analysis ? 2 : 0), 0); // Analysis + Response
+  const totalAssets = campaignAssets + reviewAssets;
+
   const limit = LIMITS[currentUser.plan] || 30;
   const used = (CODES[currentUser.code].used || 0);
   const usagePct = limit === Infinity ? 0 : Math.round((used/limit) * 100);
 
   document.getElementById('stat-campaigns').textContent = campaigns.length;
+  document.getElementById('stat-reviews').textContent = reviews.length;
   document.getElementById('stat-content').textContent = totalAssets;
   document.getElementById('stat-usage').textContent = usagePct + '%';
-  document.getElementById('stat-tasks').textContent = used;
 
   const activity = document.getElementById('recent-activity');
-  if(campaigns.length === 0) {
+  const allItems = [
+    ...campaigns.map(c => ({ name: `Campaign: ${c.name}`, date: c.created_at })),
+    ...reviews.map(r => ({ name: `Review: ${r.source} (${r.rating}★)`, date: r.created_at }))
+  ];
+
+  if(allItems.length === 0) {
     activity.textContent = 'No recent activity to show.';
   } else {
-    activity.innerHTML = campaigns.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5).map(c => `
+    activity.innerHTML = allItems.sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5).map(i => `
       <div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #eee">
-        <strong>${c.name}</strong><br>
-        <span style="font-size:10px;color:var(--tl)">${c.created_at}</span>
+        <strong>${i.name}</strong><br>
+        <span style="font-size:10px;color:var(--tl)">${i.date}</span>
       </div>
     `).join('');
   }
+}
+
+async function renderReviews() {
+  if(!currentUser) return;
+  await syncReviews();
+  const reviews = Object.values(LOCAL_REVIEWS).filter(r => r.code === currentUser.code);
+  const list = document.getElementById('review-list');
+  if(reviews.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--tl)">No reviews analyzed yet. Click "+ Analyze Review" to start.</div>';
+  } else {
+    list.innerHTML = reviews.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(r => `
+      <div class="campaign-list-item" onclick="viewReview('${r.id}')">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <strong>${r.source || 'Review'}</strong>
+            <span style="color:var(--gold);font-size:10px">${'★'.repeat(r.rating || 0)}</span>
+            ${r.escalated ? '<span style="color:var(--err);font-size:10px;font-weight:bold">⚠️ ESCALATED</span>' : ''}
+          </div>
+          <div class="campaign-meta">${r.text ? r.text.substring(0, 60) + '...' : ''}</div>
+          <div class="campaign-meta">${r.created_at}</div>
+        </div>
+        <div style="font-size:18px">→</div>
+      </div>
+    `).join('');
+  }
+}
+
+function showNewReviewForm() {
+  document.querySelectorAll('.app-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('app-panel-new-review').classList.add('active');
+  document.getElementById('r-text').value = '';
+}
+
+async function createReview() {
+  if(!checkLimit()){
+    alert('Usage limit reached.');
+    return;
+  }
+
+  const text = document.getElementById('r-text').value.trim();
+  if(!text) { alert('Please paste the review text.'); return; }
+
+  const btn = document.getElementById('btn-create-review');
+  const orig = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Analyzing...';
+
+  const body = {
+    review_source: document.getElementById('r-source').value,
+    review_rating: document.getElementById('r-rating').value,
+    review_text: text,
+    property_name: document.getElementById('r-pname').value,
+    property_type: document.getElementById('r-ptype').value,
+    code: currentUser.code
+  };
+
+  try {
+    const baseUrl = WORKER_URL || '';
+    const url = baseUrl.replace(/\/$/, '') + '/api/reviews';
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Access-Code': currentUser.code },
+      body: JSON.stringify(body)
+    });
+
+    if(res.ok) {
+      const data = await res.json();
+      LOCAL_REVIEWS[data.review.id] = data.review;
+      localStorage.setItem('RCS_REVIEWS', JSON.stringify(LOCAL_REVIEWS));
+      incrementUsage();
+      viewReview(data.review.id);
+    } else {
+      const e = await res.json();
+      alert('Error: ' + (e.error || 'Unknown error'));
+    }
+  } catch(e) {
+    alert('Review analysis failed. Check worker connection.');
+  }
+  btn.disabled = false;
+  btn.innerHTML = orig;
+}
+
+async function viewReview(id) {
+  let r = LOCAL_REVIEWS[id];
+  if(!r) return;
+
+  // Fetch full if missing details
+  if(!r.analysis) {
+    try {
+      const baseUrl = WORKER_URL || '';
+      const url = baseUrl.replace(/\/$/, '') + '/api/reviews/' + id;
+      const res = await fetch(url, { headers: { 'X-Access-Code': currentUser.code } });
+      if(res.ok) {
+        const data = await res.json();
+        r = data.review;
+        LOCAL_REVIEWS[id] = r;
+        localStorage.setItem('RCS_REVIEWS', JSON.stringify(LOCAL_REVIEWS));
+      }
+    } catch(e) {}
+  }
+
+  document.querySelectorAll('.app-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('app-panel-review-detail').classList.add('active');
+
+  document.getElementById('rev-source').textContent = r.source || 'Review';
+  document.getElementById('rev-rating').textContent = '★'.repeat(r.rating || 0);
+  document.getElementById('rev-text').textContent = `"${r.text}"`;
+  document.getElementById('rev-date').textContent = 'Received: ' + r.created_at;
+
+  const esc = document.getElementById('rev-escalation-badge');
+  if(r.analysis?.escalation?.escalate) {
+    esc.innerHTML = `<span class="esc-badge-ui esc-yes">⚠️ ESCALATED: ${r.analysis.escalation.reason}</span>`;
+  } else {
+    esc.innerHTML = `<span class="esc-badge-ui esc-no">✅ Resolved / Standard</span>`;
+  }
+
+  document.getElementById('rev-sentiment').textContent = r.analysis?.sentiment_label || 'N/A';
+  document.getElementById('rev-sentiment-score').textContent = r.analysis?.sentiment_score || '0';
+  document.getElementById('rev-risk').textContent = r.analysis?.risk_score || '0';
+  document.getElementById('rev-topics').textContent = (r.analysis?.topics || []).join(', ');
+  document.getElementById('rev-summary').textContent = r.analysis?.summary || '';
+  document.getElementById('rev-draft').textContent = r.response?.draft || '';
+}
+
+async function renderAnalytics() {
+  if(!currentUser) return;
+  try {
+    const baseUrl = WORKER_URL || '';
+    const url = baseUrl.replace(/\/$/, '') + '/api/reputation';
+    const res = await fetch(url, { headers: { 'X-Access-Code': currentUser.code } });
+    if(res.ok) {
+      const data = await res.json();
+      const m = data.metrics;
+      document.getElementById('ana-rating').textContent = m.avgRating;
+      document.getElementById('ana-count').textContent = m.totalReviews;
+      document.getElementById('ana-pos').textContent = m.positive;
+      document.getElementById('ana-neg').textContent = m.negative;
+
+      const topics = document.getElementById('ana-topics');
+      topics.innerHTML = m.topTopics.map(t => `<span class="topic-tag">${t}</span>`).join('');
+
+      const escRate = m.totalReviews > 0 ? Math.round((m.escalated / m.totalReviews) * 100) : 0;
+      document.getElementById('ana-esc-text').textContent = escRate + '%';
+      document.getElementById('ana-esc-fill').style.width = escRate + '%';
+    }
+  } catch(e) { console.error('Analytics failed:', e); }
 }
 
 function renderCampaigns() {
